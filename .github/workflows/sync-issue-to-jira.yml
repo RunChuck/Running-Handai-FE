@@ -1,0 +1,191 @@
+name: Create Jira Subtask from GitHub Issue
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  create-jira-subtask:
+    runs-on: ubuntu-latest
+    if: contains(github.event.issue.labels.*.name, 'jira-sync')
+    
+    steps:
+    - name: Parse Issue Template Data
+      id: parse
+      run: |
+        # GitHub 이슈 본문에서 템플릿 데이터 추출
+        ISSUE_BODY='${{ github.event.issue.body }}'
+        
+        # 각 필드 추출 (GitHub Issue Form 형식)
+        PARENT_TICKET=$(echo "$ISSUE_BODY" | grep -A1 "### 🎟️ 상위 Jira 티켓" | tail -1 | xargs)
+        TASK_TITLE=$(echo "$ISSUE_BODY" | grep -A1 "### 🎯 태스크 제목" | tail -1 | xargs)
+        ASSIGNEE=$(echo "$ISSUE_BODY" | grep -A1 "### 👤 담당자" | tail -1 | xargs)
+        
+        # 작업 설명은 여러 줄이므로 별도 처리
+        TASK_DESC=$(echo "$ISSUE_BODY" | sed -n '/### 📝 작업 설명/,/### /p' | sed '1d;$d' | sed 's/^[[:space:]]*//')
+        
+        # GitHub 이슈 정보
+        ISSUE_URL="${{ github.event.issue.html_url }}"
+        ISSUE_NUMBER="${{ github.event.issue.number }}"
+        
+        # 출력 변수 설정
+        echo "PARENT_TICKET=$PARENT_TICKET" >> $GITHUB_OUTPUT
+        echo "TASK_TITLE=$TASK_TITLE" >> $GITHUB_OUTPUT
+        echo "ASSIGNEE=$ASSIGNEE" >> $GITHUB_OUTPUT
+        echo "ISSUE_URL=$ISSUE_URL" >> $GITHUB_OUTPUT
+        echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
+        
+        # 멀티라인 텍스트 처리
+        echo "TASK_DESC<<EOF" >> $GITHUB_OUTPUT
+        echo "$TASK_DESC" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+        
+        echo "✅ 파싱 완료"
+        echo "상위 티켓: $PARENT_TICKET"
+        echo "태스크 제목: $TASK_TITLE"
+        echo "담당자: $ASSIGNEE"
+
+    - name: Validate Parent Ticket
+      id: validate
+      run: |
+        PARENT_TICKET="${{ steps.parse.outputs.PARENT_TICKET }}"
+        
+        # 상위 티켓 확인
+        if [[ -z "$PARENT_TICKET" || "$PARENT_TICKET" == "_No response_" ]]; then
+          echo "❌ 상위 티켓이 지정되지 않았습니다."
+          exit 1
+        fi
+        
+        # Jira API로 상위 티켓 존재 여부 확인
+        RESPONSE=$(curl -s -w "%{http_code}" -o /tmp/parent_check.json \
+          -H "Authorization: Basic $(echo -n '${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}' | base64)" \
+          '${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/'$PARENT_TICKET)
+        
+        HTTP_CODE=$(tail -n1 <<< "$RESPONSE")
+        
+        if [[ "$HTTP_CODE" != "200" ]]; then
+          echo "❌ 상위 티켓 '$PARENT_TICKET'을 찾을 수 없습니다."
+          echo "HTTP 응답 코드: $HTTP_CODE"
+          cat /tmp/parent_check.json
+          exit 1
+        fi
+        
+        echo "✅ 상위 티켓 확인 완료: $PARENT_TICKET"
+
+    - name: Create Jira Subtask
+      id: create-subtask
+      run: |
+        # 담당자 필드 설정
+        ASSIGNEE="${{ steps.parse.outputs.ASSIGNEE }}"
+        ASSIGNEE_FIELD=""
+        
+        if [[ -n "$ASSIGNEE" && "$ASSIGNEE" != "_No response_" && "$ASSIGNEE" != "No response" ]]; then
+          ASSIGNEE_FIELD='"assignee": {"emailAddress": "'$ASSIGNEE'"},'
+        fi
+        
+        # 작업 설명 JSON 이스케이프 처리
+        TASK_DESC='${{ steps.parse.outputs.TASK_DESC }}'
+        TASK_DESC_ESCAPED=$(echo "$TASK_DESC" | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+        
+        # Jira 하위 태스크 생성 API 호출
+        echo "🚀 Jira 하위 태스크 생성 중..."
+        
+        RESPONSE=$(curl -X POST \
+          -H "Content-Type: application/json" \
+          -H "Authorization: Basic $(echo -n '${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}' | base64)" \
+          -d '{
+            "fields": {
+              "project": {
+                "key": "SCRUM"
+              },
+              "parent": {
+                "key": "${{ steps.parse.outputs.PARENT_TICKET }}"
+              },
+              "summary": "${{ steps.parse.outputs.TASK_TITLE }}",
+              "description": {
+                "type": "doc",
+                "version": 1,
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "🔗 GitHub Issue에서 자동 생성됨: ${{ steps.parse.outputs.ISSUE_URL }}"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "rule"
+                  },
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "'"$TASK_DESC_ESCAPED"'"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "issuetype": {
+                "name": "Sub-task"
+              },
+              '"$ASSIGNEE_FIELD"'
+              "labels": ["github-auto", "subtask"]
+            }
+          }' \
+          '${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue')
+        
+        # 응답 확인 및 티켓 키 추출
+        echo "API 응답: $RESPONSE"
+        
+        JIRA_KEY=$(echo $RESPONSE | jq -r '.key // empty')
+        ERROR_MESSAGE=$(echo $RESPONSE | jq -r '.errorMessages[]? // empty')
+        
+        if [[ -z "$JIRA_KEY" || "$JIRA_KEY" == "null" ]]; then
+          echo "❌ Jira 하위 태스크 생성 실패"
+          echo "에러 메시지: $ERROR_MESSAGE"
+          echo "전체 응답: $RESPONSE"
+          exit 1
+        fi
+        
+        echo "JIRA_KEY=$JIRA_KEY" >> $GITHUB_OUTPUT
+        echo "✅ Jira 하위 태스크 생성 완료: $JIRA_KEY"
+
+    - name: Update GitHub Issue with Success
+      if: success()
+      run: |
+        JIRA_KEY="${{ steps.create-subtask.outputs.JIRA_KEY }}"
+        PARENT_KEY="${{ steps.parse.outputs.PARENT_TICKET }}"
+        JIRA_URL="${{ secrets.JIRA_BASE_URL }}/browse/$JIRA_KEY"
+        PARENT_URL="${{ secrets.JIRA_BASE_URL }}/browse/$PARENT_KEY"
+        
+        # 성공 댓글 추가
+        curl -X POST \
+          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "body": "🎉 **Jira 연동 완료!**\n\n📋 **생성된 하위 태스크**: ['$JIRA_KEY']('$JIRA_URL')\n📊 **상위 태스크**: ['$PARENT_KEY']('$PARENT_URL')\n\n> 💡 이제 Jira에서 해당 하위 태스크로 브랜치를 생성하고 작업을 시작할 수 있습니다!"
+          }' \
+          "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments"
+        
+        # jira-linked 라벨 추가
+        curl -X POST \
+          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Content-Type: application/json" \
+          -d '["jira-linked"]' \
+          "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/labels"
+
+    - name: Update GitHub Issue with Failure
+      if: failure()
+      run: |
+        # 실패 댓글 추가
+        curl -X POST \
+          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "body": "❌ **Jira 연동 실패**\n\n다음 사항을 확인해주세요:\n- 상위 Jira 티켓 키가 올바른지 확인\n- Jira 프로젝트 권한이 있는지 확인\n- 담당자 이메일이 정확한지 확인\n\n🔍 자세한 오류 내용은 [Actions 로그](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})를 확인하세요."
+          }' \
+          "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments"
