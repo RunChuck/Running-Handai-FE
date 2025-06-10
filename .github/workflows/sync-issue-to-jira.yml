@@ -16,13 +16,33 @@ jobs:
         # GitHub 이슈 본문에서 템플릿 데이터 추출
         ISSUE_BODY='${{ github.event.issue.body }}'
         
-        # 각 필드 추출 (GitHub Issue Form 형식)
-        PARENT_TICKET=$(echo "$ISSUE_BODY" | grep -A1 "### 🎟️ 상위 Jira 티켓" | tail -1 | xargs)
-        TASK_TITLE=$(echo "$ISSUE_BODY" | grep -A1 "### 🎯 태스크 제목" | tail -1 | xargs)
-        ASSIGNEE=$(echo "$ISSUE_BODY" | grep -A1 "### 👤 담당자" | tail -1 | xargs)
+        # 디버깅: 전체 이슈 본문 출력
+        echo "=== 전체 이슈 본문 ==="
+        echo "$ISSUE_BODY"
+        echo "=================="
+        
+        # 각 필드 추출 (GitHub Issue Form 형식 - ### 없이 파싱)
+        PARENT_TICKET=$(echo "$ISSUE_BODY" | grep -A1 "🎟️ 상위 Jira 티켓" | tail -1 | xargs)
+        TASK_TITLE=$(echo "$ISSUE_BODY" | grep -A1 "🎯 태스크 제목" | tail -1 | xargs)
+        ASSIGNEE=$(echo "$ISSUE_BODY" | grep -A1 "👤 담당자" | tail -1 | xargs)
+        
+        # 대안 파싱 방법들 시도
+        if [[ -z "$PARENT_TICKET" ]]; then
+          PARENT_TICKET=$(echo "$ISSUE_BODY" | grep -A1 "### 🎟️ 상위 Jira 티켓" | tail -1 | xargs)
+        fi
+        if [[ -z "$PARENT_TICKET" ]]; then
+          PARENT_TICKET=$(echo "$ISSUE_BODY" | grep -A1 "상위 Jira 티켓" | tail -1 | xargs)
+        fi
+        
+        if [[ -z "$TASK_TITLE" ]]; then
+          TASK_TITLE=$(echo "$ISSUE_BODY" | grep -A1 "### 🎯 태스크 제목" | tail -1 | xargs)
+        fi
+        if [[ -z "$TASK_TITLE" ]]; then
+          TASK_TITLE=$(echo "$ISSUE_BODY" | grep -A1 "태스크 제목" | tail -1 | xargs)
+        fi
         
         # 작업 설명은 여러 줄이므로 별도 처리
-        TASK_DESC=$(echo "$ISSUE_BODY" | sed -n '/### 📝 작업 설명/,/### /p' | sed '1d;$d' | sed 's/^[[:space:]]*//')
+        TASK_DESC=$(echo "$ISSUE_BODY" | sed -n '/📝 작업 설명/,/👤 담당자/p' | sed '1d;$d' | sed 's/^[[:space:]]*//')
         
         # GitHub 이슈 정보
         ISSUE_URL="${{ github.event.issue.html_url }}"
