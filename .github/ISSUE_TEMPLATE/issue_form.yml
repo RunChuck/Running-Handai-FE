@@ -1,0 +1,46 @@
+name: Jira Task 생성
+description: 새로운 작업을 위한 이슈 템플릿 (생성된 이슈는 Jira와 연동)
+title: "[TASK] "
+labels: ["jira-sync", "task"]
+body:
+  - type: input
+    id: parent-ticket
+    attributes:
+      label: "🎟️ 상위 Jira 티켓"
+      description: "이 작업이 속할 상위 티켓 키를 입력하세요"
+      placeholder: "SCRUM-123"
+    validations:
+      required: true
+  
+  - type: input
+    id: task-title
+    attributes:
+      label: "🎯 태스크 제목"
+      description: "구체적이고 명확한 태스크 제목을 입력하세요"
+      placeholder: "예: 로그인 인증 기능 구현"
+    validations:
+      required: true
+  
+  - type: textarea
+    id: task-description
+    attributes:
+      label: "📝 작업 설명"
+      description: "작업의 상세 내용을 설명하세요"
+      value: |
+        ## 작업 내용
+        - 작업 내용 상세
+        
+        ## TODO
+        - [ ] 조건 1
+        - [ ] 조건 2
+    validations:
+      required: true
+  
+  - type: input
+    id: assignee
+    attributes:
+      label: "👤 담당자"
+      description: "Jira 사용자 이메일 또는 사용자명"
+      placeholder: "chacha_@hufs.ac.kr"
+    validations:
+      required: false
