@@ -2,7 +2,7 @@ name: Create Jira Subtask from GitHub Issue
 
 on:
   issues:
-    types: [opened]
+    types: [opened, labeled]
 
 jobs:
   create-jira-subtask:
