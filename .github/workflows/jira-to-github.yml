@@ -1,0 +1,92 @@
+name: Create GitHub Issue from Jira Subtask
+
+on:
+  repository_dispatch:
+    types: [jira-subtask-assigned]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  create-github-issue:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Extract Jira Data
+      id: extract-data
+      run: |
+        echo "=== Jira Webhook Data ==="
+        echo "Issue Key: ${{ github.event.client_payload.issue_key }}"
+        echo "Summary: ${{ github.event.client_payload.summary }}"
+        echo "Assignee: ${{ github.event.client_payload.assignee }}"
+        echo "Parent Key: ${{ github.event.client_payload.parent_key }}"
+        echo "Description: ${{ github.event.client_payload.description }}"
+        echo "=========================="
+        
+        # 데이터 정리
+        JIRA_KEY="${{ github.event.client_payload.issue_key }}"
+        TITLE="${{ github.event.client_payload.summary }}"
+        ASSIGNEE="${{ github.event.client_payload.assignee }}"
+        PARENT="${{ github.event.client_payload.parent_key }}"
+        DESC="${{ github.event.client_payload.description }}"
+        
+        echo "JIRA_KEY=$JIRA_KEY" >> $GITHUB_OUTPUT
+        echo "TITLE=$TITLE" >> $GITHUB_OUTPUT
+        echo "ASSIGNEE=$ASSIGNEE" >> $GITHUB_OUTPUT
+        echo "PARENT=$PARENT" >> $GITHUB_OUTPUT
+        echo "DESC=$DESC" >> $GITHUB_OUTPUT
+
+    - name: Check if assigned to me
+      id: check-assignee
+      run: |
+        ASSIGNEE="${{ steps.extract-data.outputs.ASSIGNEE }}"
+        MY_JIRA_EMAIL="${{ secrets.JIRA_USER_EMAIL }}"
+        
+        if [[ "$ASSIGNEE" == "$MY_JIRA_EMAIL" ]]; then
+          echo "✅ 나에게 할당된 작업입니다"
+          echo "CREATE_ISSUE=true" >> $GITHUB_OUTPUT
+        else
+          echo "❌ 다른 사람에게 할당된 작업입니다: $ASSIGNEE"
+          echo "CREATE_ISSUE=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Create GitHub Issue
+      if: steps.check-assignee.outputs.CREATE_ISSUE == 'true'
+      id: create-issue
+      uses: actions-cool/issues-helper@v3
+      with:
+        actions: 'create-issue'
+        token: ${{ secrets.GITHUB_TOKEN }}
+        title: '[${{ steps.extract-data.outputs.JIRA_KEY }}] ${{ steps.extract-data.outputs.TITLE }}'
+        body: |
+          ## 🎯 Jira Sub-task에서 자동 생성
+          
+          **📋 Jira 링크**: [${{ steps.extract-data.outputs.JIRA_KEY }}](${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.extract-data.outputs.JIRA_KEY }})
+          **📊 상위 Story**: [${{ steps.extract-data.outputs.PARENT }}](${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.extract-data.outputs.PARENT }})
+          **👤 할당자**: ${{ steps.extract-data.outputs.ASSIGNEE }}
+          
+          ## 📝 작업 설명
+          ${{ steps.extract-data.outputs.DESC }}
+          
+          ---
+          > 💡 이 이슈는 PM이 Jira에서 하위 작업을 할당했을 때 자동으로 생성되었습니다.
+        labels: |
+          jira-linked
+          assigned-task
+
+    - name: Add Development Checklist
+      if: steps.check-assignee.outputs.CREATE_ISSUE == 'true'
+      uses: actions-cool/issues-helper@v3
+      with:
+        actions: 'create-comment'
+        token: ${{ secrets.GITHUB_TOKEN }}
+        issue-number: ${{ steps.create-issue.outputs.issue-number }}
+        body: |
+          🚀 **개발 시작 체크리스트**
+          
+          - [ ] 요구사항 분석 완료
+          - [ ] 기술 스택 및 구현 방법 검토
+          - [ ] 브랜치 생성 및 환경 설정
+          
+          **관련 Jira**: [${{ steps.extract-data.outputs.JIRA_KEY }}](${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.extract-data.outputs.JIRA_KEY }})
