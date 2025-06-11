@@ -1,0 +1,128 @@
+name: Complete Jira Ticket on Issue Close
+
+on:
+  issues:
+    types: [closed]
+
+permissions:
+  issues: read
+  contents: read
+
+jobs:
+  complete-jira-ticket:
+    runs-on: ubuntu-latest
+    # PR에 의해 닫힌 이슈만 처리 (수동으로 닫힌 이슈는 제외)
+    if: github.event.issue.state_reason == 'completed'
+    
+    steps:
+    - name: Extract Jira Ticket from Issue
+      id: extract-jira
+      run: |
+        echo "=== 이슈 정보 확인 ==="
+        echo "Issue Title: ${{ github.event.issue.title }}"
+        echo "Issue Body: ${{ github.event.issue.body }}"
+        echo "State Reason: ${{ github.event.issue.state_reason }}"
+        echo "=========================="
+        
+        # 이슈 제목에서 Jira 티켓 키 추출 (예: [SCRUM-123] 제목)
+        TITLE="${{ github.event.issue.title }}"
+        JIRA_KEY=""
+        
+        # 제목에서 [SCRUM-XXX] 패턴 찾기
+        if [[ "$TITLE" =~ \[([A-Z]+-[0-9]+)\] ]]; then
+          JIRA_KEY="${BASH_REMATCH[1]}"
+          echo "✅ 제목에서 Jira 키 발견: $JIRA_KEY"
+        else
+          # 이슈 본문에서 Jira 링크 찾기
+          BODY="${{ github.event.issue.body }}"
+          if [[ "$BODY" =~ browse/([A-Z]+-[0-9]+) ]]; then
+            JIRA_KEY="${BASH_REMATCH[1]}"
+            echo "✅ 본문에서 Jira 키 발견: $JIRA_KEY"
+          fi
+        fi
+        
+        if [[ -n "$JIRA_KEY" ]]; then
+          echo "JIRA_KEY=$JIRA_KEY" >> $GITHUB_OUTPUT
+          echo "HAS_JIRA=true" >> $GITHUB_OUTPUT
+        else
+          echo "❌ Jira 티켓 키를 찾을 수 없습니다"
+          echo "HAS_JIRA=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Login to Jira
+      if: steps.extract-jira.outputs.HAS_JIRA == 'true'
+      uses: atlassian/gajira-login@v3
+      env:
+        JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+        JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+        JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+
+    - name: Get Current Jira Issue Status
+      if: steps.extract-jira.outputs.HAS_JIRA == 'true'
+      id: get-status
+      run: |
+        echo "🔍 현재 Jira 이슈 상태 확인중..."
+        
+        # Jira API로 현재 상태 확인
+        RESPONSE=$(curl -s -u "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
+          -H "Accept: application/json" \
+          "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/${{ steps.extract-jira.outputs.JIRA_KEY }}")
+        
+        if [[ $? -eq 0 ]]; then
+          CURRENT_STATUS=$(echo "$RESPONSE" | jq -r '.fields.status.name')
+          echo "현재 상태: $CURRENT_STATUS"
+          echo "CURRENT_STATUS=$CURRENT_STATUS" >> $GITHUB_OUTPUT
+        else
+          echo "❌ Jira 이슈 정보를 가져올 수 없습니다"
+          echo "CURRENT_STATUS=unknown" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Transition Jira Issue to Done
+      if: steps.extract-jira.outputs.HAS_JIRA == 'true' && steps.get-status.outputs.CURRENT_STATUS != 'Done'
+      uses: atlassian/gajira-transition@v3
+      with:
+        issue: ${{ steps.extract-jira.outputs.JIRA_KEY }}
+        transition: "Done"
+
+    - name: Add Completion Comment to Jira
+      if: steps.extract-jira.outputs.HAS_JIRA == 'true'
+      uses: atlassian/gajira-comment@v3
+      with:
+        issue: ${{ steps.extract-jira.outputs.JIRA_KEY }}
+        comment: |
+          ✅ *GitHub에서 자동 완료 처리*
+          
+          연결된 GitHub Issue가 PR 머지로 인해 닫혔습니다.
+          
+          📋 *GitHub Issue*: ${{ github.event.issue.html_url }}
+          👤 *완료자*: ${{ github.event.issue.user.login }}
+          🕐 *완료 시간*: ${{ github.event.issue.closed_at }}
+
+    - name: Add Success Comment to GitHub Issue
+      if: steps.extract-jira.outputs.HAS_JIRA == 'true'
+      uses: actions-cool/issues-helper@v3
+      with:
+        actions: 'create-comment'
+        token: ${{ secrets.GITHUB_TOKEN }}
+        issue-number: ${{ github.event.issue.number }}
+        body: |
+          🎉 **Jira 티켓 자동 완료!**
+          
+          📋 **완료된 티켓**: [${{ steps.extract-jira.outputs.JIRA_KEY }}](${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.extract-jira.outputs.JIRA_KEY }})
+          📊 **이전 상태**: ${{ steps.get-status.outputs.CURRENT_STATUS }} → Done
+          
+          > 💡 PR 머지로 인해 연결된 Jira 티켓이 자동으로 완료 처리되었습니다!
+
+    - name: Add No Jira Comment
+      if: steps.extract-jira.outputs.HAS_JIRA == 'false'
+      uses: actions-cool/issues-helper@v3
+      with:
+        actions: 'create-comment'
+        token: ${{ secrets.GITHUB_TOKEN }}
+        issue-number: ${{ github.event.issue.number }}
+        body: |
+          ℹ️ **Jira 연동 없음**
+          
+          이 이슈에서 연결된 Jira 티켓을 찾을 수 없어 자동 완료 처리를 건너뜁니다.
+          
+          > 💡 Jira 연동을 위해서는 이슈 제목에 `[SCRUM-XXX]`를 포함하거나 본문에 Jira 링크를 추가해주세요.
