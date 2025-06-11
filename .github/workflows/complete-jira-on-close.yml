@@ -11,44 +11,38 @@ permissions:
 jobs:
   complete-jira-ticket:
     runs-on: ubuntu-latest
-    # 모든 닫힌 이슈 처리 
+    # 모든 닫힌 이슈 처리 (PR 머지든 수동 닫기든 상관없이)
     if: github.event.issue.state == 'closed'
     
     steps:
     - name: Extract Jira Ticket from Issue
       id: extract-jira
-      run: |
-        echo "=== 이슈 정보 확인 ==="
-        echo "Issue Number: ${{ github.event.issue.number }}"
-        echo "State Reason: ${{ github.event.issue.state_reason }}"
-        echo "=========================="
-        
-        # GitHub API로 최신 이슈 제목 가져오기
-        LATEST_TITLE=$(gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }} --jq '.title')
-        echo "Latest Title: $LATEST_TITLE"
-        
-        JIRA_KEY=""
-        
-        # 최신 제목에서 [SCRUM-XXX] 패턴 찾기
-        if [[ "$LATEST_TITLE" =~ \[([A-Z]+-[0-9]+)\] ]]; then
-          JIRA_KEY="${BASH_REMATCH[1]}"
-          echo "✅ 제목에서 Jira 키 발견: $JIRA_KEY"
-        else
-          # 제목에 없으면 이슈 본문에서 Jira 링크 찾기
-          BODY="${{ github.event.issue.body }}"
-          if [[ "$BODY" =~ browse/([A-Z]+-[0-9]+) ]]; then
-            JIRA_KEY="${BASH_REMATCH[1]}"
-            echo "✅ 본문에서 Jira 키 발견: $JIRA_KEY"
-          fi
-        fi
-        
-        if [[ -n "$JIRA_KEY" ]]; then
-          echo "JIRA_KEY=$JIRA_KEY" >> $GITHUB_OUTPUT
-          echo "HAS_JIRA=true" >> $GITHUB_OUTPUT
-        else
-          echo "❌ Jira 티켓 키를 찾을 수 없습니다"
-          echo "HAS_JIRA=false" >> $GITHUB_OUTPUT
-        fi
+      uses: actions/github-script@v6
+      with:
+        script: |
+          // 현재 이슈 정보 가져오기 (최신 제목 포함)
+          const { data: issue } = await github.rest.issues.get({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number
+          });
+          
+          console.log("=== 이슈 정보 확인 ===");
+          console.log("Issue Number:", issue.number);
+          console.log("Latest Title:", issue.title);
+          console.log("State Reason:", issue.state_reason);
+          console.log("========================");
+          
+          // 제목에서 [SCRUM-XXX] 패턴 찾기
+          const titleMatch = issue.title.match(/\[([A-Z]+-[0-9]+)\]/);
+          if (titleMatch) {
+            console.log("✅ 제목에서 Jira 키 발견:", titleMatch[1]);
+            return titleMatch[1];
+          }
+          
+          console.log("❌ Jira 티켓 키를 찾을 수 없습니다");
+          return '';
+        result-encoding: string
 
     - name: Login to Jira
       if: steps.extract-jira.outputs.HAS_JIRA == 'true'
