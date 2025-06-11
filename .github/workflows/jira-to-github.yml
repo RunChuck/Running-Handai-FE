@@ -62,18 +62,15 @@ jobs:
         body: |
           ## 🎯 Jira Sub-task에서 자동 생성
           
-          **📋 Jira 링크**: [${{ steps.extract-data.outputs.JIRA_KEY }}](${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.extract-data.outputs.JIRA_KEY }})
-          **📊 상위 Story**: [${{ steps.extract-data.outputs.PARENT }}](${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.extract-data.outputs.PARENT }})
-          **👤 할당자**: ${{ steps.extract-data.outputs.ASSIGNEE }}
+          **🎟️ Jira 티켓 링크**: [${{ steps.extract-data.outputs.JIRA_KEY }}](${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.extract-data.outputs.JIRA_KEY }})
+          **📊 상위 티켓**: [${{ steps.extract-data.outputs.PARENT }}](${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.extract-data.outputs.PARENT }})
+          **👤 담당자**: ${{ steps.extract-data.outputs.ASSIGNEE }}
           
           ## 📝 작업 설명
           ${{ steps.extract-data.outputs.DESC }}
           
           ---
           > 💡 이 이슈는 PM이 Jira에서 하위 작업을 할당했을 때 자동으로 생성되었습니다.
-        labels: |
-          jira-linked
-          assigned-task
 
     - name: Add Development Checklist
       if: steps.check-assignee.outputs.CREATE_ISSUE == 'true'
@@ -83,7 +80,7 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         issue-number: ${{ steps.create-issue.outputs.issue-number }}
         body: |
-          🚀 **개발 시작 체크리스트**
+          🚀 ** 체크리스트**
           
           - [ ] 요구사항 분석 완료
           - [ ] 기술 스택 및 구현 방법 검토
