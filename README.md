@@ -1,54 +1,17 @@
-# React + TypeScript + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+| 깃모지 | 타입 | 상황 |
+| --- | --- | --- |
+| 🎉 | Init | 프로젝트 시작, 초기 설정 |
+| ✨ | Feat | 새로운 기능 추가, 구현 |
+| 🐛 | Fix | 버그 수정 |
+| 💄 | Design | CSS 등 사용자 UI 디자인 변경 |
+| 🎨 | Style | 코드 포맷 변경, 세미 콜론 누락, 코드 수정이 없는 경우, 사소한 코드 변경! |
+| 🔧 | Chore | 단순 오타 수정, 기타 사소한 작업 |
+| 📝 | Docs | 문서 파일 추가 및 수정 (readme) |
+| 🚚 | Move | 파일, 경로, route를 옮기거나 이름 변경 |
+| 🔄 | Rename | 파일, 폴더명 수정 |
+| ♻️ | Refactor | 코드 리팩토링 |
+| 🔥 | Remove | 삭제 (파일, 코드) |
+| 💡 | Comment | 필요한 주석 추가 및 변경 |
+| 🏗️ | Build | 빌드 시스템 수정, 외부 종속성 추가 또는 제거 |
+| 🚀 | Deploy | 배포 관련 설정, CICD 등 |
+| 🚨 | Hotfix | 치명적인 버그나 긴급한 수정 |

@@ -1,0 +1,82 @@
+# 커밋 메시지 자동 포맷팅
+# 형식: ✨ [SCRUM-108] Feat: 로그인 기능 구현
+
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat $COMMIT_MSG_FILE)
+
+# 현재 브랜치명에서 Jira 티켓 번호 추출
+BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+JIRA_TICKET=""
+
+if [[ $BRANCH_NAME =~ (SCRUM-[0-9]+) ]]; then
+    JIRA_TICKET="${BASH_REMATCH[1]}"
+fi
+
+# 이미 포맷팅된 메시지인지 확인 (깃모지로 시작하는지)
+if [[ $COMMIT_MSG =~ ^[🎉✨🐛💄🎨🔧📝🚚🔄♻️🔥💡🏗️🚀🚨] ]]; then
+    echo "✅ 이미 포맷팅된 커밋 메시지입니다."
+    exit 0
+fi
+
+# 커밋 타입과 깃모지 매핑 함수
+get_emoji() {
+    case $1 in
+        "Init") echo "🎉" ;;
+        "Feat") echo "✨" ;;
+        "Fix") echo "🐛" ;;
+        "Design") echo "💄" ;;
+        "Style") echo "🎨" ;;
+        "Chore") echo "🔧" ;;
+        "Docs") echo "📝" ;;
+        "Move") echo "🚚" ;;
+        "Rename") echo "🔄" ;;
+        "Refactor") echo "♻️" ;;
+        "Remove") echo "🔥" ;;
+        "Comment") echo "💡" ;;
+        "Build") echo "🏗️" ;;
+        "Deploy") echo "🚀" ;;
+        "Hotfix") echo "🚨" ;;
+        *) echo "" ;;
+    esac
+}
+
+# 커밋 메시지 파싱: "Feat: 메시지" 또는 "Feat: 메시지 #2" 형식
+if [[ $COMMIT_MSG =~ ^[[:space:]]*([A-Za-z]+):[[:space:]]*(.+) ]]; then
+    COMMIT_TYPE="${BASH_REMATCH[1]}"
+    COMMIT_MESSAGE="${BASH_REMATCH[2]}"
+    
+    # 첫 글자 대문자로 변환
+    COMMIT_TYPE="$(tr '[:lower:]' '[:upper:]' <<< ${COMMIT_TYPE:0:1})${COMMIT_TYPE:1}"
+    
+    EMOJI=$(get_emoji "$COMMIT_TYPE")
+    
+    if [[ -z "$EMOJI" ]]; then
+        echo "❌ 알 수 없는 커밋 타입: $COMMIT_TYPE"
+        echo "사용 가능한 타입: Init, Feat, Fix, Design, Style, Chore, Docs, Move, Rename, Refactor, Remove, Comment, Build, Deploy, Hotfix"
+        exit 1
+    fi
+    
+    # 최종 메시지 구성
+    FORMATTED_MSG="$EMOJI"
+    
+    # Jira 티켓 번호 추가 (있는 경우)
+    if [[ ! -z "$JIRA_TICKET" ]]; then
+        FORMATTED_MSG="$FORMATTED_MSG [$JIRA_TICKET]"
+    fi
+    
+    FORMATTED_MSG="$FORMATTED_MSG $COMMIT_TYPE: $COMMIT_MESSAGE"
+    
+    # 포맷팅된 메시지를 파일에 저장
+    echo "$FORMATTED_MSG" > $COMMIT_MSG_FILE
+    echo "✅ 커밋 메시지 포맷팅 완료: $FORMATTED_MSG"
+else
+    echo "❌ 잘못된 커밋 메시지 형식입니다."
+    echo "올바른 형식: Feat: 커밋 메시지"
+    echo ""
+    echo "예시:"
+    echo "  git commit -m 'Feat: 새로운 기능 추가'"
+    echo "  git commit -m 'Fix: 버그 수정'"
+    echo "  git commit -m 'Docs: 문서 업데이트'"
+    echo "  git commit -m 'Feat: 기능 추가 #2'  # 이슈 번호 포함"
+    exit 1
+fi
