@@ -11,29 +11,30 @@ permissions:
 jobs:
   complete-jira-ticket:
     runs-on: ubuntu-latest
-    # PR에 의해 닫힌 이슈만 처리 (수동으로 닫힌 이슈는 제외)
-    if: github.event.issue.state_reason == 'completed'
+    # 모든 닫힌 이슈 처리 
+    if: github.event.issue.state == 'closed'
     
     steps:
     - name: Extract Jira Ticket from Issue
       id: extract-jira
       run: |
         echo "=== 이슈 정보 확인 ==="
-        echo "Issue Title: ${{ github.event.issue.title }}"
-        echo "Issue Body: ${{ github.event.issue.body }}"
+        echo "Issue Number: ${{ github.event.issue.number }}"
         echo "State Reason: ${{ github.event.issue.state_reason }}"
         echo "=========================="
         
-        # 이슈 제목에서 Jira 티켓 키 추출 (예: [SCRUM-123] 제목)
-        TITLE="${{ github.event.issue.title }}"
+        # GitHub API로 최신 이슈 제목 가져오기
+        LATEST_TITLE=$(gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }} --jq '.title')
+        echo "Latest Title: $LATEST_TITLE"
+        
         JIRA_KEY=""
         
-        # 제목에서 [SCRUM-XXX] 패턴 찾기
-        if [[ "$TITLE" =~ \[([A-Z]+-[0-9]+)\] ]]; then
+        # 최신 제목에서 [SCRUM-XXX] 패턴 찾기
+        if [[ "$LATEST_TITLE" =~ \[([A-Z]+-[0-9]+)\] ]]; then
           JIRA_KEY="${BASH_REMATCH[1]}"
           echo "✅ 제목에서 Jira 키 발견: $JIRA_KEY"
         else
-          # 이슈 본문에서 Jira 링크 찾기
+          # 제목에 없으면 이슈 본문에서 Jira 링크 찾기
           BODY="${{ github.event.issue.body }}"
           if [[ "$BODY" =~ browse/([A-Z]+-[0-9]+) ]]; then
             JIRA_KEY="${BASH_REMATCH[1]}"
@@ -92,11 +93,12 @@ jobs:
         comment: |
           ✅ *GitHub에서 자동 완료 처리*
           
-          연결된 GitHub Issue가 PR 머지로 인해 닫혔습니다.
+          연결된 GitHub Issue가 닫혔습니다.
           
           📋 *GitHub Issue*: ${{ github.event.issue.html_url }}
-          👤 *완료자*: ${{ github.event.issue.user.login }}
+          👤 *닫은 사용자*: ${{ github.event.issue.user.login }}
           🕐 *완료 시간*: ${{ github.event.issue.closed_at }}
+          📝 *닫힌 방식*: ${{ github.event.issue.state_reason == 'completed' && 'PR 머지' || '수동 닫기' }}
 
     - name: Add Success Comment to GitHub Issue
       if: steps.extract-jira.outputs.HAS_JIRA == 'true'
@@ -111,7 +113,7 @@ jobs:
           📋 **완료된 티켓**: [${{ steps.extract-jira.outputs.JIRA_KEY }}](${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.extract-jira.outputs.JIRA_KEY }})
           📊 **이전 상태**: ${{ steps.get-status.outputs.CURRENT_STATUS }} → Done
           
-          > 💡 PR 머지로 인해 연결된 Jira 티켓이 자동으로 완료 처리되었습니다!
+          > 💡 GitHub 이슈 closed로 연결된 Jira 티켓이 완료 처리되었습니다!
 
     - name: Add No Jira Comment
       if: steps.extract-jira.outputs.HAS_JIRA == 'false'
