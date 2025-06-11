@@ -5,7 +5,7 @@ on:
     types: [closed]
 
 permissions:
-  issues: read
+  issues: write
   contents: read
 
 jobs:
@@ -45,7 +45,7 @@ jobs:
         result-encoding: string
 
     - name: Login to Jira
-      if: steps.extract-jira.outputs.HAS_JIRA == 'true'
+      if: steps.extract-jira.outputs.result != ''
       uses: atlassian/gajira-login@v3
       env:
         JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
@@ -53,7 +53,7 @@ jobs:
         JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
 
     - name: Get Current Jira Issue Status
-      if: steps.extract-jira.outputs.HAS_JIRA == 'true'
+      if: steps.extract-jira.outputs.result != ''
       id: get-status
       run: |
         echo "🔍 현재 Jira 이슈 상태 확인중..."
@@ -61,7 +61,7 @@ jobs:
         # Jira API로 현재 상태 확인
         RESPONSE=$(curl -s -u "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
           -H "Accept: application/json" \
-          "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/${{ steps.extract-jira.outputs.JIRA_KEY }}")
+          "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/${{ steps.extract-jira.outputs.result }}")
         
         if [[ $? -eq 0 ]]; then
           CURRENT_STATUS=$(echo "$RESPONSE" | jq -r '.fields.status.name')
@@ -73,17 +73,17 @@ jobs:
         fi
 
     - name: Transition Jira Issue to Done
-      if: steps.extract-jira.outputs.HAS_JIRA == 'true' && steps.get-status.outputs.CURRENT_STATUS != 'Done'
+      if: steps.extract-jira.outputs.result != '' && steps.get-status.outputs.CURRENT_STATUS != '완료'
       uses: atlassian/gajira-transition@v3
       with:
-        issue: ${{ steps.extract-jira.outputs.JIRA_KEY }}
-        transition: "Done"
+        issue: ${{ steps.extract-jira.outputs.result }}
+        transition: "완료"
 
     - name: Add Completion Comment to Jira
-      if: steps.extract-jira.outputs.HAS_JIRA == 'true'
+      if: steps.extract-jira.outputs.result != ''
       uses: atlassian/gajira-comment@v3
       with:
-        issue: ${{ steps.extract-jira.outputs.JIRA_KEY }}
+        issue: ${{ steps.extract-jira.outputs.result }}
         comment: |
           ✅ *GitHub에서 자동 완료 처리*
           
@@ -95,7 +95,7 @@ jobs:
           📝 *닫힌 방식*: ${{ github.event.issue.state_reason == 'completed' && 'PR 머지' || '수동 닫기' }}
 
     - name: Add Success Comment to GitHub Issue
-      if: steps.extract-jira.outputs.HAS_JIRA == 'true'
+      if: steps.extract-jira.outputs.result != ''
       uses: actions-cool/issues-helper@v3
       with:
         actions: 'create-comment'
@@ -104,13 +104,13 @@ jobs:
         body: |
           🎉 **Jira 티켓 자동 완료!**
           
-          📋 **완료된 티켓**: [${{ steps.extract-jira.outputs.JIRA_KEY }}](${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.extract-jira.outputs.JIRA_KEY }})
-          📊 **이전 상태**: ${{ steps.get-status.outputs.CURRENT_STATUS }} → Done
+          📋 **완료된 티켓**: [${{ steps.extract-jira.outputs.result }}](${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.extract-jira.outputs.result }})
+          📊 **이전 상태**: ${{ steps.get-status.outputs.CURRENT_STATUS }} → 완료
           
           > 💡 GitHub 이슈 closed로 연결된 Jira 티켓이 완료 처리되었습니다!
 
     - name: Add No Jira Comment
-      if: steps.extract-jira.outputs.HAS_JIRA == 'false'
+      if: steps.extract-jira.outputs.result == ''
       uses: actions-cool/issues-helper@v3
       with:
         actions: 'create-comment'
