@@ -70,7 +70,7 @@ jobs:
           ${{ steps.extract-data.outputs.DESC }}
           
           ---
-          > 💡 이 이슈는 PM이 Jira에서 하위 작업을 할당했을 때 자동으로 생성되었습니다.
+          > 💡 이 이슈는 Jira에서 하위 작업을 할당하여 자동으로 생성되었습니다.
 
     - name: Add Development Checklist
       if: steps.check-assignee.outputs.CREATE_ISSUE == 'true'
