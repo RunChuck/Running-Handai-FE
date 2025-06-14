@@ -36,11 +36,3 @@ body:
     validations:
       required: true
   
-  - type: input
-    id: assignee
-    attributes:
-      label: "👤 담당자"
-      description: "Jira 사용자 이메일 또는 사용자명"
-      placeholder: "chacha_@hufs.ac.kr"
-    validations:
-      required: false
