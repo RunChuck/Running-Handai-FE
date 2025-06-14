@@ -29,9 +29,13 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
       // 추가 규칙들
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_' },
+      ],
+      '@typescript-eslint/no-empty-object-type': 'off',
       'prefer-const': 'error',
       'no-var': 'error',
     },
-  },
-)
+  }
+);
