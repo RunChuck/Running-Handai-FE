@@ -77,6 +77,7 @@ export const GlobalStyles = () => (
         font-size: 16px;
         -webkit-text-size-adjust: 100%;
         -ms-text-size-adjust: 100%;
+        background-color: var(--surface-surface-highlight, #f4f4f4);
       }
 
       body {
@@ -88,7 +89,7 @@ export const GlobalStyles = () => (
         font-weight: 400;
         line-height: 1.5;
         color: var(--text-text-title);
-        background-color: var(--surface-surface-default);
+        background-color: var(--surface-surface-highlight, #f4f4f4);
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         -webkit-tap-highlight-color: transparent;
@@ -97,18 +98,24 @@ export const GlobalStyles = () => (
       }
 
       #root {
-        height: 100%;
         width: 100%;
         max-width: 600px;
         margin: 0 auto;
         position: relative;
-        /* 웹에서 볼 때 경계선 */
+        background-color: var(--surface-surface-default, #ffffff);
+        min-height: 100vh; /* 모바일과 웹 모두 min-height 사용 */
+
         @media (min-width: 601px) {
           box-shadow: var(--shadow-lg);
         }
+
+        /* 모바일에서 추가 최적화 */
+        @media (max-width: 600px) {
+          min-height: 100dvh; /* 동적 뷰포트 높이 사용 */
+        }
       }
 
-      /* 웹앱 느낌을 위한 스크롤바 스타일링 */
+      /* TODO: 스크롤바 스타일링 수정 필요 */
       ::-webkit-scrollbar {
         width: 4px;
       }
@@ -118,7 +125,7 @@ export const GlobalStyles = () => (
       }
 
       ::-webkit-scrollbar-thumb {
-        background: var(--line-line002);
+        background: var(--line-line-002);
         border-radius: 2px;
       }
 
@@ -132,7 +139,7 @@ export const GlobalStyles = () => (
         text-decoration: none;
 
         &:hover {
-          color: var(--brand-primary-hover);
+          color: var(--text-text-primary);
         }
       }
 
@@ -168,20 +175,6 @@ export const GlobalStyles = () => (
         max-width: 100%;
         height: auto;
         display: block;
-      }
-
-      /* 모바일 터치 환경 최적화 */
-      @media (max-width: 600px) {
-        body {
-          /* iOS Safari에서 주소창 숨김 처리 */
-          height: 100vh;
-          height: 100dvh;
-        }
-
-        #root {
-          height: 100vh;
-          height: 100dvh;
-        }
       }
     `}
   />
