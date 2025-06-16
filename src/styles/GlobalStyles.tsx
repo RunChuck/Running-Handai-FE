@@ -8,6 +8,7 @@ export const GlobalStyles = () => (
         /* Spacing */
         --spacing-4: 0.25rem; /* 4px */
         --spacing-8: 0.5rem; /* 8px */
+        --spacing-12: 0.75rem; /* 12px */
         --spacing-16: 1rem; /* 16px */
         --spacing-24: 1.5rem; /* 24px */
         --spacing-32: 2rem; /* 32px */
