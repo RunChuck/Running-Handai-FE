@@ -1,17 +1,13 @@
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
-import BackgroundImgSrc from '@/assets/background-img.png';
+import BackgroundImgSrc from '@/assets/images/background-img.png';
 
 export const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(
-      108deg,
-      rgba(69, 97, 255, 0.8) 0%,
-      rgba(28, 55, 206, 0.8) 100%
-    ),
+  background: linear-gradient(108deg, rgba(69, 97, 255, 0.8) 0%, rgba(28, 55, 206, 0.8) 100%),
     url(${BackgroundImgSrc}) lightgray 50% / cover no-repeat;
   width: 100vw;
   height: 100vh;
@@ -49,20 +45,15 @@ export const TitleWrapper = styled.div`
 
 export const TempLogo = styled.span`
   color: var(--text-text-primary, #4561ff);
-  text-align: center;
-  font-family: 'Carter One';
-  font-size: 9.375rem;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 100%; /* 9.375rem */
+  font-family: 'Carter One', system-ui;
+  font-size: 150px;
+  line-height: 100%;
 `;
 
 export const Title = styled.span`
   color: var(--text-text-primary, #4561ff);
-  font-family: 'Hakgyoansim Allimjang OTF';
+  font-family: 'HakgyoansimAllimjang', sans-serif;
   font-size: 50px;
-  font-style: normal;
-  font-weight: 400;
   line-height: 100%;
 `;
 
@@ -90,8 +81,12 @@ export const Button = styled.button`
   color: #fff;
 `;
 
-export const AutoLogin = styled.span`
+export const AutoLogin = styled.div`
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
   ${theme.typography.body1};
-  color: #d9d9d9;
+  color: var(--GrayScale-gray700, #777);
   text-align: left;
+  cursor: pointer;
 `;
