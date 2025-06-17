@@ -15,3 +15,4 @@
 | 🏗️ | Build | 빌드 시스템 수정, 외부 종속성 추가 또는 제거 |
 | 🚀 | Deploy | 배포 관련 설정, CICD 등 |
 | 🚨 | Hotfix | 치명적인 버그나 긴급한 수정 |
+| 🚧 | WIP | 작업 진행 중 (Work in Progress) |

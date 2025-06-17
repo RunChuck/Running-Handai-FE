@@ -13,7 +13,7 @@ if [[ $BRANCH_NAME =~ (SCRUM-[0-9]+) ]]; then
 fi
 
 # 이미 포맷팅된 메시지인지 확인 (깃모지로 시작하는지)
-if [[ $COMMIT_MSG =~ ^[🎉✨🐛💄🎨🔧📝🚚🔄♻️🔥💡🏗️🚀🚨] ]]; then
+if [[ $COMMIT_MSG =~ ^[🎉✨🐛💄🎨🔧📝🚚🔄♻️🔥💡🏗️🚀🚨🚧] ]]; then
     echo "✅ 이미 포맷팅된 커밋 메시지입니다."
     exit 0
 fi
@@ -36,6 +36,7 @@ get_emoji() {
         "Build") echo "🏗️" ;;
         "Deploy") echo "🚀" ;;
         "Hotfix") echo "🚨" ;;
+        "WIP") echo "🚧" ;;
         *) echo "" ;;
     esac
 }
@@ -52,7 +53,7 @@ if [[ $COMMIT_MSG =~ ^[[:space:]]*([A-Za-z]+):[[:space:]]*(.+) ]]; then
     
     if [[ -z "$EMOJI" ]]; then
         echo "❌ 알 수 없는 커밋 타입: $COMMIT_TYPE"
-        echo "사용 가능한 타입: Init, Feat, Fix, Design, Style, Chore, Docs, Move, Rename, Refactor, Remove, Comment, Build, Deploy, Hotfix"
+        echo "사용 가능한 타입: Init, Feat, Fix, Design, Style, Chore, Docs, Move, Rename, Refactor, Remove, Comment, Build, Deploy, Hotfix, WIP"
         exit 1
     fi
     

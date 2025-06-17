@@ -3,11 +3,23 @@ import { Global, css } from '@emotion/react';
 export const GlobalStyles = () => (
   <Global
     styles={css`
+      @import url('https://fonts.googleapis.com/css2?family=Carter+One&family=Jersey+15&family=Noto+Sans+KR:wght@100..900&display=swap');
+
+      @font-face {
+        font-family: 'HakgyoansimAllimjang';
+        src: url('/src/assets/fonts/Hakgyoansim Allimjang TTF R.ttf')
+          format('truetype');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+
       /* CSS 변수 정의 */
       :root {
         /* Spacing */
         --spacing-4: 0.25rem; /* 4px */
         --spacing-8: 0.5rem; /* 8px */
+        --spacing-12: 0.75rem; /* 12px */
         --spacing-16: 1rem; /* 16px */
         --spacing-24: 1.5rem; /* 24px */
         --spacing-32: 2rem; /* 32px */
@@ -18,6 +30,18 @@ export const GlobalStyles = () => (
 
         /* Brand Color */
         --primary-primary: #4561ff;
+
+        /* GrayScale */
+        --GrayScale-gray900: #1c1c1c;
+        --GrayScale-gray800: #333333;
+        --GrayScale-gray700: #555555;
+        --GrayScale-gray600: #777777;
+        --GrayScale-gray500: #999999;
+        --GrayScale-gray400: #bbbbbb;
+        --GrayScale-gray300: #e0e0e0;
+        --GrayScale-gray200: #eeeeee;
+        --GrayScale-gray100: #f4f4f4;
+        --GrayScale-gray050: #fafafa;
 
         /* Text Colors */
         --text-text-primary: #4561ff;
