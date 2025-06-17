@@ -32,6 +32,13 @@ export const LoginContainer = styled.div`
   background: var(--surface-surface-default, #fff);
   border-radius: 24px;
   gap: 44px;
+
+  @media (max-width: 600px) {
+    padding: 80px 16px;
+    background: transparent;
+    border-radius: 0;
+    width: 100%;
+  }
 `;
 
 export const TitleWrapper = styled.div`
@@ -41,6 +48,10 @@ export const TitleWrapper = styled.div`
   gap: var(--spacing-12);
   align-self: stretch;
   width: 440px;
+
+  @media (max-width: 600px) {
+    width: 100%;
+  }
 `;
 
 export const TempLogo = styled.span`
@@ -48,6 +59,10 @@ export const TempLogo = styled.span`
   font-family: 'Carter One', system-ui;
   font-size: 150px;
   line-height: 100%;
+
+  @media (max-width: 600px) {
+    color: var(--text-text-inverse, #fff);
+  }
 `;
 
 export const Title = styled.span`
@@ -55,6 +70,10 @@ export const Title = styled.span`
   font-family: 'HakgyoansimAllimjang', sans-serif;
   font-size: 50px;
   line-height: 100%;
+
+  @media (max-width: 600px) {
+    color: var(--text-text-inverse, #fff);
+  }
 `;
 
 export const ButtonWrapper = styled.div`
@@ -62,6 +81,10 @@ export const ButtonWrapper = styled.div`
   flex-direction: column;
   gap: var(--spacing-24);
   width: 343px;
+
+  @media (max-width: 600px) {
+    width: 100%;
+  }
 `;
 
 export const ButtonGroup = styled.div`
@@ -89,4 +112,8 @@ export const AutoLogin = styled.div`
   color: var(--GrayScale-gray700, #777);
   text-align: left;
   cursor: pointer;
+
+  @media (max-width: 600px) {
+    color: var(--text-text-inverse, #fff);
+  }
 `;

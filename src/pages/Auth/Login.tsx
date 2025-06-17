@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as S from './Login.styled';
 
-import Button from '@/components/common/Button';
+import Button from '@/components/Button';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import GoogleIconSrc from '@/assets/icons/google-icon.svg';
@@ -12,10 +12,68 @@ import NaverIconSrc from '@/assets/icons/naver-icon.svg';
 const Login = () => {
   const navigate = useNavigate();
   const [isAutoLoginChecked, setIsAutoLoginChecked] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth <= 600);
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
   const handleAutoLoginToggle = () => {
     setIsAutoLoginChecked(!isAutoLoginChecked);
   };
+
+  const buttonSize = isMobile ? 'md' : 'lg';
+
+  const loginButtons = [
+    {
+      id: 'google',
+      text: 'Google 로그인',
+      backgroundColor: '#fff',
+      icon: <img src={GoogleIconSrc} alt="Google" width="20" height="20" />,
+      style: { color: 'var(--text-text-title, #1C1C1C)', border: '1px solid #dadce0' },
+      onClick: () => {
+        // TODO: 구글 로그인
+      },
+    },
+    {
+      id: 'kakao',
+      text: 'Kakao 로그인',
+      backgroundColor: '#FEE500',
+      icon: <img src={KakaoIconSrc} alt="Kakao" width="20" height="20" />,
+      style: { color: 'var(--text-text-title, #1C1C1C)' },
+      onClick: () => {
+        // TODO: 카카오 로그인
+      },
+    },
+    {
+      id: 'naver',
+      text: 'Naver 로그인',
+      backgroundColor: '#03C75A',
+      icon: <img src={NaverIconSrc} alt="Naver" width="20" height="20" />,
+      style: {},
+      onClick: () => {
+        // TODO: 네이버 로그인
+      },
+    },
+    {
+      id: 'guest',
+      text: '게스트로 이용하기',
+      backgroundColor: isMobile ? 'rgba(255, 255, 255, 0.10)' : 'var(--GrayScale-gray200)',
+      icon: null,
+      style: {
+        color: isMobile ? 'var(--text-text-inverse, #fff)' : 'var(--text-text-title, #1C1C1C)',
+        border: isMobile ? '1px solid #fff' : 'none',
+      },
+      onClick: () => navigate('/main'),
+    },
+  ];
 
   return (
     <S.Container>
@@ -26,47 +84,27 @@ const Login = () => {
         </S.TitleWrapper>
         <S.ButtonWrapper>
           <S.ButtonGroup>
-            <Button
-              fullWidth
-              size="lg"
-              backgroundColor="#fff"
-              startIcon={<img src={GoogleIconSrc} alt="Google" width="20" height="20" />}
-              iconPosition="left"
-              style={{ color: 'var(--text-text-title, #1C1C1C)', border: '1px solid #dadce0' }}
-            >
-              Google 로그인
-            </Button>
-            <Button
-              fullWidth
-              size="lg"
-              backgroundColor="#FEE500"
-              startIcon={<img src={KakaoIconSrc} alt="Kakao" width="20" height="20" />}
-              iconPosition="left"
-              style={{ color: 'var(--text-text-title, #1C1C1C)' }}
-            >
-              Kakao 로그인
-            </Button>
-            <Button
-              fullWidth
-              size="lg"
-              backgroundColor="#03C75A"
-              startIcon={<img src={NaverIconSrc} alt="Naver" width="20" height="20" />}
-              iconPosition="left"
-            >
-              Naver 로그인
-            </Button>
-            <Button
-              fullWidth
-              size="lg"
-              backgroundColor="var(--GrayScale-gray200)"
-              style={{ color: 'var(--text-text-title, #1C1C1C)' }}
-              onClick={() => navigate('/main')}
-            >
-              게스트로 이용하기
-            </Button>
+            {loginButtons.map(button => (
+              <Button
+                key={button.id}
+                fullWidth
+                size={buttonSize}
+                backgroundColor={button.backgroundColor}
+                startIcon={button.icon}
+                iconPosition={button.icon ? 'left' : undefined}
+                style={button.style}
+                onClick={button.onClick}
+              >
+                {button.text}
+              </Button>
+            ))}
           </S.ButtonGroup>
           <S.AutoLogin onClick={handleAutoLoginToggle}>
-            {isAutoLoginChecked ? <CheckBoxIcon color="disabled" /> : <CheckBoxOutlineBlankIcon color="disabled" />}
+            {isAutoLoginChecked ? (
+              <CheckBoxIcon color={isMobile ? 'inherit' : 'disabled'} />
+            ) : (
+              <CheckBoxOutlineBlankIcon color={isMobile ? 'inherit' : 'disabled'} />
+            )}
             자동 로그인
           </S.AutoLogin>
         </S.ButtonWrapper>
