@@ -4,6 +4,17 @@ import { COURSE_LOCATIONS } from '@/constants/locations';
 import { useMap } from '@/contexts/MapContext';
 
 import BackIconSrc from '@/assets/icons/arrow-left-24px.svg';
+import locationOpt1 from '@/assets/images/location-opt1.png';
+import locationOpt2 from '@/assets/images/location-opt2.png';
+import locationOpt3 from '@/assets/images/location-opt3.png';
+import locationOpt4 from '@/assets/images/location-opt4.png';
+import locationOpt5 from '@/assets/images/location-opt5.png';
+import locationOpt6 from '@/assets/images/location-opt6.png';
+import locationOpt7 from '@/assets/images/location-opt7.png';
+import themeSea from '@/assets/images/theme-sea.png';
+import themeRiver from '@/assets/images/theme-river.png';
+import themeMountain from '@/assets/images/theme-mountain.png';
+import themeCity from '@/assets/images/theme-city.png';
 
 interface CourseModalProps {
   isOpen: boolean;
@@ -46,23 +57,55 @@ const CourseModal = ({ isOpen, onClose }: CourseModalProps) => {
           <Section>
             <Subtitle>어디로 가시나요?</Subtitle>
             <OptionGrid>
-              <OptionButton onClick={() => handleOptionSelect('해운대')}>해운대</OptionButton>
-              <OptionButton onClick={() => handleOptionSelect('송정기장')}>송정기장</OptionButton>
-              <OptionButton onClick={() => handleOptionSelect('서면동래')}>서면동래</OptionButton>
-              <OptionButton onClick={() => handleOptionSelect('원도심영도')}>원도심영도</OptionButton>
-              <OptionButton onClick={() => handleOptionSelect('남부해안')}>남부해안</OptionButton>
-              <OptionButton onClick={() => handleOptionSelect('서부낙동강')}>서부낙동강</OptionButton>
-              <OptionButton onClick={() => handleOptionSelect('북부산')}>북부산</OptionButton>
+              <OptionButton backgroundImage={locationOpt1} onClick={() => handleOptionSelect('해운대')}>
+                해운
+                <br />
+                광안
+              </OptionButton>
+              <OptionButton backgroundImage={locationOpt2} onClick={() => handleOptionSelect('송정기장')}>
+                송정
+                <br />
+                기장
+              </OptionButton>
+              <OptionButton backgroundImage={locationOpt3} onClick={() => handleOptionSelect('서면동래')}>
+                서면
+                <br />
+                동래
+              </OptionButton>
+              <OptionButton backgroundImage={locationOpt4} onClick={() => handleOptionSelect('원도심영도')}>
+                원도심
+                <br />
+                영도
+              </OptionButton>
+              <OptionButton backgroundImage={locationOpt5} onClick={() => handleOptionSelect('남부해안')}>
+                남부해안
+              </OptionButton>
+              <OptionButton backgroundImage={locationOpt6} onClick={() => handleOptionSelect('서부낙동강')}>
+                서부
+                <br />
+                낙동강
+              </OptionButton>
+              <OptionButton backgroundImage={locationOpt7} onClick={() => handleOptionSelect('북부산')}>
+                북부산
+              </OptionButton>
             </OptionGrid>
           </Section>
 
           <Section>
             <Subtitle>어떤 테마로 원하세요?</Subtitle>
             <OptionGrid>
-              <OptionButton onClick={() => handleOptionSelect('바다')}>바다</OptionButton>
-              <OptionButton onClick={() => handleOptionSelect('강변')}>강변</OptionButton>
-              <OptionButton onClick={() => handleOptionSelect('산')}>산</OptionButton>
-              <OptionButton onClick={() => handleOptionSelect('도심')}>도심</OptionButton>
+              <OptionButton backgroundImage={themeSea} onClick={() => handleOptionSelect('바다')}>
+                바다
+              </OptionButton>
+              <OptionButton backgroundImage={themeRiver} onClick={() => handleOptionSelect('강변')}>
+                강변
+              </OptionButton>
+              <OptionButton backgroundImage={themeMountain} onClick={() => handleOptionSelect('산')}>
+                산
+              </OptionButton>
+              <OptionButton backgroundImage={themeCity} onClick={() => handleOptionSelect('도심')}>
+                도심
+              </OptionButton>
             </OptionGrid>
           </Section>
         </Content>
@@ -165,7 +208,7 @@ const OptionGrid = styled.div`
   gap: var(--spacing-8);
 `;
 
-const OptionButton = styled.button`
+const OptionButton = styled.button<{ backgroundImage: string }>`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -173,16 +216,17 @@ const OptionButton = styled.button`
   height: 64px;
   border: 1px solid var(--line-line-002, #e0e0e0);
   border-radius: 50%;
-  background: var(--surface-surface-default, #fff);
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.4) 100%),
+    url(${props => props.backgroundImage}) lightgray 50% / cover no-repeat;
   cursor: pointer;
   transition: all 0.2s ease;
 
-  ${theme.typography.body2}
-  color: var(--text-text-title, #1c1c1c);
+  ${theme.typography.caption1}
+  color: var(--text-text-inverse, #ffffff);
+  line-height: 1.2;
 
   &:hover {
-    background: var(--surface-surface-highlight, #f4f4f4);
-    border-color: var(--primary-primary, #4561ff);
+    transform: scale(1.05);
   }
 
   &:active {
