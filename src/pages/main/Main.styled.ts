@@ -11,28 +11,34 @@ export const MapContainer = styled.div`
   height: 100%;
 `;
 
-export const ControlPanel = styled.div`
+export const CurrentLocationButton = styled.div`
   position: absolute;
-  top: 20px;
-  left: 20px;
+  bottom: 20px;
+  right: 20px;
   z-index: 100;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-`;
-
-export const CourseButton = styled.button<{ color: string }>`
-  padding: 10px 15px;
-  background: ${props => props.color};
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
+  width: 40px;
+  height: 40px;
+  background: var(--black-white-wh, #fff);
+  border-radius: 500px;
+  box-shadow: 1px 1px 4px 0px rgba(0, 0, 0, 0.15);
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
 
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    transform: scale(1.05);
+    box-shadow: 2px 2px 8px 0px rgba(0, 0, 0, 0.2);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  img {
+    width: 19.5px;
+    height: 19.5px;
   }
 `;
