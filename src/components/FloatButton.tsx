@@ -57,14 +57,14 @@ const StyledFloatButton = styled.div<{
   /* 크기 설정 */
   ${({ size, variant }) => {
     if (variant === 'pill') {
-      return {
-        height: '44px',
-        padding: 'var(--spacing-8) var(--spacing-16)',
-        gap: 'var(--spacing-4)',
-        ...theme.typography.caption1,
-        color: 'var(--text-text-title, #1c1c1c)',
-        whiteSpace: 'nowrap',
-      };
+      return `
+        height: 44px;
+        padding: var(--spacing-8) var(--spacing-16);
+        gap: var(--spacing-4);
+        ${theme.typography.caption1}
+        color: var(--text-text-title, #1c1c1c);
+        white-space: nowrap;
+      `;
     }
 
     switch (size) {
