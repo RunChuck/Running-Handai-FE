@@ -48,8 +48,8 @@ const Main = () => {
     <S.Container>
       <MapView ref={mapRef} />
 
-      <FloatButton onClick={handleMenuClick} position={{ top: 16, left: 16 }} size="medium" variant="rounded">
-        <img src={MenuIconSrc} alt="메뉴" />
+      <FloatButton onClick={handleMenuClick} position={{ top: 16, left: 16 }} size="large" variant="rounded">
+        <img src={MenuIconSrc} alt="메뉴" width={24} height={24} />
       </FloatButton>
 
       <FloatButton onClick={handleRecommendCourseClick} position={{ bottom: 16, center: true }} variant="pill">
@@ -57,8 +57,8 @@ const Main = () => {
         <img src={ArrowUprightIconSrc} alt="추천 코스 탐색" />
       </FloatButton>
 
-      <FloatButton onClick={moveToCurrentLocation} position={{ bottom: 16, right: 16 }} size="small" variant="circular">
-        <img src={LocationIconSrc} alt="현재 위치" />
+      <FloatButton onClick={moveToCurrentLocation} position={{ bottom: 16, right: 16 }} variant="circular">
+        <img src={LocationIconSrc} alt="현재 위치" width={20} height={20} />
       </FloatButton>
 
       <CourseModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />

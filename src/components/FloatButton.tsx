@@ -58,7 +58,7 @@ const StyledFloatButton = styled.div<{
   ${({ size, variant }) => {
     if (variant === 'pill') {
       return `
-        height: 44px;
+        height: 40px;
         padding: var(--spacing-8) var(--spacing-16);
         gap: var(--spacing-4);
         ${theme.typography.caption1}
@@ -75,18 +75,18 @@ const StyledFloatButton = styled.div<{
         `;
       case 'medium':
         return `
-          width: 44px;
-          height: 44px;
+          width: 40px;
+          height: 40px;
         `;
       case 'large':
         return `
-          width: 56px;
-          height: 56px;
+          width: 44px;
+          height: 44px;
         `;
       default:
         return `
-          width: 44px;
-          height: 44px;
+          width: 40px;
+          height: 40px;
         `;
     }
   }}
@@ -124,34 +124,6 @@ const StyledFloatButton = styled.div<{
 
   &:active {
     ${({ position }) => (position.center ? `transform: translateX(-50%) scale(0.98);` : `transform: scale(0.95);`)}
-  }
-
-  /* 아이콘 스타일 */
-  img {
-    ${({ size }) => {
-      switch (size) {
-        case 'small':
-          return `
-            width: 16px;
-            height: 16px;
-          `;
-        case 'medium':
-          return `
-            width: 24px;
-            height: 24px;
-          `;
-        case 'large':
-          return `
-            width: 32px;
-            height: 32px;
-          `;
-        default:
-          return `
-            width: 24px;
-            height: 24px;
-          `;
-      }
-    }}
   }
 `;
 
