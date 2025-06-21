@@ -1,21 +1,21 @@
-import { useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import * as S from './Main.styled';
 
 import { useDebounce } from '@/hooks/useDebounce';
 import { getUserLocation } from '@/utils/geolocation';
 import { BUSAN_CITY_HALL } from '@/constants/locations';
+import { useMap } from '@/contexts/MapContext';
 
 import MapView from '@/components/MapView';
-import type { MapViewRef } from '@/components/MapView';
 import FloatButton from '@/components/FloatButton';
+import CourseModal from '@/components/CourseModal';
 import LocationIconSrc from '@/assets/icons/location-icon.svg';
 import ArrowUprightIconSrc from '@/assets/icons/arrow-upright.svg';
 import MenuIconSrc from '@/assets/icons/menu-24px.svg';
 
 const Main = () => {
-  const mapRef = useRef<MapViewRef>(null);
-  const navigate = useNavigate();
+  const { mapRef } = useMap();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const moveToCurrentLocationHandler = async () => {
     try {
@@ -36,7 +36,7 @@ const Main = () => {
   const { debouncedCallback: moveToCurrentLocation } = useDebounce(moveToCurrentLocationHandler, 300);
 
   const handleRecommendCourseClick = () => {
-    navigate('/course-recommendation');
+    setIsModalOpen(true);
   };
 
   const handleMenuClick = () => {
@@ -60,6 +60,8 @@ const Main = () => {
       <FloatButton onClick={moveToCurrentLocation} position={{ bottom: 16, right: 16 }} size="small" variant="circular">
         <img src={LocationIconSrc} alt="현재 위치" />
       </FloatButton>
+
+      <CourseModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </S.Container>
   );
 };
