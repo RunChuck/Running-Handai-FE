@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import * as S from './Main.styled';
 
 import { useDebounce } from '@/hooks/useDebounce';
@@ -14,6 +15,7 @@ import MenuIconSrc from '@/assets/icons/menu-24px.svg';
 
 const Main = () => {
   const mapRef = useRef<MapViewRef>(null);
+  const navigate = useNavigate();
 
   const moveToCurrentLocationHandler = async () => {
     try {
@@ -34,7 +36,7 @@ const Main = () => {
   const { debouncedCallback: moveToCurrentLocation } = useDebounce(moveToCurrentLocationHandler, 300);
 
   const handleRecommendCourseClick = () => {
-    // TODO: 추천 코스 탐색
+    navigate('/course-recommendation');
   };
 
   const handleMenuClick = () => {
