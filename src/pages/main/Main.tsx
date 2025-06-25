@@ -8,7 +8,7 @@ import { useMap } from '@/contexts/MapContext';
 
 import MapView from '@/components/MapView';
 import FloatButton from '@/components/FloatButton';
-import CourseModal from '@/components/CourseModal';
+import CourseModal from './components/CourseModal';
 import LocationIconSrc from '@/assets/icons/location-icon.svg';
 import ArrowUprightIconSrc from '@/assets/icons/arrow-upright.svg';
 import MenuIconSrc from '@/assets/icons/menu-24px.svg';

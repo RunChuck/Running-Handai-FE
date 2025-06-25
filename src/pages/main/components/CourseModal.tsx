@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
-import { COURSE_LOCATIONS } from '@/constants/locations';
+import { COURSE_LOCATIONS, THEME_LOCATIONS } from '@/constants/locations';
 import { useMap } from '@/contexts/MapContext';
 
 import BackIconSrc from '@/assets/icons/arrow-left-24px.svg';
@@ -21,21 +21,37 @@ interface CourseModalProps {
   onClose: () => void;
 }
 
+const LOCATION_OPTIONS = [
+  { key: '해운대', label: '해운\n광안', image: locationOpt1 },
+  { key: '송정기장', label: '송정\n기장', image: locationOpt2 },
+  { key: '서면동래', label: '서면\n동래', image: locationOpt3 },
+  { key: '원도심영도', label: '원도심\n영도', image: locationOpt4 },
+  { key: '남부해안', label: '남부해안', image: locationOpt5 },
+  { key: '서부낙동강', label: '서부\n낙동강', image: locationOpt6 },
+  { key: '북부산', label: '북부산', image: locationOpt7 },
+] as const;
+
+const THEME_OPTIONS = [
+  { key: '바다', label: '바다', image: themeSea },
+  { key: '강변', label: '강변', image: themeRiver },
+  { key: '산', label: '산', image: themeMountain },
+  { key: '도심', label: '도심', image: themeCity },
+] as const;
+
 const CourseModal = ({ isOpen, onClose }: CourseModalProps) => {
   const { mapRef } = useMap();
 
   const handleOptionSelect = (option: string) => {
-    console.log('선택된 옵션:', option);
-
     // 지역 옵션인 경우 해당 위치로 이동
     if (option in COURSE_LOCATIONS && mapRef.current) {
       const coordinates = COURSE_LOCATIONS[option as keyof typeof COURSE_LOCATIONS];
       mapRef.current.moveToLocation(coordinates.lat, coordinates.lng);
     }
-    // 테마 옵션인 경우
-    else if (['바다', '강변', '산', '도심'].includes(option) && mapRef.current) {
-      // TODO: 테마별 대표 위치로 이동하는 로직 구현
-      console.log('테마 선택:', option);
+    // 테마 옵션인 경우 해당 테마의 대표 위치로 이동
+    else if (option in THEME_LOCATIONS && mapRef.current) {
+      const coordinates = THEME_LOCATIONS[option as keyof typeof THEME_LOCATIONS];
+      mapRef.current.moveToLocation(coordinates.lat, coordinates.lng);
+      console.log('테마 선택:', option, '위치 이동:', coordinates);
     }
 
     onClose();
@@ -57,55 +73,30 @@ const CourseModal = ({ isOpen, onClose }: CourseModalProps) => {
           <Section>
             <Subtitle>어디로 가시나요?</Subtitle>
             <OptionGrid>
-              <OptionButton backgroundImage={locationOpt1} onClick={() => handleOptionSelect('해운대')}>
-                해운
-                <br />
-                광안
-              </OptionButton>
-              <OptionButton backgroundImage={locationOpt2} onClick={() => handleOptionSelect('송정기장')}>
-                송정
-                <br />
-                기장
-              </OptionButton>
-              <OptionButton backgroundImage={locationOpt3} onClick={() => handleOptionSelect('서면동래')}>
-                서면
-                <br />
-                동래
-              </OptionButton>
-              <OptionButton backgroundImage={locationOpt4} onClick={() => handleOptionSelect('원도심영도')}>
-                원도심
-                <br />
-                영도
-              </OptionButton>
-              <OptionButton backgroundImage={locationOpt5} onClick={() => handleOptionSelect('남부해안')}>
-                남부해안
-              </OptionButton>
-              <OptionButton backgroundImage={locationOpt6} onClick={() => handleOptionSelect('서부낙동강')}>
-                서부
-                <br />
-                낙동강
-              </OptionButton>
-              <OptionButton backgroundImage={locationOpt7} onClick={() => handleOptionSelect('북부산')}>
-                북부산
-              </OptionButton>
+              {LOCATION_OPTIONS.map((option) => (
+                <OptionButton 
+                  key={option.key}
+                  backgroundImage={option.image} 
+                  onClick={() => handleOptionSelect(option.key)}
+                >
+                  {option.label}
+                </OptionButton>
+              ))}
             </OptionGrid>
           </Section>
 
           <Section>
             <Subtitle>어떤 테마로 원하세요?</Subtitle>
             <OptionGrid>
-              <OptionButton backgroundImage={themeSea} onClick={() => handleOptionSelect('바다')}>
-                바다
-              </OptionButton>
-              <OptionButton backgroundImage={themeRiver} onClick={() => handleOptionSelect('강변')}>
-                강변
-              </OptionButton>
-              <OptionButton backgroundImage={themeMountain} onClick={() => handleOptionSelect('산')}>
-                산
-              </OptionButton>
-              <OptionButton backgroundImage={themeCity} onClick={() => handleOptionSelect('도심')}>
-                도심
-              </OptionButton>
+              {THEME_OPTIONS.map((option) => (
+                <OptionButton 
+                  key={option.key}
+                  backgroundImage={option.image} 
+                  onClick={() => handleOptionSelect(option.key)}
+                >
+                  {option.label}
+                </OptionButton>
+              ))}
             </OptionGrid>
           </Section>
         </Content>
@@ -214,6 +205,7 @@ const OptionButton = styled.button<{ backgroundImage: string }>`
   justify-content: center;
   width: 64px;
   height: 64px;
+  white-space: pre-line;
   border: 1px solid var(--line-line-002, #e0e0e0);
   border-radius: 50%;
   background: linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.4) 100%),
