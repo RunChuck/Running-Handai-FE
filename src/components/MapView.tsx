@@ -4,7 +4,7 @@ import { BUSAN_CITY_HALL, DEFAULT_MAP_LEVEL } from '@/constants/locations';
 import { getUserLocation, type LocationCoords } from '@/utils/geolocation';
 
 export interface MapViewRef {
-  moveToLocation: (lat: number, lng: number) => void;
+  moveToLocation: (lat: number, lng: number, level?: number) => void;
 }
 
 interface MapViewProps {
@@ -65,10 +65,24 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad }, ref) => {
 
   // 외부에서 호출할 수 있는 함수들
   useImperativeHandle(ref, () => ({
-    moveToLocation: (lat: number, lng: number) => {
+    moveToLocation: (lat: number, lng: number, level?: number) => {
       if (mapInstance.current) {
         const position = new window.kakao.maps.LatLng(lat, lng);
-        mapInstance.current.panTo(position);
+
+        if (level !== undefined) {
+          mapInstance.current.setLevel(level);
+
+          // zoom level 먼저 변경 후 위치 이동
+          setTimeout(() => {
+            if (mapInstance.current) {
+              mapInstance.current.panTo(position);
+            }
+          }, 200);
+        } else {
+          mapInstance.current.panTo(position);
+        }
+      } else {
+        console.error('MapView: mapInstance.current가 null입니다');
       }
     },
   }));

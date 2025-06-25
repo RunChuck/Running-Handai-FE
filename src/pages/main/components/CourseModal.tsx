@@ -22,36 +22,45 @@ interface CourseModalProps {
 }
 
 const LOCATION_OPTIONS = [
-  { key: '해운대', label: '해운\n광안', image: locationOpt1 },
-  { key: '송정기장', label: '송정\n기장', image: locationOpt2 },
-  { key: '서면동래', label: '서면\n동래', image: locationOpt3 },
-  { key: '원도심영도', label: '원도심\n영도', image: locationOpt4 },
-  { key: '남부해안', label: '남부해안', image: locationOpt5 },
-  { key: '서부낙동강', label: '서부\n낙동강', image: locationOpt6 },
-  { key: '북부산', label: '북부산', image: locationOpt7 },
+  { key: '해운대', label: '해운\n광안', image: locationOpt1, zoom: 7 },
+  { key: '송정기장', label: '송정\n기장', image: locationOpt2, zoom: 7 },
+  { key: '서면동래', label: '서면\n동래', image: locationOpt3, zoom: 7 },
+  { key: '원도심영도', label: '원도심\n영도', image: locationOpt4, zoom: 7 },
+  { key: '남부해안', label: '남부해안', image: locationOpt5, zoom: 7 },
+  { key: '서부낙동강', label: '서부\n낙동강', image: locationOpt6, zoom: 7 },
+  { key: '북부산', label: '북부산', image: locationOpt7, zoom: 7 },
 ] as const;
 
 const THEME_OPTIONS = [
-  { key: '바다', label: '바다', image: themeSea },
-  { key: '강변', label: '강변', image: themeRiver },
-  { key: '산', label: '산', image: themeMountain },
-  { key: '도심', label: '도심', image: themeCity },
+  { key: '바다', label: '바다', image: themeSea, zoom: 8 },
+  { key: '강변', label: '강변', image: themeRiver, zoom: 8 },
+  { key: '산', label: '산', image: themeMountain, zoom: 8 },
+  { key: '도심', label: '도심', image: themeCity, zoom: 8 },
 ] as const;
 
 const CourseModal = ({ isOpen, onClose }: CourseModalProps) => {
   const { mapRef } = useMap();
 
   const handleOptionSelect = (option: string) => {
+    if (!mapRef.current) return;
+
     // 지역 옵션인 경우 해당 위치로 이동
-    if (option in COURSE_LOCATIONS && mapRef.current) {
+    if (option in COURSE_LOCATIONS) {
       const coordinates = COURSE_LOCATIONS[option as keyof typeof COURSE_LOCATIONS];
-      mapRef.current.moveToLocation(coordinates.lat, coordinates.lng);
+      const locationOption = LOCATION_OPTIONS.find(opt => opt.key === option);
+      const zoomLevel = locationOption?.zoom || 7;
+
+      mapRef.current.moveToLocation(coordinates.lat, coordinates.lng, zoomLevel);
+      // console.log('지역 선택:', option, '위치 이동:', coordinates, '줌 레벨:', zoomLevel);
     }
     // 테마 옵션인 경우 해당 테마의 대표 위치로 이동
-    else if (option in THEME_LOCATIONS && mapRef.current) {
+    else if (option in THEME_LOCATIONS) {
       const coordinates = THEME_LOCATIONS[option as keyof typeof THEME_LOCATIONS];
-      mapRef.current.moveToLocation(coordinates.lat, coordinates.lng);
-      console.log('테마 선택:', option, '위치 이동:', coordinates);
+      const themeOption = THEME_OPTIONS.find(opt => opt.key === option);
+      const zoomLevel = themeOption?.zoom || 7;
+
+      mapRef.current.moveToLocation(coordinates.lat, coordinates.lng, zoomLevel);
+      // console.log('테마 선택:', option, '위치 이동:', coordinates, '줌 레벨:', zoomLevel);
     }
 
     onClose();
@@ -73,10 +82,10 @@ const CourseModal = ({ isOpen, onClose }: CourseModalProps) => {
           <Section>
             <Subtitle>어디로 가시나요?</Subtitle>
             <OptionGrid>
-              {LOCATION_OPTIONS.map((option) => (
-                <OptionButton 
+              {LOCATION_OPTIONS.map(option => (
+                <OptionButton
                   key={option.key}
-                  backgroundImage={option.image} 
+                  backgroundImage={option.image}
                   onClick={() => handleOptionSelect(option.key)}
                 >
                   {option.label}
@@ -88,10 +97,10 @@ const CourseModal = ({ isOpen, onClose }: CourseModalProps) => {
           <Section>
             <Subtitle>어떤 테마로 원하세요?</Subtitle>
             <OptionGrid>
-              {THEME_OPTIONS.map((option) => (
-                <OptionButton 
+              {THEME_OPTIONS.map(option => (
+                <OptionButton
                   key={option.key}
-                  backgroundImage={option.image} 
+                  backgroundImage={option.image}
                   onClick={() => handleOptionSelect(option.key)}
                 >
                   {option.label}
