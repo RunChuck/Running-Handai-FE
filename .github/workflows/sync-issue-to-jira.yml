@@ -2,7 +2,7 @@ name: Create Jira Subtask from GitHub Issue
 
 on:
   issues:
-    types: [labeled]
+    types: [opened]
 
 permissions:
   issues: write
@@ -12,6 +12,10 @@ jobs:
   create-jira-subtask:
     runs-on: ubuntu-latest
     if: contains(github.event.issue.labels.*.name, 'jira-sync')
+    
+    concurrency:
+      group: jira-sync-${{ github.event.issue.number }}
+      cancel-in-progress: true
     
     steps:
     - name: Checkout code
