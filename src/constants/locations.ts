@@ -40,3 +40,23 @@ export const COURSE_LOCATIONS = {
     lng: 129.075078,
   },
 } as const;
+
+// 테마별 좌표
+export const THEME_LOCATIONS = {
+  바다: {
+    lat: 35.2213221, 
+    lng: 129.1614972 
+  },
+  강변: {
+    lat: 35.1617158,
+    lng: 128.9885509,
+  },
+  산: {
+    lat: 35.1800626,
+    lng: 129.0745963
+  },
+  도심: {
+    lat: 35.1269695,
+    lng: 129.0483013
+  },
+}
