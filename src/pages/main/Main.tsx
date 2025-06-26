@@ -9,6 +9,7 @@ import { useMap } from '@/contexts/MapContext';
 import MapView from '@/components/MapView';
 import FloatButton from '@/components/FloatButton';
 import CourseModal from './components/CourseModal';
+import BottomSheet from '@/components/BottomSheet';
 import LocationIconSrc from '@/assets/icons/location-icon.svg';
 import ArrowUprightIconSrc from '@/assets/icons/arrow-upright.svg';
 import MenuIconSrc from '@/assets/icons/menu-24px.svg';
@@ -60,6 +61,11 @@ const Main = () => {
       <FloatButton onClick={moveToCurrentLocation} position={{ bottom: 16, right: 16 }} variant="circular">
         <img src={LocationIconSrc} alt="현재 위치" width={20} height={20} />
       </FloatButton>
+
+      <BottomSheet>
+        {/* TODO: 코스 리스트 컴포넌트 추가 */}
+        여기에 코스 리스트
+      </BottomSheet>
 
       <CourseModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </S.Container>

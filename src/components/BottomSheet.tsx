@@ -40,9 +40,7 @@ const BottomSheet = ({ children, title = '추천 코스' }: BottomSheetProps) =>
               <img src={PenIconSrc} alt="코스 등록" width={20} height={20} />
             </PenButton>
           </TitleWrapper>
-          <Sheet.Scroller autoPadding draggableAt="both">
-            <Content>{children}</Content>
-          </Sheet.Scroller>
+          <Content>{children}</Content>
         </Sheet.Content>
       </Container>
     </Sheet>
