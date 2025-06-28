@@ -55,11 +55,10 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad }, ref) => {
 
       centerDot.setMap(map);
     } else {
-      const marker = new window.kakao.maps.Marker({
-        position: position,
-      });
-
-      marker.setMap(map);
+      // const marker = new window.kakao.maps.Marker({
+      //   position: position,
+      // });
+      // marker.setMap(map);
     }
   };
 
