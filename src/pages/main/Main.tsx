@@ -8,7 +8,8 @@ import { useMap } from '@/contexts/MapContext';
 
 import MapView from '@/components/MapView';
 import FloatButton from '@/components/FloatButton';
-import CourseModal from '@/components/CourseModal';
+import CourseModal from './components/CourseModal';
+import BottomSheet from '@/components/BottomSheet';
 import LocationIconSrc from '@/assets/icons/location-icon.svg';
 import ArrowUprightIconSrc from '@/assets/icons/arrow-upright.svg';
 import MenuIconSrc from '@/assets/icons/menu-24px.svg';
@@ -16,7 +17,6 @@ import MenuIconSrc from '@/assets/icons/menu-24px.svg';
 const Main = () => {
   const { mapRef } = useMap();
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const moveToCurrentLocationHandler = async () => {
     try {
       const location = await getUserLocation();
@@ -44,6 +44,19 @@ const Main = () => {
     // TODO: 메뉴 기능 구현
   };
 
+  const floatButtons = (
+    <>
+      <FloatButton onClick={handleRecommendCourseClick} position={{ bottom: 0, center: true }} variant="pill">
+        🏃‍♂️ 추천 코스 탐색
+        <img src={ArrowUprightIconSrc} alt="추천 코스 탐색" />
+      </FloatButton>
+
+      <FloatButton onClick={moveToCurrentLocation} position={{ bottom: 0, right: 16 }} variant="circular">
+        <img src={LocationIconSrc} alt="현재 위치" width={20} height={20} />
+      </FloatButton>
+    </>
+  );
+
   return (
     <S.Container>
       <MapView ref={mapRef} />
@@ -52,14 +65,12 @@ const Main = () => {
         <img src={MenuIconSrc} alt="메뉴" width={24} height={24} />
       </FloatButton>
 
-      <FloatButton onClick={handleRecommendCourseClick} position={{ bottom: 16, center: true }} variant="pill">
-        🏃‍♂️ 추천 코스 탐색
-        <img src={ArrowUprightIconSrc} alt="추천 코스 탐색" />
-      </FloatButton>
-
-      <FloatButton onClick={moveToCurrentLocation} position={{ bottom: 16, right: 16 }} variant="circular">
-        <img src={LocationIconSrc} alt="현재 위치" width={20} height={20} />
-      </FloatButton>
+      {!isModalOpen && (
+        <BottomSheet floatButtons={floatButtons}>
+          {/* TODO: 코스 리스트 컴포넌트 추가 */}
+          여기에 코스 리스트
+        </BottomSheet>
+      )}
 
       <CourseModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </S.Container>
