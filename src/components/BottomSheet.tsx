@@ -1,51 +1,71 @@
-import { Sheet } from 'react-modal-sheet';
+import { forwardRef, useImperativeHandle, useRef } from 'react';
+import type { ReactNode } from 'react';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
-import type { ReactNode } from 'react';
 
+import { Sheet, type SheetRef } from 'react-modal-sheet';
 import PenIconSrc from '@/assets/icons/pen-24px.svg';
 
 interface BottomSheetProps {
   children: ReactNode;
   title?: string;
+  floatButtons?: ReactNode;
+}
+
+export interface BottomSheetRef {
+  snapTo: (index: number) => void;
 }
 
 const snapPoints = [window.innerHeight * 0.9, window.innerHeight * 0.6, 32]; // max, default, min
 const initialSnap = 1; // 60%
 
-const BottomSheet = ({ children, title = '추천 코스' }: BottomSheetProps) => {
-  const isOpen = true;
+const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
+  ({ children, title = '추천 코스', floatButtons }, ref) => {
+    const isOpen = true;
+    const sheetRef = useRef<SheetRef>(null);
 
-  return (
-    <Sheet
-      isOpen={isOpen}
-      onClose={() => {}}
-      snapPoints={snapPoints}
-      initialSnap={initialSnap}
-      disableDrag={false}
-      mountPoint={document.body}
-    >
-      <Container>
-        <Sheet.Header>
-          <Header>
-            <DragHandle />
-          </Header>
-        </Sheet.Header>
+    useImperativeHandle(ref, () => ({
+      snapTo: (index: number) => {
+        sheetRef.current?.snapTo(index);
+      },
+    }));
 
-        <Sheet.Content>
-          <TitleWrapper>
-            <div />
-            <Title>{title}</Title>
-            <PenButton>
-              <img src={PenIconSrc} alt="코스 등록" width={20} height={20} />
-            </PenButton>
-          </TitleWrapper>
-          <Content>{children}</Content>
-        </Sheet.Content>
-      </Container>
-    </Sheet>
-  );
-};
+    return (
+      <Sheet
+        ref={sheetRef}
+        isOpen={isOpen}
+        onClose={() => {}}
+        snapPoints={snapPoints}
+        initialSnap={initialSnap}
+        disableDrag={false}
+        mountPoint={document.body}
+      >
+        <Container>
+          {floatButtons && <FloatButtonWrapper>{floatButtons}</FloatButtonWrapper>}
+
+          <Sheet.Header>
+            <Header>
+              <DragHandle />
+            </Header>
+          </Sheet.Header>
+
+          <Sheet.Content>
+            <TitleWrapper>
+              <div />
+              <Title>{title}</Title>
+              <PenButton>
+                <img src={PenIconSrc} alt="코스 등록" width={20} height={20} />
+              </PenButton>
+            </TitleWrapper>
+            <Content>{children}</Content>
+          </Sheet.Content>
+        </Container>
+      </Sheet>
+    );
+  }
+);
+
+BottomSheet.displayName = 'BottomSheet';
 
 export default BottomSheet;
 
@@ -54,11 +74,25 @@ const Container = styled(Sheet.Container)`
   margin: 0 auto;
   left: 0;
   right: 0;
+  position: relative;
 
   &.react-modal-sheet-container {
     border-top-left-radius: 16px !important;
     border-top-right-radius: 16px !important;
     box-shadow: 0px -4px 16px 0px rgba(0, 0, 0, 0.08) !important;
+  }
+`;
+
+const FloatButtonWrapper = styled.div`
+  position: absolute;
+  top: -16px;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  pointer-events: none; /* 컨테이너는 클릭 X */
+
+  & > * {
+    pointer-events: auto;
   }
 `;
 
