@@ -65,10 +65,12 @@ const Main = () => {
         <img src={MenuIconSrc} alt="메뉴" width={24} height={24} />
       </FloatButton>
 
-      <BottomSheet floatButtons={floatButtons}>
-        {/* TODO: 코스 리스트 컴포넌트 추가 */}
-        여기에 코스 리스트
-      </BottomSheet>
+      {!isModalOpen && (
+        <BottomSheet floatButtons={floatButtons}>
+          {/* TODO: 코스 리스트 컴포넌트 추가 */}
+          여기에 코스 리스트
+        </BottomSheet>
+      )}
 
       <CourseModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </S.Container>
