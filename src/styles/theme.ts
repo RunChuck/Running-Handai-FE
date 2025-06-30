@@ -22,6 +22,9 @@ export const theme = {
     // Captions
     caption1: createTypography('0.875rem', 600, 1.5), // 14px, SemiBold, 150%
     caption2: createTypography('0.8125rem', 600, 1.2), // 13px, SemiBold, 120%
+
+    // Lagels
+    label1: createTypography('0.75rem', 600, 1.2), // 12px, SemiBold, 120%
   },
 
   breakpoints: {
