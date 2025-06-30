@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 
@@ -18,21 +17,16 @@ export interface CourseData {
 
 interface CourseItemProps {
   course: CourseData;
+  onBookmarkClick: () => void;
 }
 
-const CourseItem = ({ course }: CourseItemProps) => {
-  const [isBookmarked, setIsBookmarked] = useState(course.isBookmarked || false);
-
-  const handleBookmarkClick = () => {
-    setIsBookmarked(!isBookmarked);
-  };
-
+const CourseItem = ({ course, onBookmarkClick }: CourseItemProps) => {
   return (
     <ItemContainer>
       <ThumbnailWrapper>
         <CourseBadge>{course.title}</CourseBadge>
-        <BookmarkButton onClick={handleBookmarkClick}>
-          <img src={isBookmarked ? HeartIconFilledSrc : HeartIconSrc} alt="heart" />
+        <BookmarkButton onClick={onBookmarkClick}>
+          <img src={course.isBookmarked ? HeartIconFilledSrc : HeartIconSrc} alt="heart" />
         </BookmarkButton>
         <Thumbnail src={course.thumbnail} alt="thumbnail" />
         <CourseStats>

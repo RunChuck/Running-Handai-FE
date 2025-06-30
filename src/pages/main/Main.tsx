@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import * as S from './Main.styled';
 
 import { useDebounce } from '@/hooks/useDebounce';
@@ -11,6 +12,7 @@ import FloatButton from '@/components/FloatButton';
 import CourseModal from './components/CourseModal';
 import BottomSheet from '@/components/BottomSheet';
 import CourseItem, { type CourseData } from './components/CourseItem';
+import CommonModal from '@/components/CommonModal';
 import LocationIconSrc from '@/assets/icons/location-icon.svg';
 import ArrowUprightIconSrc from '@/assets/icons/arrow-upright.svg';
 import MenuIconSrc from '@/assets/icons/menu-24px.svg';
@@ -82,7 +84,10 @@ const MOCK_COURSES: CourseData[] = [
 
 const Main = () => {
   const { mapRef } = useMap();
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
   const moveToCurrentLocationHandler = async () => {
     try {
       const location = await getUserLocation();
@@ -110,6 +115,15 @@ const Main = () => {
     // TODO: 메뉴 기능 구현
   };
 
+  const handleBookmarkClick = () => {
+    // TODO: 로그인 상태 확인 후 북마크 연결
+    setIsLoginModalOpen(true);
+  };
+
+  const handleLoginModalClose = () => {
+    setIsLoginModalOpen(false);
+  };
+
   const floatButtons = (
     <>
       <FloatButton onClick={handleRecommendCourseClick} position={{ bottom: 0, center: true }} variant="pill">
@@ -135,13 +149,22 @@ const Main = () => {
         <BottomSheet floatButtons={floatButtons}>
           <S.CourseGrid>
             {MOCK_COURSES.map(course => (
-              <CourseItem key={course.id} course={course} />
+              <CourseItem key={course.id} course={course} onBookmarkClick={handleBookmarkClick} />
             ))}
           </S.CourseGrid>
         </BottomSheet>
       )}
 
       <CourseModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+
+      <CommonModal
+        isOpen={isLoginModalOpen}
+        onClose={handleLoginModalClose}
+        onConfirm={() => navigate('/')}
+        content={`로그인하고\n마음에 드는 코스를 저장해보세요!`}
+        cancelText="취소"
+        confirmText="간편 로그인 하기"
+      />
     </S.Container>
   );
 };
