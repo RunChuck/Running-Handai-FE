@@ -10,9 +10,75 @@ import MapView from '@/components/MapView';
 import FloatButton from '@/components/FloatButton';
 import CourseModal from './components/CourseModal';
 import BottomSheet from '@/components/BottomSheet';
+import CourseItem, { type CourseData } from './components/CourseItem';
 import LocationIconSrc from '@/assets/icons/location-icon.svg';
 import ArrowUprightIconSrc from '@/assets/icons/arrow-upright.svg';
 import MenuIconSrc from '@/assets/icons/menu-24px.svg';
+import TempThumbnailImgSrc from '@/assets/images/temp-thumbnail.png';
+
+// mock data
+const MOCK_COURSES: CourseData[] = [
+  {
+    id: 1,
+    title: 'A코스',
+    thumbnail: TempThumbnailImgSrc,
+    bookmarkCount: 125,
+    distance: '4km',
+    duration: '4시간 44분',
+    elevation: '44m',
+    isBookmarked: true,
+  },
+  {
+    id: 2,
+    title: 'B코스',
+    thumbnail: TempThumbnailImgSrc,
+    bookmarkCount: 89,
+    distance: '2.5km',
+    duration: '2시간 15분',
+    elevation: '32m',
+    isBookmarked: false,
+  },
+  {
+    id: 3,
+    title: 'C코스',
+    thumbnail: TempThumbnailImgSrc,
+    bookmarkCount: 203,
+    distance: '6.2km',
+    duration: '5시간 30분',
+    elevation: '128m',
+    isBookmarked: true,
+  },
+  {
+    id: 4,
+    title: 'D코스',
+    thumbnail: TempThumbnailImgSrc,
+    bookmarkCount: 67,
+    distance: '3.8km',
+    duration: '3시간 20분',
+    elevation: '56m',
+    isBookmarked: false,
+  },
+  {
+    id: 5,
+    title: 'E코스',
+    thumbnail: TempThumbnailImgSrc,
+    bookmarkCount: 156,
+    distance: '5.1km',
+    duration: '4시간 50분',
+    elevation: '89m',
+    isBookmarked: false,
+  },
+  {
+    id: 6,
+    title: 'F코스',
+    thumbnail: TempThumbnailImgSrc,
+    bookmarkCount: 92,
+    distance: '7.3km',
+    duration: '6시간 10분',
+    elevation: '145m',
+    isBookmarked: false,
+  },
+];
 
 const Main = () => {
   const { mapRef } = useMap();
@@ -67,8 +133,11 @@ const Main = () => {
 
       {!isModalOpen && (
         <BottomSheet floatButtons={floatButtons}>
-          {/* TODO: 코스 리스트 컴포넌트 추가 */}
-          여기에 코스 리스트
+          <S.CourseGrid>
+            {MOCK_COURSES.map(course => (
+              <CourseItem key={course.id} course={course} />
+            ))}
+          </S.CourseGrid>
         </BottomSheet>
       )}
 
