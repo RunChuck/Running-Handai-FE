@@ -22,6 +22,12 @@ export const theme = {
     // Captions
     caption1: createTypography('0.875rem', 600, 1.5), // 14px, SemiBold, 150%
     caption2: createTypography('0.8125rem', 600, 1.2), // 13px, SemiBold, 120%
+
+    // Labels
+    label1: createTypography('0.75rem', 600, 1.2), // 12px, SemiBold, 120%
+
+    // Modal
+    modalContent: createTypography('1.125rem', 400, 1.5), // 18px, Regular, 150%
   },
 
   breakpoints: {
