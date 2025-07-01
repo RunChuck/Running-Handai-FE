@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 
@@ -21,11 +22,18 @@ interface CourseItemProps {
 }
 
 const CourseItem = ({ course, onBookmarkClick }: CourseItemProps) => {
+  const navigate = useNavigate();
+
+  const handleBookmarkClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onBookmarkClick();
+  };
+
   return (
     <ItemContainer>
-      <ThumbnailWrapper>
+      <ThumbnailWrapper onClick={() => navigate(`/course-detail/${course.id}`)}>
         <CourseBadge>{course.title}</CourseBadge>
-        <BookmarkButton onClick={onBookmarkClick}>
+        <BookmarkButton onClick={handleBookmarkClick}>
           <img src={course.isBookmarked ? HeartIconFilledSrc : HeartIconSrc} alt="heart" />
         </BookmarkButton>
         <Thumbnail src={course.thumbnail} alt="thumbnail" />
@@ -50,6 +58,7 @@ const ThumbnailWrapper = styled.div`
   position: relative;
   width: 100%;
   aspect-ratio: 1;
+  cursor: pointer;
 `;
 
 const CourseBadge = styled.div`
