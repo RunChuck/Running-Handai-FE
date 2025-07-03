@@ -1,4 +1,4 @@
-import type { CourseData } from '@/pages/main/components/CourseItem';
+import type { CourseData } from '@/types/course';
 import TempThumbnailImgSrc from '@/assets/images/temp-thumbnail.png';
 
 export const MOCK_COURSES: CourseData[] = [

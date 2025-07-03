@@ -1,20 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
+import type { CourseData } from '@/types/course';
 
 import HeartIconSrc from '@/assets/icons/heart-default.svg';
 import HeartIconFilledSrc from '@/assets/icons/heart-filled.svg';
-
-export interface CourseData {
-  id: number;
-  title: string;
-  thumbnail: string;
-  bookmarkCount: number;
-  distance: string;
-  duration: string;
-  elevation: string;
-  isBookmarked?: boolean;
-}
 
 interface CourseItemProps {
   course: CourseData;
