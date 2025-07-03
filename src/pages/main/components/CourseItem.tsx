@@ -19,9 +19,15 @@ const CourseItem = ({ course, onBookmarkClick }: CourseItemProps) => {
     onBookmarkClick();
   };
 
+  const handleClick = () => {
+    navigate(`/course-detail/${course.id}`, {
+      state: { course },
+    });
+  };
+
   return (
     <ItemContainer>
-      <ThumbnailWrapper onClick={() => navigate(`/course-detail/${course.id}`)}>
+      <ThumbnailWrapper onClick={handleClick}>
         <CourseBadge>{course.title}</CourseBadge>
         <BookmarkButton onClick={handleBookmarkClick}>
           <img src={course.isBookmarked ? HeartIconFilledSrc : HeartIconSrc} alt="heart" />
