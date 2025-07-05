@@ -7,8 +7,7 @@ export const GlobalStyles = () => (
 
       @font-face {
         font-family: 'HakgyoansimAllimjang';
-        src: url('/src/assets/fonts/Hakgyoansim Allimjang TTF R.ttf')
-          format('truetype');
+        src: url('/src/assets/fonts/Hakgyoansim Allimjang TTF R.ttf') format('truetype');
         font-weight: 400;
         font-style: normal;
         font-display: swap;
@@ -83,10 +82,8 @@ export const GlobalStyles = () => (
 
         /* Shadow */
         --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1),
-          0 2px 4px -2px rgb(0 0 0 / 0.1);
-        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
-          0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
       }
 
       /* Reset & Base Styles */
@@ -106,14 +103,13 @@ export const GlobalStyles = () => (
 
       body {
         height: 100%;
-        font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont,
-          system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo',
-          'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji',
+        font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue',
+          'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji',
           'Segoe UI Symbol', sans-serif;
         font-weight: 400;
         line-height: 1.5;
         color: var(--text-text-title);
-        background-color: var(--surface-surface-highlight, #f4f4f4);
+        background-color: var(--surface-surface-tertiary, #eeeeee);
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         -webkit-tap-highlight-color: transparent;

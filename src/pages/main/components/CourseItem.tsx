@@ -1,19 +1,10 @@
+import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
+import type { CourseData } from '@/types/course';
 
 import HeartIconSrc from '@/assets/icons/heart-default.svg';
 import HeartIconFilledSrc from '@/assets/icons/heart-filled.svg';
-
-export interface CourseData {
-  id: number;
-  title: string;
-  thumbnail: string;
-  bookmarkCount: number;
-  distance: string;
-  duration: string;
-  elevation: string;
-  isBookmarked?: boolean;
-}
 
 interface CourseItemProps {
   course: CourseData;
@@ -21,11 +12,24 @@ interface CourseItemProps {
 }
 
 const CourseItem = ({ course, onBookmarkClick }: CourseItemProps) => {
+  const navigate = useNavigate();
+
+  const handleBookmarkClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onBookmarkClick();
+  };
+
+  const handleClick = () => {
+    navigate(`/course-detail/${course.id}`, {
+      state: { course },
+    });
+  };
+
   return (
     <ItemContainer>
-      <ThumbnailWrapper>
+      <ThumbnailWrapper onClick={handleClick}>
         <CourseBadge>{course.title}</CourseBadge>
-        <BookmarkButton onClick={onBookmarkClick}>
+        <BookmarkButton onClick={handleBookmarkClick}>
           <img src={course.isBookmarked ? HeartIconFilledSrc : HeartIconSrc} alt="heart" />
         </BookmarkButton>
         <Thumbnail src={course.thumbnail} alt="thumbnail" />
@@ -50,6 +54,7 @@ const ThumbnailWrapper = styled.div`
   position: relative;
   width: 100%;
   aspect-ratio: 1;
+  cursor: pointer;
 `;
 
 const CourseBadge = styled.div`

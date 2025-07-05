@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 
 import Login from '@/pages/auth/Login';
 import Main from '@/pages/main/Main';
+import CourseDetail from '@/pages/course/CoursDetail';
 import Test from '@/pages/temp/Test';
 
 const AppRoutes = () => {
@@ -9,6 +10,7 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/" element={<Login />} />
       <Route path="/main" element={<Main />} />
+      <Route path="/course-detail/:id" element={<CourseDetail />} />
       <Route path="/test" element={<Test />} />
     </Routes>
   );

@@ -13,16 +13,21 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   backgroundColor?: string;
   startIcon?: React.ReactNode;
   iconPosition?: IconPosition;
+  border?: string;
+  borderRadius?: string | number;
+  textColor?: string;
+  customTypography?: boolean;
 }
 
 const ButtonBase = styled.button<ButtonProps>`
   display: inline-flex;
   align-items: center;
-  border-radius: 4px;
-  font-weight: 500;
+  border-radius: ${({ borderRadius }) =>
+    typeof borderRadius === 'number' ? `${borderRadius}px` : borderRadius || '4px'};
+  border: ${({ border }) => border || 'none'};
   transition: all 0.2s ease-in-out;
   cursor: pointer;
-  color: #fff;
+  color: ${({ textColor }) => textColor || '#fff'};
   position: relative;
 
   ${({ iconPosition = 'center' }) => {
@@ -39,23 +44,26 @@ const ButtonBase = styled.button<ButtonProps>`
   }}
 
   /* 크기 설정 */
-  ${({ size = 'md' }) => {
-    switch (size) {
-      case 'lg':
-        return css`
-          padding: 12px 16px;
-          height: 52px;
-          font-size: 18px;
-          font-weight: 500;
-        `;
-      default:
-        return css`
-          padding: 10px 16px;
-          height: 44px;
-          font-size: 16px;
-          font-weight: 500;
-        `;
-    }
+  ${({ size = 'md', customTypography }) => {
+    const baseStyles = css`
+      padding: 10px 16px;
+      height: 44px;
+    `;
+
+    const lgStyles = css`
+      padding: 12px 16px;
+      height: 52px;
+    `;
+
+    const fontStyles = css`
+      font-size: ${size === 'lg' ? '18px' : '16px'};
+      font-weight: 500;
+    `;
+
+    return css`
+      ${size === 'lg' ? lgStyles : baseStyles}
+      ${!customTypography && fontStyles}
+    `;
   }}
 
   background-color: ${({ backgroundColor }) => backgroundColor || 'var(--primary-primary)'};
