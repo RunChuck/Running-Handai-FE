@@ -33,9 +33,9 @@ const Tabs = ({ course }: CourseTabProps) => {
       case 'course':
         return <CourseTab course={course} />;
       case 'attractions':
-        return <AttractionsTab course={course} />;
+        return <AttractionsTab />;
       case 'reviews':
-        return <ReviewTab course={course} />;
+        return <ReviewTab />;
       default:
         return <OverviewTab onTabChange={handleTabChange} course={course} />;
     }
