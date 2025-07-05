@@ -17,7 +17,7 @@ const CourseDetail = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { scrollRef, scrollToTop } = useScrollToTop();
+  const { scrollRef, scrollToTop, showScrollButton } = useScrollToTop();
   const state = location.state as LocationState | null;
   const course = state?.course;
 
@@ -54,12 +54,14 @@ const CourseDetail = () => {
       />
       <CourseThumbnail src={course.thumbnail} alt="thumbnail" />
       <Tabs course={course} />
-      <ScrollButtonContainer>
-        <ScrollButton onClick={scrollToTop}>
-          <img src={ScrollIconSrc} alt="scroll" />
-        </ScrollButton>
-        <ScrollToTop>맨 위로</ScrollToTop>
-      </ScrollButtonContainer>
+      {showScrollButton && (
+        <ScrollButtonContainer>
+          <ScrollButton onClick={scrollToTop}>
+            <img src={ScrollIconSrc} alt="scroll" />
+          </ScrollButton>
+          <ScrollToTop>맨 위로</ScrollToTop>
+        </ScrollButtonContainer>
+      )}
     </Container>
   );
 };

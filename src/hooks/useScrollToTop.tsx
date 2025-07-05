@@ -1,7 +1,13 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useState, useEffect } from 'react';
 
-export default function useScrollToTop() {
+interface UseScrollToTopOptions {
+  showButtonThreshold?: number;
+}
+
+export default function useScrollToTop(options: UseScrollToTopOptions = {}) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { showButtonThreshold = 200 } = options;
+  const [showScrollButton, setShowScrollButton] = useState(false);
 
   const scrollToTop = useCallback(() => {
     if (scrollRef.current) {
@@ -9,5 +15,24 @@ export default function useScrollToTop() {
     }
   }, []);
 
-  return { scrollRef, scrollToTop };
+  useEffect(() => {
+    const scrollElement = scrollRef.current;
+    if (!scrollElement) return;
+
+    const handleScroll = () => {
+      const scrollTop = scrollElement.scrollTop;
+      setShowScrollButton(scrollTop > showButtonThreshold);
+    };
+
+    scrollElement.addEventListener('scroll', handleScroll);
+
+    // 초기 상태 설정
+    handleScroll();
+
+    return () => {
+      scrollElement.removeEventListener('scroll', handleScroll);
+    };
+  }, [showButtonThreshold]);
+
+  return { scrollRef, scrollToTop, showScrollButton };
 }
