@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import * as S from './Section.styled';
 import { theme } from '@/styles/theme';
-import type { CourseTabType, CourseData } from '@/types/course';
+import type { CourseTabType, CourseMockData } from '@/types/course';
 
 import Button from '@/components/Button';
 import DistanceIconSrc from '@/assets/icons/course-distance.svg';
@@ -11,7 +11,7 @@ import ArrowIconSrc from '@/assets/icons/arrow-down-16px.svg';
 
 interface CourseSectionProps {
   onTabChange: (tabKey: CourseTabType) => void;
-  course: CourseData;
+  course: CourseMockData;
 }
 
 const CourseSection = ({ onTabChange, course }: CourseSectionProps) => {

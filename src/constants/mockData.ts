@@ -1,7 +1,7 @@
-import type { CourseData } from '@/types/course';
+import type { CourseMockData } from '@/types/course';
 import TempThumbnailImgSrc from '@/assets/images/temp-thumbnail.png';
 
-export const MOCK_COURSES: CourseData[] = [
+export const MOCK_COURSES: CourseMockData[] = [
   {
     id: 1,
     title: 'A코스',

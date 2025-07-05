@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
-import type { CourseData } from '@/types/course';
+import type { CourseMockData } from '@/types/course';
 import useScrollToTop from '@/hooks/useScrollToTop';
 
 import Header from './components/Header';
@@ -10,7 +10,7 @@ import Tabs from './components/Tabs';
 import ScrollIconSrc from '@/assets/icons/scroll-up.svg';
 
 interface LocationState {
-  course: CourseData;
+  course: CourseMockData;
 }
 
 const CourseDetail = () => {

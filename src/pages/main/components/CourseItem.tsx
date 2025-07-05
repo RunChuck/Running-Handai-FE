@@ -1,13 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
-import type { CourseData } from '@/types/course';
+import type { CourseMockData } from '@/types/course';
 
 import HeartIconSrc from '@/assets/icons/heart-default.svg';
 import HeartIconFilledSrc from '@/assets/icons/heart-filled.svg';
 
 interface CourseItemProps {
-  course: CourseData;
+  course: CourseMockData;
   onBookmarkClick: () => void;
 }
 

@@ -1,4 +1,4 @@
-import type { CourseData, CourseTabType } from '@/types/course';
+import type { CourseMockData, CourseTabType } from '@/types/course';
 
 import CourseSection from '../sections.tsx/CourseSection';
 import ReviewSection from '../sections.tsx/ReviewSection';
@@ -7,7 +7,7 @@ import styled from '@emotion/styled';
 
 interface OverviewTabProps {
   onTabChange: (tabKey: CourseTabType) => void;
-  course: CourseData;
+  course: CourseMockData;
 }
 
 const OverviewTab = ({ onTabChange, course }: OverviewTabProps) => {

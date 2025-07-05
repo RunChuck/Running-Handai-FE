@@ -1,4 +1,4 @@
-import type { CourseData } from '@/types/course';
+import type { CourseMockData } from '@/types/course';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 
@@ -9,7 +9,7 @@ import MinAltitudeIconSrc from '@/assets/icons/course-min-altitude.svg';
 import LevelIconSrc from '@/assets/icons/course-level.svg';
 
 interface CourseTabProps {
-  course: CourseData;
+  course: CourseMockData;
 }
 
 const CourseTab = ({ course }: CourseTabProps) => {
@@ -128,4 +128,3 @@ const CourseAnalysisContent = styled.div`
   ${theme.typography.body2};
   color: var(--text-text-secondary, #555555);
 `;
-

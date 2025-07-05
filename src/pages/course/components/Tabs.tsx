@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
-import type { CourseTabType, CourseTabItem, CourseData } from '@/types/course';
+import type { CourseTabType, CourseTabItem, CourseMockData } from '@/types/course';
 
 import OverviewTab from './tab/OverviewTab';
 import CourseTab from './tab/CourseTab';
@@ -9,7 +9,7 @@ import AttractionsTab from './tab/AttractionTab';
 import ReviewTab from './tab/ReviewTab';
 
 interface CourseTabProps {
-  course: CourseData;
+  course: CourseMockData;
 }
 
 const TAB_ITEMS: CourseTabItem[] = [
