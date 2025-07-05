@@ -9,7 +9,7 @@ export const courseAPI = {
     return response.data;
   },
 
-  getCourse: async (courseId: number) => {
+  getCourseDetail: async (courseId: number) => {
     const response = await http.get<CourseDetailResponse>(`${PREFIX}/${courseId}`);
     return response.data;
   },
