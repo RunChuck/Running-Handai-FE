@@ -22,14 +22,14 @@ const TAB_ITEMS: CourseTabItem[] = [
 const Tabs = ({ course }: CourseTabProps) => {
   const [activeTab, setActiveTab] = useState<CourseTabType>('overview');
 
-  const handleTabClick = (tabKey: CourseTabType) => {
+  const handleTabChange = (tabKey: CourseTabType) => {
     setActiveTab(tabKey);
   };
 
   const renderTabContent = () => {
     switch (activeTab) {
       case 'overview':
-        return <OverviewTab course={course} />;
+        return <OverviewTab onTabChange={handleTabChange} course={course} />;
       case 'course':
         return <CourseTab course={course} />;
       case 'attractions':
@@ -37,7 +37,7 @@ const Tabs = ({ course }: CourseTabProps) => {
       case 'reviews':
         return <ReviewTab course={course} />;
       default:
-        return <OverviewTab course={course} />;
+        return <OverviewTab onTabChange={handleTabChange} course={course} />;
     }
   };
 
@@ -45,7 +45,7 @@ const Tabs = ({ course }: CourseTabProps) => {
     <Container>
       <TabWrapper>
         {TAB_ITEMS.map(tab => (
-          <TabButton key={tab.key} isActive={activeTab === tab.key} onClick={() => handleTabClick(tab.key)}>
+          <TabButton key={tab.key} isActive={activeTab === tab.key} onClick={() => handleTabChange(tab.key)}>
             {tab.label}
           </TabButton>
         ))}
@@ -107,6 +107,5 @@ const TabButton = styled.button<{ isActive: boolean }>`
 
 const TabContent = styled.div`
   flex: 1;
-  padding: var(--spacing-16);
   overflow-y: auto;
 `;
