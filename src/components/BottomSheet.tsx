@@ -8,7 +8,11 @@ import PenIconSrc from '@/assets/icons/pen-24px.svg';
 
 interface BottomSheetProps {
   children: ReactNode;
-  title?: string;
+  titleData?: {
+    prefix: string;
+    suffix: string;
+    isFiltered: boolean;
+  };
   floatButtons?: ReactNode;
 }
 
@@ -20,7 +24,7 @@ const snapPoints = [window.innerHeight * 0.9, window.innerHeight * 0.6, 32]; // 
 const initialSnap = 1; // 60%
 
 const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
-  ({ children, title = '추천 코스', floatButtons }, ref) => {
+  ({ children, titleData = { prefix: '', suffix: '추천 코스', isFiltered: false }, floatButtons }, ref) => {
     const isOpen = true;
     const sheetRef = useRef<SheetRef>(null);
 
@@ -52,7 +56,10 @@ const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
           <Sheet.Content>
             <TitleWrapper>
               <div />
-              <Title>{title}</Title>
+              <Title>
+                {titleData.prefix && <FilterText>{titleData.prefix}&nbsp;</FilterText>}
+                <BaseText>{titleData.suffix}</BaseText>
+              </Title>
               <PenButton>
                 <img src={PenIconSrc} alt="코스 등록" width={20} height={20} />
               </PenButton>
@@ -127,10 +134,18 @@ const TitleWrapper = styled.div`
 
 const Title = styled.h2`
   ${theme.typography.subtitle1}
-  color: var(--text-text-title);
   margin: 0;
+  display: flex;
+  align-items: center;
 `;
 
+const FilterText = styled.span`
+  color: var(--primary-primary, #4561ff);
+`;
+
+const BaseText = styled.span`
+  color: var(--text-text-title, #1c1c1c);
+`;
 const PenButton = styled.button`
   background: none;
   border: none;

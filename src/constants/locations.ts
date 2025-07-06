@@ -11,31 +11,31 @@ export const DEFAULT_MAP_LEVEL = 7;
 
 // 추천 코스 지역별 좌표
 export const COURSE_LOCATIONS = {
-  해운대: {
+  HAEUN_GWANGAN: {
     lat: 35.1627995,
     lng: 129.1371227,
   },
-  송정기장: {
+  SONGJEONG_GIJANG: {
     lat: 35.188314,
     lng: 129.2232312,
   },
-  서면동래: {
+  SEOMYEON_DONGNAE: {
     lat: 35.1666396,
     lng: 129.0552696,
   },
-  원도심영도: {
+  WONDOSIM: {
     lat: 35.1006679,
     lng: 129.0324484,
   },
-  남부해안: {
+  SOUTHERN_COAST: {
     lat: 35.1257997,
     lng: 129.1003063,
   },
-  서부낙동강: {
+  WESTERN_NAKDONGRIVER: {
     lat: 35.1363725,
     lng: 128.9220322,
   },
-  북부산: {
+  NORTHERN_BUSAN: {
     lat: 35.2199017,
     lng: 129.075078,
   },
@@ -43,20 +43,20 @@ export const COURSE_LOCATIONS = {
 
 // 테마별 좌표
 export const THEME_LOCATIONS = {
-  바다: {
-    lat: 35.2213221, 
-    lng: 129.1614972 
+  SEA: {
+    lat: 35.2213221,
+    lng: 129.1614972,
   },
-  강변: {
+  RIVERSIDE: {
     lat: 35.1617158,
     lng: 128.9885509,
   },
-  산: {
+  MOUNTAIN: {
     lat: 35.1800626,
-    lng: 129.0745963
+    lng: 129.0745963,
   },
-  도심: {
+  DOWNTOWN: {
     lat: 35.1269695,
-    lng: 129.0483013
+    lng: 129.0483013,
   },
-}
+} as const;

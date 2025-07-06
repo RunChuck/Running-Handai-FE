@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
-import type { CourseTabType, CourseTabItem, CourseData } from '@/types/course';
+import type { CourseTabType, CourseTabItem, CourseDetailResponse } from '@/types/course';
 
 import OverviewTab from './tab/OverviewTab';
 import CourseTab from './tab/CourseTab';
@@ -9,7 +9,7 @@ import AttractionsTab from './tab/AttractionTab';
 import ReviewTab from './tab/ReviewTab';
 
 interface CourseTabProps {
-  course: CourseData;
+  courseDetail: CourseDetailResponse['data'];
 }
 
 const TAB_ITEMS: CourseTabItem[] = [
@@ -19,7 +19,7 @@ const TAB_ITEMS: CourseTabItem[] = [
   { key: 'reviews', label: '리뷰' },
 ];
 
-const Tabs = ({ course }: CourseTabProps) => {
+const Tabs = ({ courseDetail }: CourseTabProps) => {
   const [activeTab, setActiveTab] = useState<CourseTabType>('overview');
 
   const handleTabChange = (tabKey: CourseTabType) => {
@@ -29,15 +29,15 @@ const Tabs = ({ course }: CourseTabProps) => {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'overview':
-        return <OverviewTab onTabChange={handleTabChange} course={course} />;
+        return <OverviewTab onTabChange={handleTabChange} courseDetail={courseDetail} />;
       case 'course':
-        return <CourseTab course={course} />;
+        return <CourseTab courseDetail={courseDetail} />;
       case 'attractions':
         return <AttractionsTab />;
       case 'reviews':
         return <ReviewTab />;
       default:
-        return <OverviewTab onTabChange={handleTabChange} course={course} />;
+        return <OverviewTab onTabChange={handleTabChange} courseDetail={courseDetail} />;
     }
   };
 

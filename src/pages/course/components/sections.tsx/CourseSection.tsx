@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import * as S from './Section.styled';
 import { theme } from '@/styles/theme';
-import type { CourseTabType, CourseData } from '@/types/course';
+import type { CourseTabType, CourseDetailResponse } from '@/types/course';
 
 import Button from '@/components/Button';
 import DistanceIconSrc from '@/assets/icons/course-distance.svg';
@@ -11,33 +11,46 @@ import ArrowIconSrc from '@/assets/icons/arrow-down-16px.svg';
 
 interface CourseSectionProps {
   onTabChange: (tabKey: CourseTabType) => void;
-  course: CourseData;
+  courseDetail: CourseDetailResponse['data'];
 }
 
-const CourseSection = ({ onTabChange, course }: CourseSectionProps) => {
+const CourseSection = ({ onTabChange, courseDetail }: CourseSectionProps) => {
   const handleCourseDetail = () => {
     onTabChange('course');
   };
+
+  const courseInfoItems = [
+    {
+      icon: DistanceIconSrc,
+      alt: 'distance',
+      label: `${courseDetail.distance}km`,
+    },
+    {
+      icon: TimeIconSrc,
+      alt: 'time',
+      label: `${courseDetail.duration}분`,
+    },
+    {
+      icon: AltitudeIconSrc,
+      alt: 'altitude',
+      label: `최고 ${Math.round(courseDetail.maxElevation)}m`,
+    },
+  ];
 
   return (
     <S.SectionContainer>
       <S.ContentContainer>
         <S.SectionTitle>코스</S.SectionTitle>
         <CourseInfoWrapper>
-          <CourseInfoItem>
-            <img src={DistanceIconSrc} alt="distance" />
-            <span>{course.distance}</span>
-          </CourseInfoItem>
-          <Divider />
-          <CourseInfoItem>
-            <img src={TimeIconSrc} alt="time" />
-            <span>{course.duration}</span>
-          </CourseInfoItem>
-          <Divider />
-          <CourseInfoItem>
-            <img src={AltitudeIconSrc} alt="altitude" />
-            <span>{course.elevation}</span>
-          </CourseInfoItem>
+          {courseInfoItems.map((item, index) => (
+            <CourseInfoItemGroup key={index}>
+              <CourseInfoItem>
+                <img src={item.icon} alt={item.alt} />
+                <span>{item.label}</span>
+              </CourseInfoItem>
+              {index < courseInfoItems.length - 1 && <Divider />}
+            </CourseInfoItemGroup>
+          ))}
         </CourseInfoWrapper>
       </S.ContentContainer>
       <Button
@@ -65,6 +78,12 @@ const CourseInfoWrapper = styled.div`
   gap: var(--spacing-12);
   padding: var(--spacing-12);
   border-radius: 4px;
+`;
+
+const CourseInfoItemGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-12);
 `;
 
 const CourseInfoItem = styled.div`

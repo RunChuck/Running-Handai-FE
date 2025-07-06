@@ -6,12 +6,64 @@ export interface CourseTabItem {
 }
 
 export interface CourseData {
+  thumbnailUrl: string;
+  distanceFromUser: number;
+  distance: number;
+  maxElevation: number;
   id: number;
-  title: string;
-  thumbnail: string;
-  bookmarkCount: number;
-  distance: string;
-  duration: string;
-  elevation: string;
-  isBookmarked?: boolean;
+  duration: number;
+}
+
+export type CourseFilterType = 'NEARBY' | 'AREA' | 'THEME';
+
+export type AreaCode =
+  | 'HAEUN_GWANGAN'
+  | 'SONGJEONG_GIJANG'
+  | 'SEOMYEON_DONGNAE'
+  | 'WONDOSIM'
+  | 'SOUTHERN_COAST'
+  | 'WESTERN_NAKDONGRIVER'
+  | 'NORTHERN_BUSAN';
+
+export type ThemeCode = 'SEA' | 'DOWNTOWN' | 'RIVERSIDE' | 'MOUNTAIN';
+
+export interface CourseRequest {
+  filter: CourseFilterType;
+  lat: number;
+  lon: number;
+  area?: AreaCode;
+  theme?: ThemeCode;
+}
+
+export interface CourseResponse {
+  statusCode: number;
+  responseCode: string;
+  message: string;
+  totalCount: number;
+  data: CourseData[];
+}
+
+interface TrackPoint {
+  lat: number;
+  lon: number;
+  ele: number;
+}
+
+interface CourseDetailData {
+  courseId: number;
+  distance: number;
+  duration: number;
+  minElevation: number;
+  maxElevation: number;
+  level: string;
+  roadConditions: string[];
+  trackPoints: TrackPoint[];
+}
+
+export interface CourseDetailResponse {
+  statusCode: number;
+  responseCode: string;
+  message: string;
+  totalCount: number;
+  data: CourseDetailData;
 }
