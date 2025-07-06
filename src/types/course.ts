@@ -67,14 +67,3 @@ export interface CourseDetailResponse {
   totalCount: number;
   data: CourseDetailData;
 }
-
-export interface CourseMockData {
-  id: number;
-  title: string;
-  thumbnail: string;
-  bookmarkCount: number;
-  distance: string;
-  duration: string;
-  elevation: string;
-  isBookmarked?: boolean;
-}
