@@ -14,12 +14,25 @@ export interface CourseData {
   duration: number;
 }
 
+export type CourseFilterType = 'NEARBY' | 'AREA' | 'THEME';
+
+export type AreaCode =
+  | 'HAEUN_GWANGAN'
+  | 'SONGJEONG_GIJANG'
+  | 'SEOMYEON_DONGNAE'
+  | 'WONDOSIM'
+  | 'SOUTHERN_COAST'
+  | 'WESTERN_NAKDONGRIVER'
+  | 'NORTHERN_BUSAN';
+
+export type ThemeCode = 'SEA' | 'DOWNTOWN' | 'RIVERSIDE' | 'MOUNTAIN';
+
 export interface CourseRequest {
-  filter: string;
+  filter: CourseFilterType;
   lat: number;
   lon: number;
-  area?: string;
-  theme?: string;
+  area?: AreaCode;
+  theme?: ThemeCode;
 }
 
 export interface CourseResponse {
