@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import { COURSE_LOCATIONS, THEME_LOCATIONS } from '@/constants/locations';
 import { useMap } from '@/contexts/MapContext';
+import type { AreaCode, ThemeCode } from '@/types/course';
 
 import BackIconSrc from '@/assets/icons/arrow-left-24px.svg';
 import locationOpt1 from '@/assets/images/location-opt1.png';
@@ -19,6 +20,8 @@ import themeCity from '@/assets/images/theme-city.png';
 interface CourseModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onAreaSelect?: (area: AreaCode) => void;
+  onThemeSelect?: (theme: ThemeCode) => void;
 }
 
 const LOCATION_OPTIONS = [
@@ -62,29 +65,42 @@ const getThemeLabel = (key: string): string => {
   return labels[key] || key;
 };
 
-const CourseModal = ({ isOpen, onClose }: CourseModalProps) => {
+const CourseModal = ({ isOpen, onClose, onAreaSelect, onThemeSelect }: CourseModalProps) => {
   const { mapRef } = useMap();
 
-  const handleOptionSelect = (option: string) => {
+  const handleLocationSelect = (locationKey: string) => {
     if (!mapRef.current) return;
 
-    // 지역 옵션인 경우 해당 위치로 이동
-    if (option in COURSE_LOCATIONS) {
-      const coordinates = COURSE_LOCATIONS[option as keyof typeof COURSE_LOCATIONS];
-      const locationOption = LOCATION_OPTIONS.find(opt => opt.key === option);
+    // 지역 API 호출
+    if (onAreaSelect) {
+      onAreaSelect(locationKey as AreaCode);
+    }
+
+    if (locationKey in COURSE_LOCATIONS) {
+      const coordinates = COURSE_LOCATIONS[locationKey as keyof typeof COURSE_LOCATIONS];
+      const locationOption = LOCATION_OPTIONS.find(opt => opt.key === locationKey);
       const zoomLevel = locationOption?.zoom || 7;
 
       mapRef.current.moveToLocation(coordinates.lat, coordinates.lng, zoomLevel);
-      // console.log('지역 선택:', option, '위치 이동:', coordinates, '줌 레벨:', zoomLevel);
     }
-    // 테마 옵션인 경우 해당 테마의 대표 위치로 이동
-    else if (option in THEME_LOCATIONS) {
-      const coordinates = THEME_LOCATIONS[option as keyof typeof THEME_LOCATIONS];
-      const themeOption = THEME_OPTIONS.find(opt => opt.key === option);
+
+    onClose();
+  };
+
+  const handleThemeSelect = (themeKey: string) => {
+    if (!mapRef.current) return;
+
+    // 테마 API 호출
+    if (onThemeSelect) {
+      onThemeSelect(themeKey as ThemeCode);
+    }
+
+    if (themeKey in THEME_LOCATIONS) {
+      const coordinates = THEME_LOCATIONS[themeKey as keyof typeof THEME_LOCATIONS];
+      const themeOption = THEME_OPTIONS.find(opt => opt.key === themeKey);
       const zoomLevel = themeOption?.zoom || 7;
 
       mapRef.current.moveToLocation(coordinates.lat, coordinates.lng, zoomLevel);
-      // console.log('테마 선택:', option, '위치 이동:', coordinates, '줌 레벨:', zoomLevel);
     }
 
     onClose();
@@ -110,7 +126,7 @@ const CourseModal = ({ isOpen, onClose }: CourseModalProps) => {
                 <OptionButton
                   key={option.key}
                   backgroundImage={option.image}
-                  onClick={() => handleOptionSelect(option.key)}
+                  onClick={() => handleLocationSelect(option.key)}
                 >
                   {getLocationLabel(option.key)}
                 </OptionButton>
@@ -125,7 +141,7 @@ const CourseModal = ({ isOpen, onClose }: CourseModalProps) => {
                 <OptionButton
                   key={option.key}
                   backgroundImage={option.image}
-                  onClick={() => handleOptionSelect(option.key)}
+                  onClick={() => handleThemeSelect(option.key)}
                 >
                   {getThemeLabel(option.key)}
                 </OptionButton>

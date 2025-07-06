@@ -7,6 +7,7 @@ import { useCourses } from '@/hooks/useCourses';
 import { getUserLocation } from '@/utils/geolocation';
 import { BUSAN_CITY_HALL } from '@/constants/locations';
 import { useMap } from '@/contexts/MapContext';
+import type { AreaCode, ThemeCode } from '@/types/course';
 
 import MapView from '@/components/MapView';
 import FloatButton from '@/components/FloatButton';
@@ -23,8 +24,12 @@ const Main = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState<{
+    type: 'nearby' | 'area' | 'theme';
+    value?: AreaCode | ThemeCode;
+  }>({ type: 'nearby' });
 
-  const { courses, loading, error, fetchNearbyCourses } = useCourses();
+  const { courses, loading, error, fetchNearbyCourses, fetchCoursesByArea, fetchCoursesByTheme } = useCourses();
 
   const moveToCurrentLocationHandler = async () => {
     try {
@@ -60,6 +65,57 @@ const Main = () => {
 
   const handleLoginModalClose = () => {
     setIsLoginModalOpen(false);
+  };
+
+  const handleAreaSelect = (area: AreaCode) => {
+    setSelectedFilter({ type: 'area', value: area });
+    fetchCoursesByArea(area);
+  };
+
+  const handleThemeSelect = (theme: ThemeCode) => {
+    setSelectedFilter({ type: 'theme', value: theme });
+    fetchCoursesByTheme(theme);
+  };
+
+  const getBottomSheetTitle = () => {
+    const areaLabels: Record<AreaCode, string> = {
+      HAEUN_GWANGAN: '해운/광안',
+      SONGJEONG_GIJANG: '송정/기장',
+      SEOMYEON_DONGNAE: '서면/동래',
+      WONDOSIM: '원도심/영도',
+      SOUTHERN_COAST: '남부해안',
+      WESTERN_NAKDONGRIVER: '서부/낙동강',
+      NORTHERN_BUSAN: '북부산',
+    };
+
+    const themeLabels: Record<ThemeCode, string> = {
+      SEA: '바다',
+      RIVERSIDE: '강변',
+      MOUNTAIN: '산',
+      DOWNTOWN: '도심',
+    };
+
+    if (selectedFilter.type === 'area' && selectedFilter.value) {
+      return {
+        prefix: areaLabels[selectedFilter.value as AreaCode],
+        suffix: '추천 코스',
+        isFiltered: true,
+      };
+    }
+
+    if (selectedFilter.type === 'theme' && selectedFilter.value) {
+      return {
+        prefix: themeLabels[selectedFilter.value as ThemeCode],
+        suffix: '추천 코스',
+        isFiltered: true,
+      };
+    }
+
+    return {
+      prefix: '',
+      suffix: '추천 코스',
+      isFiltered: false,
+    };
   };
 
   const floatButtons = (
@@ -118,9 +174,18 @@ const Main = () => {
         <img src={MenuIconSrc} alt="메뉴" width={24} height={24} />
       </FloatButton>
 
-      {!isModalOpen && <BottomSheet floatButtons={floatButtons}>{renderCourseList()}</BottomSheet>}
+      {!isModalOpen && (
+        <BottomSheet titleData={getBottomSheetTitle()} floatButtons={floatButtons}>
+          {renderCourseList()}
+        </BottomSheet>
+      )}
 
-      <CourseModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <CourseModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onAreaSelect={handleAreaSelect}
+        onThemeSelect={handleThemeSelect}
+      />
 
       <CommonModal
         isOpen={isLoginModalOpen}
