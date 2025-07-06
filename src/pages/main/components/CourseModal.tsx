@@ -22,21 +22,45 @@ interface CourseModalProps {
 }
 
 const LOCATION_OPTIONS = [
-  { key: '해운대', label: '해운\n광안', image: locationOpt1, zoom: 7 },
-  { key: '송정기장', label: '송정\n기장', image: locationOpt2, zoom: 7 },
-  { key: '서면동래', label: '서면\n동래', image: locationOpt3, zoom: 7 },
-  { key: '원도심영도', label: '원도심\n영도', image: locationOpt4, zoom: 7 },
-  { key: '남부해안', label: '남부해안', image: locationOpt5, zoom: 7 },
-  { key: '서부낙동강', label: '서부\n낙동강', image: locationOpt6, zoom: 7 },
-  { key: '북부산', label: '북부산', image: locationOpt7, zoom: 7 },
+  { key: 'HAEUN_GWANGAN', image: locationOpt1, zoom: 7 },
+  { key: 'SONGJEONG_GIJANG', image: locationOpt2, zoom: 7 },
+  { key: 'SEOMYEON_DONGNAE', image: locationOpt3, zoom: 7 },
+  { key: 'WONDOSIM', image: locationOpt4, zoom: 7 },
+  { key: 'SOUTHERN_COAST', image: locationOpt5, zoom: 7 },
+  { key: 'WESTERN_NAKDONGRIVER', image: locationOpt6, zoom: 7 },
+  { key: 'NORTHERN_BUSAN', image: locationOpt7, zoom: 7 },
 ] as const;
 
 const THEME_OPTIONS = [
-  { key: '바다', label: '바다', image: themeSea, zoom: 8 },
-  { key: '강변', label: '강변', image: themeRiver, zoom: 8 },
-  { key: '산', label: '산', image: themeMountain, zoom: 8 },
-  { key: '도심', label: '도심', image: themeCity, zoom: 8 },
+  { key: 'SEA', image: themeSea, zoom: 8 },
+  { key: 'RIVERSIDE', image: themeRiver, zoom: 8 },
+  { key: 'MOUNTAIN', image: themeMountain, zoom: 8 },
+  { key: 'DOWNTOWN', image: themeCity, zoom: 8 },
 ] as const;
+
+// TODO: 다국어 추가시 임시 라벨 함수 제거
+const getLocationLabel = (key: string): string => {
+  const labels: Record<string, string> = {
+    HAEUN_GWANGAN: '해운\n광안',
+    SONGJEONG_GIJANG: '송정\n기장',
+    SEOMYEON_DONGNAE: '서면\n동래',
+    WONDOSIM: '원도심\n영도',
+    SOUTHERN_COAST: '남부해안',
+    WESTERN_NAKDONGRIVER: '서부\n낙동강',
+    NORTHERN_BUSAN: '북부산',
+  };
+  return labels[key] || key;
+};
+
+const getThemeLabel = (key: string): string => {
+  const labels: Record<string, string> = {
+    SEA: '바다',
+    RIVERSIDE: '강변',
+    MOUNTAIN: '산',
+    DOWNTOWN: '도심',
+  };
+  return labels[key] || key;
+};
 
 const CourseModal = ({ isOpen, onClose }: CourseModalProps) => {
   const { mapRef } = useMap();
@@ -88,7 +112,7 @@ const CourseModal = ({ isOpen, onClose }: CourseModalProps) => {
                   backgroundImage={option.image}
                   onClick={() => handleOptionSelect(option.key)}
                 >
-                  {option.label}
+                  {getLocationLabel(option.key)}
                 </OptionButton>
               ))}
             </OptionGrid>
@@ -103,7 +127,7 @@ const CourseModal = ({ isOpen, onClose }: CourseModalProps) => {
                   backgroundImage={option.image}
                   onClick={() => handleOptionSelect(option.key)}
                 >
-                  {option.label}
+                  {getThemeLabel(option.key)}
                 </OptionButton>
               ))}
             </OptionGrid>

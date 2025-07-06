@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import * as S from './Main.styled';
 
 import { useDebounce } from '@/hooks/useDebounce';
+import { useCourses } from '@/hooks/useCourses';
 import { getUserLocation } from '@/utils/geolocation';
 import { BUSAN_CITY_HALL } from '@/constants/locations';
 import { useMap } from '@/contexts/MapContext';
@@ -17,13 +18,13 @@ import LocationIconSrc from '@/assets/icons/location-icon.svg';
 import ArrowUprightIconSrc from '@/assets/icons/arrow-upright.svg';
 import MenuIconSrc from '@/assets/icons/menu-24px.svg';
 
-import { MOCK_COURSES } from '@/constants/mockData';
-
 const Main = () => {
   const { mapRef } = useMap();
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+  const { courses, loading, error, fetchNearbyCourses } = useCourses();
 
   const moveToCurrentLocationHandler = async () => {
     try {
@@ -74,6 +75,41 @@ const Main = () => {
     </>
   );
 
+  const renderCourseList = () => {
+    if (loading) {
+      return (
+        <S.StatusContainer>
+          <S.StatusText>코스를 불러오는 중...🏃‍♂️</S.StatusText>
+        </S.StatusContainer>
+      );
+    }
+
+    if (error) {
+      return (
+        <S.ErrorContainer>
+          <S.StatusText>{error}</S.StatusText>
+          <S.RetryButton onClick={fetchNearbyCourses}>다시 시도</S.RetryButton>
+        </S.ErrorContainer>
+      );
+    }
+
+    if (courses.length === 0) {
+      return (
+        <S.StatusContainer>
+          <S.StatusText>주변에 추천할 수 있는 코스가 없습니다 🥲</S.StatusText>
+        </S.StatusContainer>
+      );
+    }
+
+    return (
+      <S.CourseGrid>
+        {courses.map((course, index) => (
+          <CourseItem key={course.id} course={course} index={index} onBookmarkClick={handleBookmarkClick} />
+        ))}
+      </S.CourseGrid>
+    );
+  };
+
   return (
     <S.Container>
       <MapView ref={mapRef} />
@@ -82,15 +118,7 @@ const Main = () => {
         <img src={MenuIconSrc} alt="메뉴" width={24} height={24} />
       </FloatButton>
 
-      {!isModalOpen && (
-        <BottomSheet floatButtons={floatButtons}>
-          <S.CourseGrid>
-            {MOCK_COURSES.map(course => (
-              <CourseItem key={course.id} course={course} onBookmarkClick={handleBookmarkClick} />
-            ))}
-          </S.CourseGrid>
-        </BottomSheet>
-      )}
+      {!isModalOpen && <BottomSheet floatButtons={floatButtons}>{renderCourseList()}</BottomSheet>}
 
       <CourseModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 

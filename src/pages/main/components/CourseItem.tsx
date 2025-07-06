@@ -1,17 +1,19 @@
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
-import type { CourseMockData } from '@/types/course';
+import type { CourseData } from '@/types/course';
 
 import HeartIconSrc from '@/assets/icons/heart-default.svg';
-import HeartIconFilledSrc from '@/assets/icons/heart-filled.svg';
+// import HeartIconFilledSrc from '@/assets/icons/heart-filled.svg';
+import TempThumbnailImgSrc from '@/assets/images/temp-thumbnail.png';
 
 interface CourseItemProps {
-  course: CourseMockData;
+  course: CourseData;
   onBookmarkClick: () => void;
+  index: number;
 }
 
-const CourseItem = ({ course, onBookmarkClick }: CourseItemProps) => {
+const CourseItem = ({ course, onBookmarkClick, index }: CourseItemProps) => {
   const navigate = useNavigate();
 
   const handleBookmarkClick = (e: React.MouseEvent) => {
@@ -25,22 +27,30 @@ const CourseItem = ({ course, onBookmarkClick }: CourseItemProps) => {
     });
   };
 
+  // 인덱스를 알파벳으로 변환
+  const getCourseName = (index: number) => {
+    return `${String.fromCharCode(65 + index)}코스`;
+  };
+
   return (
     <ItemContainer>
       <ThumbnailWrapper onClick={handleClick}>
-        <CourseBadge>{course.title}</CourseBadge>
+        <CourseBadge>{getCourseName(index)}</CourseBadge>
         <BookmarkButton onClick={handleBookmarkClick}>
-          <img src={course.isBookmarked ? HeartIconFilledSrc : HeartIconSrc} alt="heart" />
+          {/* 현재는 모든 코스가 북마크되지 않은 상태로 처리 */}
+          <img src={HeartIconSrc} alt="북마크" />
         </BookmarkButton>
-        <Thumbnail src={course.thumbnail} alt="thumbnail" />
+        <Thumbnail src={TempThumbnailImgSrc} alt="코스 썸네일" />
         <CourseStats>
-          {course.distance} · {course.duration} · {course.elevation}
+          {course.distance}km · {course.duration}분 · {course.maxElevation}m
         </CourseStats>
       </ThumbnailWrapper>
-      <BookmarkCount>{course.bookmarkCount}명이 저장한 코스</BookmarkCount>
+      {/* 임시로 북마크 수는 랜덤 값으로 표시 */}
+      <BookmarkCount>{Math.floor(Math.random() * 100) + 1}명이 저장한 코스</BookmarkCount>
     </ItemContainer>
   );
 };
+
 
 export default CourseItem;
 
