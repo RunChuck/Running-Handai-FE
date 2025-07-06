@@ -53,7 +53,7 @@ interface CourseDetailData {
   courseId: number;
   distance: number;
   duration: number;
-  minelevation: number;
+  minElevation: number;
   maxElevation: number;
   level: string;
   roadConditions: string[];

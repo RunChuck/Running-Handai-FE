@@ -1,4 +1,4 @@
-import type { CourseMockData } from '@/types/course';
+import type { CourseDetailResponse } from '@/types/course';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 
@@ -9,52 +9,62 @@ import MinAltitudeIconSrc from '@/assets/icons/course-min-altitude.svg';
 import LevelIconSrc from '@/assets/icons/course-level.svg';
 
 interface CourseTabProps {
-  course: CourseMockData;
+  courseDetail: CourseDetailResponse['data'];
 }
 
-const CourseTab = ({ course }: CourseTabProps) => {
+const CourseTab = ({ courseDetail }: CourseTabProps) => {
+  const courseInfoItems = [
+    {
+      icon: DistanceIconSrc,
+      alt: 'distance',
+      label: `${courseDetail.distance}km`,
+    },
+    {
+      icon: TimeIconSrc,
+      alt: 'time',
+      label: `${courseDetail.duration}분`,
+    },
+    {
+      icon: MaxAltitudeIconSrc,
+      alt: 'max altitude',
+      label: `최고 ${Math.round(courseDetail.maxElevation)}m`,
+    },
+    {
+      icon: MinAltitudeIconSrc,
+      alt: 'min altitude',
+      label: `최저 ${Math.round(courseDetail.minElevation)}m`,
+    },
+    {
+      icon: LevelIconSrc,
+      alt: 'level',
+      label: '난이도',
+      value: courseDetail.level,
+      isSpecial: true,
+    },
+  ];
+
   return (
     <Container>
-      {/* TODO: 코스 정보 맵핑으로 변경 */}
       <CourseInfoWrapper>
-        <CourseInfoItem>
-          <img src={DistanceIconSrc} alt="distance" />
-          <span>{course.distance}</span>
-        </CourseInfoItem>
-        <Divider />
-        <CourseInfoItem>
-          <img src={TimeIconSrc} alt="time" />
-          <span>{course.duration}</span>
-        </CourseInfoItem>
-        <Divider />
-        <CourseInfoItem>
-          <img src={MaxAltitudeIconSrc} alt="max altitude" />
-          <span>{course.elevation}</span>
-        </CourseInfoItem>
-        <Divider />
-        <CourseInfoItem>
-          <img src={MinAltitudeIconSrc} alt="altitude" />
-          <span>{course.elevation}</span>
-        </CourseInfoItem>
-        <Divider />
-        <CourseInfoItem>
-          <img src={LevelIconSrc} alt="altitude" />
-          <span>난이도</span>
-          <CourseLevel>쉬움</CourseLevel>
-        </CourseInfoItem>
+        {courseInfoItems.map((item, index) => (
+          <CourseInfoItemGroup key={index}>
+            <CourseInfoItem>
+              <img src={item.icon} alt={item.alt} />
+              <span>{item.label}</span>
+              {item.isSpecial && <CourseLevel>{item.value}</CourseLevel>}
+            </CourseInfoItem>
+            {index < courseInfoItems.length - 1 && <Divider />}
+          </CourseInfoItemGroup>
+        ))}
       </CourseInfoWrapper>
+
       <CourseAnalysisContainer>
         <CourseAnalysisTitle>AI 코스 분석(추정)</CourseAnalysisTitle>
         <CourseAnalysisContent>
           <ul>
-            <li>일반적인 도보 트레킹 수준이며, 특별한 등반 장비 없이도 도보 여행이 가능</li>
-            <li>일반적인 도보 트레킹 수준이며, 특별한 등반 장비 없이도 도보 여행이 가능</li>
-            <li>일반적인 도보 트레킹 수준이며, 특별한 등반 장비 없이도 도보 여행이 가능</li>
-            <li>일반적인 도보 트레킹 수준이며, 특별한 등반 장비 없이도 도보 여행이 가능</li>
-            <li>
-              비교적 긴 거리(약 16.7km)와 누적 고도를 고려할 때 초보자도 완주 가능하지만 중간 이상의 체력이 요구되며,
-              체력 부담이 다소 있을 수 있음
-            </li>
+            {courseDetail.roadConditions.map((condition, index) => (
+              <li key={index}>{condition}</li>
+            ))}
           </ul>
         </CourseAnalysisContent>
       </CourseAnalysisContainer>
@@ -79,6 +89,12 @@ const CourseInfoWrapper = styled.div`
   gap: var(--spacing-12);
   padding: var(--spacing-12);
   border-radius: 4px;
+`;
+
+const CourseInfoItemGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-12);
 `;
 
 const CourseInfoItem = styled.div`

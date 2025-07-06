@@ -26,6 +26,7 @@ export const StatusContainer = styled.div`
   align-items: center;
   justify-content: center;
   padding: var(--spacing-40);
+  height: 100%;
 `;
 
 export const StatusText = styled.div`

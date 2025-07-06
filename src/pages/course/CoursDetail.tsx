@@ -1,35 +1,30 @@
 import { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
-import type { CourseMockData } from '@/types/course';
+import * as S from '@/pages/main/Main.styled';
 import useScrollToTop from '@/hooks/useScrollToTop';
+import { useCourseDetail } from '@/hooks/useCourseDetail';
 
 import Header from './components/Header';
 import Tabs from './components/Tabs';
 import ScrollIconSrc from '@/assets/icons/scroll-up.svg';
-
-interface LocationState {
-  course: CourseMockData;
-}
+import TempThumbnailImgSrc from '@/assets/images/temp-thumbnail.png';
 
 const CourseDetail = () => {
-  const location = useLocation();
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
 
   const { scrollRef, scrollToTop, showScrollButton } = useScrollToTop();
-  const state = location.state as LocationState | null;
-  const course = state?.course;
+
+  const courseId = parseInt(id || '0', 10);
+  const { courseDetail, loading, error } = useCourseDetail(courseId);
 
   useEffect(() => {
-    if (!course) {
+    if (!courseId) {
       navigate('/main', { replace: true });
     }
-  }, [course, navigate]);
-
-  if (!course) {
-    return null;
-  }
+  }, [courseId, navigate]);
 
   const handleBack = () => {
     navigate(-1);
@@ -43,17 +38,44 @@ const CourseDetail = () => {
     // TODO: 북마크 기능
   };
 
+  if (loading) {
+    return (
+      <Container>
+        <S.StatusContainer>
+          <S.StatusText>코스 정보를 불러오는 중...🏃‍♂️</S.StatusText>
+        </S.StatusContainer>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container>
+        <S.StatusContainer>
+          <S.StatusText>{error}</S.StatusText>
+          <S.RetryButton onClick={() => window.location.reload()}>다시 시도</S.RetryButton>
+        </S.StatusContainer>
+      </Container>
+    );
+  }
+
+  if (!courseDetail) {
+    return null;
+  }
+
+  const title = `코스 ${courseDetail.courseId}`;
+
   return (
     <Container ref={scrollRef}>
       <Header
-        title={course.title}
-        isBookmarked={course.isBookmarked}
+        title={title}
+        isBookmarked={false} // TODO: 북마크 상태 연결
         onBack={handleBack}
         onShare={handleShare}
         onBookmarkToggle={handleBookmarkToggle}
       />
-      <CourseThumbnail src={course.thumbnail} alt="thumbnail" />
-      <Tabs course={course} />
+      <CourseThumbnail src={TempThumbnailImgSrc} alt="코스 썸네일" />
+      <Tabs courseDetail={courseDetail} />
       {showScrollButton && (
         <ScrollButtonContainer>
           <ScrollButton onClick={scrollToTop}>
