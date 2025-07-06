@@ -8,8 +8,8 @@ import { useCourseDetail } from '@/hooks/useCourseDetail';
 
 import Header from './components/Header';
 import Tabs from './components/Tabs';
+import CourseRouteMap from '@/components/CourseRouteMap';
 import ScrollIconSrc from '@/assets/icons/scroll-up.svg';
-import TempThumbnailImgSrc from '@/assets/images/temp-thumbnail.png';
 
 const CourseDetail = () => {
   const navigate = useNavigate();
@@ -74,7 +74,7 @@ const CourseDetail = () => {
         onShare={handleShare}
         onBookmarkToggle={handleBookmarkToggle}
       />
-      <CourseThumbnail src={TempThumbnailImgSrc} alt="코스 썸네일" />
+      <CourseRouteMap courseDetail={courseDetail} />
       <Tabs courseDetail={courseDetail} />
       {showScrollButton && (
         <ScrollButtonContainer>
@@ -99,12 +99,6 @@ const Container = styled.div`
   ::-webkit-scrollbar {
     display: none;
   }
-`;
-
-const CourseThumbnail = styled.img`
-  width: 100%;
-  object-fit: cover;
-  aspect-ratio: 1/1;
 `;
 
 const ScrollButtonContainer = styled.div`
