@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import * as S from './Section.styled';
 import { theme } from '@/styles/theme';
@@ -5,12 +6,14 @@ import { theme } from '@/styles/theme';
 import StarIconSrc from '@/assets/icons/star-default.svg';
 
 const ReviewSection = () => {
+  const [t] = useTranslation();
+
   return (
     <S.SectionContainer>
       <S.ContentContainer>
-        <S.SectionTitle>리뷰</S.SectionTitle>
+        <S.SectionTitle>{t('review')}</S.SectionTitle>
         <RatingContainer>
-          <RatingText>코스의 첫번째 리뷰어가 되어주세요!</RatingText>
+          <RatingText>{t('courseDetail.firstReviewer')}</RatingText>
           <RatingIconWrapper>
             <img src={StarIconSrc} alt="star" />
             <img src={StarIconSrc} alt="star" />

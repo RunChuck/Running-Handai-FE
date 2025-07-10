@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
@@ -12,6 +13,7 @@ import CourseRouteMap from '@/components/CourseRouteMap';
 import ScrollIconSrc from '@/assets/icons/scroll-up.svg';
 
 const CourseDetail = () => {
+  const [t] = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
@@ -42,7 +44,7 @@ const CourseDetail = () => {
     return (
       <Container>
         <S.StatusContainer>
-          <S.StatusText>코스 정보를 불러오는 중...🏃‍♂️</S.StatusText>
+          <S.StatusText>{t('courseDetail.loading')}</S.StatusText>
         </S.StatusContainer>
       </Container>
     );
@@ -53,7 +55,7 @@ const CourseDetail = () => {
       <Container>
         <S.StatusContainer>
           <S.StatusText>{error}</S.StatusText>
-          <S.RetryButton onClick={() => window.location.reload()}>다시 시도</S.RetryButton>
+          <S.RetryButton onClick={() => window.location.reload()}>{t('courseDetail.retry')}</S.RetryButton>
         </S.StatusContainer>
       </Container>
     );
@@ -63,7 +65,7 @@ const CourseDetail = () => {
     return null;
   }
 
-  const title = `코스 ${courseDetail.courseId}`;
+  const title = `${t('course')} ${courseDetail.courseId}`;
 
   return (
     <Container ref={scrollRef}>
@@ -81,7 +83,7 @@ const CourseDetail = () => {
           <ScrollButton onClick={scrollToTop}>
             <img src={ScrollIconSrc} alt="scroll" />
           </ScrollButton>
-          <ScrollToTop>맨 위로</ScrollToTop>
+          <ScrollToTop>{t('courseDetail.scrollToTop')}</ScrollToTop>
         </ScrollButtonContainer>
       )}
     </Container>

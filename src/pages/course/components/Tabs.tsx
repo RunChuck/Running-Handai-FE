@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import type { CourseTabType, CourseTabItem, CourseDetailResponse } from '@/types/course';
@@ -13,13 +14,14 @@ interface CourseTabProps {
 }
 
 const TAB_ITEMS: CourseTabItem[] = [
-  { key: 'overview', label: '전체' },
-  { key: 'course', label: '코스' },
-  { key: 'attractions', label: '즐길거리' },
-  { key: 'reviews', label: '리뷰' },
+  { key: 'overview', label: 'tabs.overview' },
+  { key: 'course', label: 'tabs.course' },
+  { key: 'attractions', label: 'tabs.attractions' },
+  { key: 'reviews', label: 'tabs.reviews' },
 ];
 
 const Tabs = ({ courseDetail }: CourseTabProps) => {
+  const [t] = useTranslation();
   const [activeTab, setActiveTab] = useState<CourseTabType>('overview');
 
   const handleTabChange = (tabKey: CourseTabType) => {
@@ -46,7 +48,7 @@ const Tabs = ({ courseDetail }: CourseTabProps) => {
       <TabWrapper>
         {TAB_ITEMS.map(tab => (
           <TabButton key={tab.key} isActive={activeTab === tab.key} onClick={() => handleTabChange(tab.key)}>
-            {tab.label}
+            {t(tab.label)}
           </TabButton>
         ))}
       </TabWrapper>

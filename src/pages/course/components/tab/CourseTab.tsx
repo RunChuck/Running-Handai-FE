@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { CourseDetailResponse } from '@/types/course';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
@@ -13,6 +14,8 @@ interface CourseTabProps {
 }
 
 const CourseTab = ({ courseDetail }: CourseTabProps) => {
+  const [t] = useTranslation();
+
   const courseInfoItems = [
     {
       icon: DistanceIconSrc,
@@ -22,22 +25,22 @@ const CourseTab = ({ courseDetail }: CourseTabProps) => {
     {
       icon: TimeIconSrc,
       alt: 'time',
-      label: `${courseDetail.duration}분`,
+      label: `${courseDetail.duration}${t('minutes')}`,
     },
     {
       icon: MaxAltitudeIconSrc,
       alt: 'max altitude',
-      label: `최고 ${Math.round(courseDetail.maxElevation)}m`,
+      label: `${t('max')} ${Math.round(courseDetail.maxElevation)}m`,
     },
     {
       icon: MinAltitudeIconSrc,
       alt: 'min altitude',
-      label: `최저 ${Math.round(courseDetail.minElevation)}m`,
+      label: `${t('min')} ${Math.round(courseDetail.minElevation)}m`,
     },
     {
       icon: LevelIconSrc,
       alt: 'level',
-      label: '난이도',
+      label: t('level'),
       value: courseDetail.level,
       isSpecial: true,
     },
@@ -59,7 +62,7 @@ const CourseTab = ({ courseDetail }: CourseTabProps) => {
       </CourseInfoWrapper>
 
       <CourseAnalysisContainer>
-        <CourseAnalysisTitle>AI 코스 분석(추정)</CourseAnalysisTitle>
+        <CourseAnalysisTitle>{t('courseDetail.aiCourseAnalysis')}</CourseAnalysisTitle>
         <CourseAnalysisContent>
           <ul>
             {courseDetail.roadConditions.map((condition, index) => (

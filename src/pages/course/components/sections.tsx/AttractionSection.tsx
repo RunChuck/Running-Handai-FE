@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import * as S from './Section.styled';
 import type { CourseTabType } from '@/types/course';
@@ -11,6 +12,8 @@ interface AttractionSectionProps {
 }
 
 const AttractionSection = ({ onTabChange }: AttractionSectionProps) => {
+  const [t] = useTranslation();
+
   const handleAttractionDetail = () => {
     onTabChange('attractions');
   };
@@ -18,7 +21,7 @@ const AttractionSection = ({ onTabChange }: AttractionSectionProps) => {
   return (
     <S.SectionContainer>
       <S.ContentContainer>
-        <S.SectionTitle>즐길거리</S.SectionTitle>
+        <S.SectionTitle>{t('attractions')}</S.SectionTitle>
         <AttractionList>
           <AttractionItem />
           <AttractionItem />
@@ -33,7 +36,7 @@ const AttractionSection = ({ onTabChange }: AttractionSectionProps) => {
         customTypography={true}
         onClick={handleAttractionDetail}
       >
-        <S.ButtonText>즐길거리 더보기</S.ButtonText>
+        <S.ButtonText>{t('courseDetail.moreAttractions')}</S.ButtonText>
         <img src={ArrowIconSrc} alt="arrow" />
       </Button>
     </S.SectionContainer>
