@@ -160,7 +160,7 @@ const Main = () => {
     return (
       <S.CourseGrid>
         {courses.map((course, index) => (
-          <CourseItem key={course.id} course={course} index={index} onBookmarkClick={handleBookmarkClick} />
+          <CourseItem key={course.courseId} course={course} index={index} onBookmarkClick={handleBookmarkClick} />
         ))}
       </S.CourseGrid>
     );

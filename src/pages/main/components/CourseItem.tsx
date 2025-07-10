@@ -22,7 +22,7 @@ const CourseItem = ({ course, onBookmarkClick, index }: CourseItemProps) => {
   };
 
   const handleClick = () => {
-    navigate(`/course-detail/${course.id}`, {
+    navigate(`/course-detail/${course.courseId}`, {
       state: { course },
     });
   };
