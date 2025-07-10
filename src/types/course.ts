@@ -6,12 +6,13 @@ export interface CourseTabItem {
 }
 
 export interface CourseData {
+  courseId: number;
   thumbnailUrl: string;
   distanceFromUser: number;
   distance: number;
   maxElevation: number;
-  id: number;
   duration: number;
+  trackPoints?: TrackPoint[];
 }
 
 export type CourseFilterType = 'NEARBY' | 'AREA' | 'THEME';

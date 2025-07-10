@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import * as S from './Main.styled';
 
 import { useDebounce } from '@/hooks/useDebounce';
@@ -20,6 +21,7 @@ import ArrowUprightIconSrc from '@/assets/icons/arrow-upright.svg';
 import MenuIconSrc from '@/assets/icons/menu-24px.svg';
 
 const Main = () => {
+  const [t] = useTranslation();
   const { mapRef } = useMap();
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -78,42 +80,25 @@ const Main = () => {
   };
 
   const getBottomSheetTitle = () => {
-    const areaLabels: Record<AreaCode, string> = {
-      HAEUN_GWANGAN: '해운/광안',
-      SONGJEONG_GIJANG: '송정/기장',
-      SEOMYEON_DONGNAE: '서면/동래',
-      WONDOSIM: '원도심/영도',
-      SOUTHERN_COAST: '남부해안',
-      WESTERN_NAKDONGRIVER: '서부/낙동강',
-      NORTHERN_BUSAN: '북부산',
-    };
-
-    const themeLabels: Record<ThemeCode, string> = {
-      SEA: '바다',
-      RIVERSIDE: '강변',
-      MOUNTAIN: '산',
-      DOWNTOWN: '도심',
-    };
-
     if (selectedFilter.type === 'area' && selectedFilter.value) {
       return {
-        prefix: areaLabels[selectedFilter.value as AreaCode],
-        suffix: '추천 코스',
+        prefix: t(`location.${selectedFilter.value.toLowerCase()}`),
+        suffix: t('recommendedCourses'),
         isFiltered: true,
       };
     }
 
     if (selectedFilter.type === 'theme' && selectedFilter.value) {
       return {
-        prefix: themeLabels[selectedFilter.value as ThemeCode],
-        suffix: '추천 코스',
+        prefix: t(`theme.${selectedFilter.value.toLowerCase()}`),
+        suffix: t('recommendedCourses'),
         isFiltered: true,
       };
     }
 
     return {
       prefix: '',
-      suffix: '추천 코스',
+      suffix: t('recommendedCourses'),
       isFiltered: false,
     };
   };
@@ -121,12 +106,12 @@ const Main = () => {
   const floatButtons = (
     <>
       <FloatButton onClick={handleRecommendCourseClick} position={{ bottom: 0, center: true }} variant="pill">
-        🏃‍♂️ 추천 코스 탐색
-        <img src={ArrowUprightIconSrc} alt="추천 코스 탐색" />
+        🏃‍♂️ {t('main.exploreCourses')}
+        <img src={ArrowUprightIconSrc} alt={t('main.exploreCourses')} />
       </FloatButton>
 
       <FloatButton onClick={moveToCurrentLocation} position={{ bottom: 0, right: 16 }} variant="circular">
-        <img src={LocationIconSrc} alt="현재 위치" width={20} height={20} />
+        <img src={LocationIconSrc} alt={t('currentLocation')} width={20} height={20} />
       </FloatButton>
     </>
   );
@@ -135,7 +120,7 @@ const Main = () => {
     if (loading) {
       return (
         <S.StatusContainer>
-          <S.StatusText>코스를 불러오는 중...🏃‍♂️</S.StatusText>
+          <S.StatusText>{t('main.loading')}</S.StatusText>
         </S.StatusContainer>
       );
     }
@@ -144,7 +129,7 @@ const Main = () => {
       return (
         <S.ErrorContainer>
           <S.StatusText>{error}</S.StatusText>
-          <S.RetryButton onClick={fetchNearbyCourses}>다시 시도</S.RetryButton>
+          <S.RetryButton onClick={fetchNearbyCourses}>{t('retry')}</S.RetryButton>
         </S.ErrorContainer>
       );
     }
@@ -152,7 +137,7 @@ const Main = () => {
     if (courses.length === 0) {
       return (
         <S.StatusContainer>
-          <S.StatusText>주변에 추천할 수 있는 코스가 없습니다 🥲</S.StatusText>
+          <S.StatusText>{t('main.noCourses')}</S.StatusText>
         </S.StatusContainer>
       );
     }
@@ -160,7 +145,7 @@ const Main = () => {
     return (
       <S.CourseGrid>
         {courses.map((course, index) => (
-          <CourseItem key={course.id} course={course} index={index} onBookmarkClick={handleBookmarkClick} />
+          <CourseItem key={course.courseId} course={course} index={index} onBookmarkClick={handleBookmarkClick} />
         ))}
       </S.CourseGrid>
     );
@@ -171,7 +156,7 @@ const Main = () => {
       <MapView ref={mapRef} />
 
       <FloatButton onClick={handleMenuClick} position={{ top: 16, left: 16 }} size="large" variant="rounded">
-        <img src={MenuIconSrc} alt="메뉴" width={24} height={24} />
+        <img src={MenuIconSrc} alt={t('menu')} width={24} height={24} />
       </FloatButton>
 
       {!isModalOpen && (
@@ -180,20 +165,15 @@ const Main = () => {
         </BottomSheet>
       )}
 
-      <CourseModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onAreaSelect={handleAreaSelect}
-        onThemeSelect={handleThemeSelect}
-      />
+      <CourseModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onAreaSelect={handleAreaSelect} onThemeSelect={handleThemeSelect} />
 
       <CommonModal
         isOpen={isLoginModalOpen}
         onClose={handleLoginModalClose}
         onConfirm={() => navigate('/')}
-        content={`로그인하고\n마음에 드는 코스를 저장해보세요!`}
-        cancelText="취소"
-        confirmText="간편 로그인 하기"
+        content={t('main.loginMessage')}
+        cancelText={t('cancel')}
+        confirmText={t('main.simpleLogin')}
       />
     </S.Container>
   );

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import * as S from './Section.styled';
 import { theme } from '@/styles/theme';
@@ -15,6 +16,8 @@ interface CourseSectionProps {
 }
 
 const CourseSection = ({ onTabChange, courseDetail }: CourseSectionProps) => {
+  const [t] = useTranslation();
+
   const handleCourseDetail = () => {
     onTabChange('course');
   };
@@ -28,19 +31,19 @@ const CourseSection = ({ onTabChange, courseDetail }: CourseSectionProps) => {
     {
       icon: TimeIconSrc,
       alt: 'time',
-      label: `${courseDetail.duration}분`,
+      label: `${courseDetail.duration}${t('minutes')}`,
     },
     {
       icon: AltitudeIconSrc,
       alt: 'altitude',
-      label: `최고 ${Math.round(courseDetail.maxElevation)}m`,
+      label: `${t('max')}${Math.round(courseDetail.maxElevation)}m`,
     },
   ];
 
   return (
     <S.SectionContainer>
       <S.ContentContainer>
-        <S.SectionTitle>코스</S.SectionTitle>
+        <S.SectionTitle>{t('course')}</S.SectionTitle>
         <CourseInfoWrapper>
           {courseInfoItems.map((item, index) => (
             <CourseInfoItemGroup key={index}>
@@ -61,7 +64,7 @@ const CourseSection = ({ onTabChange, courseDetail }: CourseSectionProps) => {
         customTypography={true}
         onClick={handleCourseDetail}
       >
-        <S.ButtonText>코스 정보 더보기</S.ButtonText>
+        <S.ButtonText>{t('courseDetail.moreCourseInfo')}</S.ButtonText>
         <img src={ArrowIconSrc} alt="arrow" />
       </Button>
     </S.SectionContainer>

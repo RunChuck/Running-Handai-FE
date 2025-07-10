@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
+import { useTranslation } from 'react-i18next';
 import { theme } from '@/styles/theme';
 import type { CourseData } from '@/types/course';
 
@@ -14,6 +15,7 @@ interface CourseItemProps {
 }
 
 const CourseItem = ({ course, onBookmarkClick, index }: CourseItemProps) => {
+  const [t] = useTranslation();
   const navigate = useNavigate();
 
   const handleBookmarkClick = (e: React.MouseEvent) => {
@@ -22,14 +24,14 @@ const CourseItem = ({ course, onBookmarkClick, index }: CourseItemProps) => {
   };
 
   const handleClick = () => {
-    navigate(`/course-detail/${course.id}`, {
+    navigate(`/course-detail/${course.courseId}`, {
       state: { course },
     });
   };
 
   // 인덱스를 알파벳으로 변환
   const getCourseName = (index: number) => {
-    return `${String.fromCharCode(65 + index)}코스`;
+    return `${String.fromCharCode(65 + index)}${t('course')} `;
   };
 
   return (
@@ -42,15 +44,18 @@ const CourseItem = ({ course, onBookmarkClick, index }: CourseItemProps) => {
         </BookmarkButton>
         <Thumbnail src={TempThumbnailImgSrc} alt="코스 썸네일" />
         <CourseStats>
-          {course.distance}km · {course.duration}분 · {course.maxElevation}m
+          {course.distance}km · {course.duration}
+          {t('minutes')} · {course.maxElevation}m
         </CourseStats>
       </ThumbnailWrapper>
       {/* 임시로 북마크 수는 랜덤 값으로 표시 */}
-      <BookmarkCount>{Math.floor(Math.random() * 100) + 1}명이 저장한 코스</BookmarkCount>
+      <BookmarkCount>
+        {Math.floor(Math.random() * 100) + 1}
+        {t('main.bookmark')}
+      </BookmarkCount>
     </ItemContainer>
   );
 };
-
 
 export default CourseItem;
 

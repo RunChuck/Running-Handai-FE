@@ -1,4 +1,5 @@
 import { forwardRef, useImperativeHandle, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ReactNode } from 'react';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
@@ -23,54 +24,61 @@ export interface BottomSheetRef {
 const snapPoints = [window.innerHeight * 0.9, window.innerHeight * 0.6, 32]; // max, default, min
 const initialSnap = 1; // 60%
 
-const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
-  ({ children, titleData = { prefix: '', suffix: '추천 코스', isFiltered: false }, floatButtons }, ref) => {
-    const isOpen = true;
-    const sheetRef = useRef<SheetRef>(null);
+const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(({ children, titleData, floatButtons }, ref) => {
+  const [t] = useTranslation();
+  const isOpen = true;
+  const sheetRef = useRef<SheetRef>(null);
 
-    useImperativeHandle(ref, () => ({
-      snapTo: (index: number) => {
-        sheetRef.current?.snapTo(index);
-      },
-    }));
+  const defaultTitleData = {
+    prefix: '',
+    suffix: t('recommendedCourses'),
+    isFiltered: false,
+  };
 
-    return (
-      <Sheet
-        ref={sheetRef}
-        isOpen={isOpen}
-        onClose={() => {}}
-        snapPoints={snapPoints}
-        initialSnap={initialSnap}
-        disableDrag={false}
-        mountPoint={document.body}
-      >
-        <Container>
-          {floatButtons && <FloatButtonWrapper>{floatButtons}</FloatButtonWrapper>}
+  const finalTitleData = titleData || defaultTitleData;
 
-          <Sheet.Header>
-            <Header>
-              <DragHandle />
-            </Header>
-          </Sheet.Header>
+  useImperativeHandle(ref, () => ({
+    snapTo: (index: number) => {
+      sheetRef.current?.snapTo(index);
+    },
+  }));
 
-          <Sheet.Content>
-            <TitleWrapper>
-              <div />
-              <Title>
-                {titleData.prefix && <FilterText>{titleData.prefix}&nbsp;</FilterText>}
-                <BaseText>{titleData.suffix}</BaseText>
-              </Title>
-              <PenButton>
-                <img src={PenIconSrc} alt="코스 등록" width={20} height={20} />
-              </PenButton>
-            </TitleWrapper>
-            <Content>{children}</Content>
-          </Sheet.Content>
-        </Container>
-      </Sheet>
-    );
-  }
-);
+  return (
+    <Sheet
+      ref={sheetRef}
+      isOpen={isOpen}
+      onClose={() => {}}
+      snapPoints={snapPoints}
+      initialSnap={initialSnap}
+      disableDrag={false}
+      mountPoint={document.body}
+    >
+      <Container>
+        {floatButtons && <FloatButtonWrapper>{floatButtons}</FloatButtonWrapper>}
+
+        <Sheet.Header>
+          <Header>
+            <DragHandle />
+          </Header>
+        </Sheet.Header>
+
+        <Sheet.Content>
+          <TitleWrapper>
+            <div />
+            <Title>
+              {finalTitleData.prefix && <FilterText>{finalTitleData.prefix}&nbsp;</FilterText>}
+              <BaseText>{finalTitleData.suffix}</BaseText>
+            </Title>
+            <PenButton>
+              <img src={PenIconSrc} alt="코스 등록" width={20} height={20} />
+            </PenButton>
+          </TitleWrapper>
+          <Content>{children}</Content>
+        </Sheet.Content>
+      </Container>
+    </Sheet>
+  );
+});
 
 BottomSheet.displayName = 'BottomSheet';
 

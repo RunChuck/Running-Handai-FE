@@ -1,13 +1,16 @@
+import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 
 import StarIconSrc from '@/assets/icons/star-default.svg';
 
 const ReviewTab = () => {
+  const [t] = useTranslation();
+
   return (
     <Container>
       <RatingContainer>
-        <RatingText>코스의 첫번째 리뷰어가 되어주세요!</RatingText>
+        <RatingText>{t('courseDetail.firstReviewer')}</RatingText>
         <RatingIconWrapper>
           <img src={StarIconSrc} alt="star" />
           <img src={StarIconSrc} alt="star" />

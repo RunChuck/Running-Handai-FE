@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import * as S from './Login.styled';
 
 import Button from '@/components/Button';
@@ -8,8 +9,11 @@ import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import GoogleIconSrc from '@/assets/icons/google-icon.svg';
 import KakaoIconSrc from '@/assets/icons/kakao-icon.svg';
 import NaverIconSrc from '@/assets/icons/naver-icon.svg';
+import PrimaryLogoSrc from '@/assets/images/logo-primary.png';
+import WhiteLogoSrc from '@/assets/images/logo-white.png';
 
 const Login = () => {
+  const [t] = useTranslation();
   const navigate = useNavigate();
   const [isAutoLoginChecked, setIsAutoLoginChecked] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -34,7 +38,7 @@ const Login = () => {
   const loginButtons = [
     {
       id: 'google',
-      text: 'Google 로그인',
+      text: t('login.google'),
       backgroundColor: '#fff',
       icon: <img src={GoogleIconSrc} alt="Google" width="20" height="20" />,
       style: { color: 'var(--text-text-title, #1C1C1C)', border: '1px solid #dadce0' },
@@ -44,7 +48,7 @@ const Login = () => {
     },
     {
       id: 'kakao',
-      text: 'Kakao 로그인',
+      text: t('login.kakao'),
       backgroundColor: '#FEE500',
       icon: <img src={KakaoIconSrc} alt="Kakao" width="20" height="20" />,
       style: { color: 'var(--text-text-title, #1C1C1C)' },
@@ -54,7 +58,7 @@ const Login = () => {
     },
     {
       id: 'naver',
-      text: 'Naver 로그인',
+      text: t('login.naver'),
       backgroundColor: '#03C75A',
       icon: <img src={NaverIconSrc} alt="Naver" width="20" height="20" />,
       style: {},
@@ -64,7 +68,7 @@ const Login = () => {
     },
     {
       id: 'guest',
-      text: '게스트로 이용하기',
+      text: t('login.guest'),
       backgroundColor: isMobile ? 'rgba(255, 255, 255, 0.10)' : 'var(--GrayScale-gray200)',
       icon: null,
       style: {
@@ -78,10 +82,9 @@ const Login = () => {
   return (
     <S.Container>
       <S.LoginContainer>
-        <S.TitleWrapper>
-          <S.TempLogo>R</S.TempLogo>
-          <S.Title>러닝한다이</S.Title>
-        </S.TitleWrapper>
+        <S.LogoWrapper>
+          <img src={isMobile ? WhiteLogoSrc : PrimaryLogoSrc} alt="러닝한다이" />
+        </S.LogoWrapper>
         <S.ButtonWrapper>
           <S.ButtonGroup>
             {loginButtons.map(button => (
@@ -105,7 +108,7 @@ const Login = () => {
             ) : (
               <CheckBoxOutlineBlankIcon color={isMobile ? 'inherit' : 'disabled'} />
             )}
-            자동 로그인
+            {t('login.autoLogin')}
           </S.AutoLogin>
         </S.ButtonWrapper>
       </S.LoginContainer>

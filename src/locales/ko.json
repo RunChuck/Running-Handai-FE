@@ -1,0 +1,65 @@
+{
+  "menu": "메뉴",
+  "cancel": "취소",
+  "retry": "다시 시도",
+  "currentLocation": "현재 위치",
+  "course": "코스",
+  "recommendedCourses": "추천 코스",
+  "minutes": "분",
+  "max": "최고",
+  "min": "최저",
+  "level": "난이도",
+  "attractions": "즐길거리",
+  "review": "리뷰",
+  "login": {
+    "google": "Google 로그인",
+    "kakao": "Kakao 로그인",
+    "naver": "Naver 로그인",
+    "guest": "게스트로 이용하기",
+    "autoLogin": "자동 로그인"
+  },
+  "location": {
+    "haeun_gwangan": "해운\n광안",
+    "songjeong_gijang": "송정\n기장",
+    "seomyeon_dongnae": "서면\n동래",
+    "wondosim": "원도심\n영도",
+    "southern_coast": "남부해안",
+    "western_nakdongriver": "서부\n낙동강",
+    "northern_busan": "북부산"
+  },
+  "theme": {
+    "sea": "바다",
+    "riverside": "강변",
+    "mountain": "산",
+    "downtown": "도심"
+  },
+  "main": {
+    "exploreCourses": "추천 코스 탐색",
+    "loading": "코스를 불러오는 중...🏃‍♂️",
+    "noCourses": "주변에 추천할 수 있는 코스가 없습니다 🥲",
+    "loginMessage": "로그인하고\n마음에 드는 코스를 저장해보세요!",
+    "simpleLogin": "간편 로그인 하기",
+    "bookmark": "명이 저장한 코스"
+  },
+  "courseModal": {
+    "title": "추천 코스 탐색",
+    "location": "어디로 가시나요?",
+    "theme": "어떤 테마로 원하세요?"
+  },
+  "tabs": {
+    "overview": "전체",
+    "course": "코스",
+    "attractions": "즐길거리",
+    "reviews": "리뷰"
+  },
+  "courseDetail": {
+    "loading": "코스 정보를 불러오는 중...🏃‍♂️",
+    "error": "코스 정보를 불러오는 중 오류가 발생했습니다 🥲",
+    "retry": "다시 시도",
+    "moreCourseInfo": "코스 정보 더보기",
+    "moreAttractions": "즐길거리 더보기",
+    "firstReviewer": "코스의 첫번째 리뷰어가 되어주세요!",
+    "aiCourseAnalysis": "AI 코스 분석 (추정)",
+    "scrollToTop": "맨 위로"
+  }
+}

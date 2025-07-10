@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import { COURSE_LOCATIONS, THEME_LOCATIONS } from '@/constants/locations';
@@ -41,31 +42,8 @@ const THEME_OPTIONS = [
   { key: 'DOWNTOWN', image: themeCity, zoom: 8 },
 ] as const;
 
-// TODO: 다국어 추가시 임시 라벨 함수 제거
-const getLocationLabel = (key: string): string => {
-  const labels: Record<string, string> = {
-    HAEUN_GWANGAN: '해운\n광안',
-    SONGJEONG_GIJANG: '송정\n기장',
-    SEOMYEON_DONGNAE: '서면\n동래',
-    WONDOSIM: '원도심\n영도',
-    SOUTHERN_COAST: '남부해안',
-    WESTERN_NAKDONGRIVER: '서부\n낙동강',
-    NORTHERN_BUSAN: '북부산',
-  };
-  return labels[key] || key;
-};
-
-const getThemeLabel = (key: string): string => {
-  const labels: Record<string, string> = {
-    SEA: '바다',
-    RIVERSIDE: '강변',
-    MOUNTAIN: '산',
-    DOWNTOWN: '도심',
-  };
-  return labels[key] || key;
-};
-
 const CourseModal = ({ isOpen, onClose, onAreaSelect, onThemeSelect }: CourseModalProps) => {
+  const { t } = useTranslation();
   const { mapRef } = useMap();
 
   const handleLocationSelect = (locationKey: string) => {
@@ -113,37 +91,29 @@ const CourseModal = ({ isOpen, onClose, onAreaSelect, onThemeSelect }: CourseMod
       <ModalContainer onClick={e => e.stopPropagation()}>
         <Header>
           <BackButton onClick={onClose}>
-            <img src={BackIconSrc} alt="닫기" />
+            <img src={BackIconSrc} alt={t('common.close')} />
           </BackButton>
-          <Title>🏃‍♂️ 추천 코스 탐색</Title>
+          <Title>🏃‍♂️ {t('courseModal.title')}</Title>
         </Header>
 
         <Content>
           <Section>
-            <Subtitle>어디로 가시나요?</Subtitle>
+            <Subtitle>{t('courseModal.location')}</Subtitle>
             <OptionGrid>
               {LOCATION_OPTIONS.map(option => (
-                <OptionButton
-                  key={option.key}
-                  backgroundImage={option.image}
-                  onClick={() => handleLocationSelect(option.key)}
-                >
-                  {getLocationLabel(option.key)}
+                <OptionButton key={option.key} backgroundImage={option.image} onClick={() => handleLocationSelect(option.key)}>
+                  {t(`location.${option.key.toLowerCase()}`)}
                 </OptionButton>
               ))}
             </OptionGrid>
           </Section>
 
           <Section>
-            <Subtitle>어떤 테마로 원하세요?</Subtitle>
+            <Subtitle>{t('courseModal.theme')}</Subtitle>
             <OptionGrid>
               {THEME_OPTIONS.map(option => (
-                <OptionButton
-                  key={option.key}
-                  backgroundImage={option.image}
-                  onClick={() => handleThemeSelect(option.key)}
-                >
-                  {getThemeLabel(option.key)}
+                <OptionButton key={option.key} backgroundImage={option.image} onClick={() => handleThemeSelect(option.key)}>
+                  {t(`theme.${option.key.toLowerCase()}`)}
                 </OptionButton>
               ))}
             </OptionGrid>
@@ -257,7 +227,8 @@ const OptionButton = styled.button<{ backgroundImage: string }>`
   white-space: pre-line;
   border: 1px solid var(--line-line-002, #e0e0e0);
   border-radius: 50%;
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.4) 100%),
+  background:
+    linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.4) 100%),
     url(${props => props.backgroundImage}) lightgray 50% / cover no-repeat;
   cursor: pointer;
   transition: all 0.2s ease;
