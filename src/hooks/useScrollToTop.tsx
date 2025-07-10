@@ -6,7 +6,7 @@ interface UseScrollToTopOptions {
 
 export default function useScrollToTop(options: UseScrollToTopOptions = {}) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { showButtonThreshold = 200 } = options;
+  const { showButtonThreshold = 100 } = options;
   const [showScrollButton, setShowScrollButton] = useState(false);
 
   const scrollToTop = useCallback(() => {
