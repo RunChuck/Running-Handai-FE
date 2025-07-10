@@ -41,7 +41,7 @@ export const LoginContainer = styled.div`
   }
 `;
 
-export const TitleWrapper = styled.div`
+export const LogoWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -52,27 +52,10 @@ export const TitleWrapper = styled.div`
   @media (max-width: 600px) {
     width: 100%;
   }
-`;
 
-export const TempLogo = styled.span`
-  color: var(--text-text-primary, #4561ff);
-  font-family: 'Carter One', system-ui;
-  font-size: 150px;
-  line-height: 100%;
-
-  @media (max-width: 600px) {
-    color: var(--text-text-inverse, #fff);
-  }
-`;
-
-export const Title = styled.span`
-  color: var(--text-text-primary, #4561ff);
-  font-family: 'HakgyoansimAllimjang', sans-serif;
-  font-size: 50px;
-  line-height: 100%;
-
-  @media (max-width: 600px) {
-    color: var(--text-text-inverse, #fff);
+  img {
+    width: auto;
+    height: 200px;
   }
 `;
 

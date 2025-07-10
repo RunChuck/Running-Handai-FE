@@ -8,6 +8,8 @@ import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import GoogleIconSrc from '@/assets/icons/google-icon.svg';
 import KakaoIconSrc from '@/assets/icons/kakao-icon.svg';
 import NaverIconSrc from '@/assets/icons/naver-icon.svg';
+import PrimaryLogoSrc from '@/assets/images/logo-primary.png';
+import WhiteLogoSrc from '@/assets/images/logo-white.png';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -78,10 +80,9 @@ const Login = () => {
   return (
     <S.Container>
       <S.LoginContainer>
-        <S.TitleWrapper>
-          <S.TempLogo>R</S.TempLogo>
-          <S.Title>러닝한다이</S.Title>
-        </S.TitleWrapper>
+        <S.LogoWrapper>
+          <img src={isMobile ? WhiteLogoSrc : PrimaryLogoSrc} alt="러닝한다이" />
+        </S.LogoWrapper>
         <S.ButtonWrapper>
           <S.ButtonGroup>
             {loginButtons.map(button => (
