@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import * as S from './Main.styled';
@@ -30,6 +30,7 @@ const Main = () => {
     type: 'nearby' | 'area' | 'theme';
     value?: AreaCode | ThemeCode;
   }>({ type: 'nearby' });
+  const [selectedCourseId, setSelectedCourseId] = useState<number | undefined>();
 
   const { courses, loading, error, fetchNearbyCourses, fetchCoursesByArea, fetchCoursesByTheme } = useCourses();
 
@@ -71,12 +72,27 @@ const Main = () => {
 
   const handleAreaSelect = (area: AreaCode) => {
     setSelectedFilter({ type: 'area', value: area });
+    setSelectedCourseId(undefined);
+    if (mapRef.current) {
+      mapRef.current.clearAllCourses();
+    }
     fetchCoursesByArea(area);
   };
 
   const handleThemeSelect = (theme: ThemeCode) => {
     setSelectedFilter({ type: 'theme', value: theme });
+    setSelectedCourseId(undefined);
+    if (mapRef.current) {
+      mapRef.current.clearAllCourses();
+    }
     fetchCoursesByTheme(theme);
+  };
+
+  const handleCourseMarkerClick = (courseId: number) => {
+    setSelectedCourseId(courseId);
+    if (mapRef.current) {
+      mapRef.current.updateSelectedCourse(courseId);
+    }
   };
 
   const getBottomSheetTitle = () => {
@@ -102,6 +118,22 @@ const Main = () => {
       isFiltered: false,
     };
   };
+
+  // 필터링된 경우에만 코스 표시
+  useEffect(() => {
+    if (courses.length > 0 && mapRef.current) {
+      if (selectedFilter.type === 'area' || selectedFilter.type === 'theme') {
+        const defaultSelectedId = selectedCourseId || courses[0]?.courseId;
+        setSelectedCourseId(defaultSelectedId);
+
+        mapRef.current.displayCourses(courses, defaultSelectedId);
+      } else {
+        // nearby인 경우 코스 제거
+        mapRef.current.clearAllCourses();
+        setSelectedCourseId(undefined);
+      }
+    }
+  }, [courses, mapRef, selectedFilter.type]);
 
   const floatButtons = (
     <>
@@ -145,7 +177,13 @@ const Main = () => {
     return (
       <S.CourseGrid>
         {courses.map((course, index) => (
-          <CourseItem key={course.courseId} course={course} index={index} onBookmarkClick={handleBookmarkClick} />
+          <CourseItem
+            key={course.courseId}
+            course={course}
+            index={index}
+            isSelected={course.courseId === selectedCourseId}
+            onBookmarkClick={handleBookmarkClick}
+          />
         ))}
       </S.CourseGrid>
     );
@@ -153,7 +191,7 @@ const Main = () => {
 
   return (
     <S.Container>
-      <MapView ref={mapRef} />
+      <MapView ref={mapRef} onCourseMarkerClick={handleCourseMarkerClick} />
 
       <FloatButton onClick={handleMenuClick} position={{ top: 16, left: 16 }} size="large" variant="rounded">
         <img src={MenuIconSrc} alt={t('menu')} width={24} height={24} />
