@@ -91,7 +91,7 @@ const CourseModal = ({ isOpen, onClose, onAreaSelect, onThemeSelect }: CourseMod
       <ModalContainer onClick={e => e.stopPropagation()}>
         <Header>
           <BackButton onClick={onClose}>
-            <img src={BackIconSrc} alt={t('common.close')} />
+            <img src={BackIconSrc} alt="뒤로가기" />
           </BackButton>
           <Title>🏃‍♂️ {t('courseModal.title')}</Title>
         </Header>

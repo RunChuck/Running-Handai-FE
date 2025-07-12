@@ -6,15 +6,16 @@ import type { CourseData } from '@/types/course';
 
 import HeartIconSrc from '@/assets/icons/heart-default.svg';
 // import HeartIconFilledSrc from '@/assets/icons/heart-filled.svg';
-import TempThumbnailImgSrc from '@/assets/images/temp-thumbnail.png';
+import DefaultThumbnailImgSrc from '@/assets/images/thumbnail-default.png';
 
 interface CourseItemProps {
   course: CourseData;
-  onBookmarkClick: () => void;
   index: number;
+  isSelected?: boolean;
+  onBookmarkClick: () => void;
 }
 
-const CourseItem = ({ course, onBookmarkClick, index }: CourseItemProps) => {
+const CourseItem = ({ course, index, isSelected, onBookmarkClick }: CourseItemProps) => {
   const [t] = useTranslation();
   const navigate = useNavigate();
 
@@ -36,13 +37,13 @@ const CourseItem = ({ course, onBookmarkClick, index }: CourseItemProps) => {
 
   return (
     <ItemContainer>
-      <ThumbnailWrapper onClick={handleClick}>
+      <ThumbnailWrapper onClick={handleClick} isSelected={isSelected}>
         <CourseBadge>{getCourseName(index)}</CourseBadge>
         <BookmarkButton onClick={handleBookmarkClick}>
           {/* 현재는 모든 코스가 북마크되지 않은 상태로 처리 */}
           <img src={HeartIconSrc} alt="북마크" />
         </BookmarkButton>
-        <Thumbnail src={TempThumbnailImgSrc} alt="코스 썸네일" />
+        <Thumbnail src={course.thumbnailUrl || DefaultThumbnailImgSrc} alt="코스 썸네일" />
         <CourseStats>
           {course.distance}km · {course.duration}
           {t('minutes')} · {course.maxElevation}m
@@ -65,11 +66,30 @@ const ItemContainer = styled.div`
   gap: var(--spacing-8);
 `;
 
-const ThumbnailWrapper = styled.div`
+const ThumbnailWrapper = styled.div<{ isSelected?: boolean }>`
   position: relative;
   width: 100%;
   aspect-ratio: 1;
   cursor: pointer;
+  border-radius: 4px;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 2px solid var(--primary-primary, #4561ff);
+    border-radius: 4px;
+    opacity: ${props => (props.isSelected ? 1 : 0)};
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  transition: all 0.2s ease;
 `;
 
 const CourseBadge = styled.div`

@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import * as S from './Login.styled';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 import Button from '@/components/Button';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
@@ -16,18 +17,7 @@ const Login = () => {
   const [t] = useTranslation();
   const navigate = useNavigate();
   const [isAutoLoginChecked, setIsAutoLoginChecked] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsMobile(window.innerWidth <= 600);
-    };
-
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
+  const isMobile = useIsMobile();
 
   const handleAutoLoginToggle = () => {
     setIsAutoLoginChecked(!isAutoLoginChecked);

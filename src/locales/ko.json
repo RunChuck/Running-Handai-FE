@@ -53,6 +53,7 @@
     "reviews": "리뷰"
   },
   "courseDetail": {
+    "loadingMap": "지도를 불러오는 중...",
     "loading": "코스 정보를 불러오는 중...🏃‍♂️",
     "error": "코스 정보를 불러오는 중 오류가 발생했습니다 🥲",
     "retry": "다시 시도",

@@ -1,19 +1,54 @@
-import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
+import { useEffect, useRef, forwardRef, useImperativeHandle, useCallback } from 'react';
 import styled from '@emotion/styled';
 import { BUSAN_CITY_HALL, DEFAULT_MAP_LEVEL } from '@/constants/locations';
 import { getUserLocation, type LocationCoords } from '@/utils/geolocation';
+import {
+  convertCoursesToMapData,
+  drawMultipleCoursesOnMap,
+  updateCourseSelection,
+  clearMapElements,
+  type CourseMapElements,
+  type MultiCourseMapData,
+} from '@/utils/multiCourseUtils';
+import type { CourseData } from '@/types/course';
 
 export interface MapViewRef {
   moveToLocation: (lat: number, lng: number, level?: number) => void;
+  displayCourses: (courses: CourseData[], selectedCourseId?: number) => void;
+  updateSelectedCourse: (courseId: number) => void;
+  clearAllCourses: () => void;
 }
 
 interface MapViewProps {
   onMapLoad?: (map: kakao.maps.Map) => void;
+  onCourseMarkerClick?: (courseId: number) => void;
 }
 
-const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad }, ref) => {
+const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarkerClick }, ref) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<kakao.maps.Map | null>(null);
+  const courseElements = useRef<CourseMapElements>({ polylines: [], markers: [] });
+  const currentCoursesData = useRef<MultiCourseMapData[]>([]);
+  const isMapInitialized = useRef(false); // 지도 초기화 상태 추가
+
+  // 콜백 함수들을 useCallback으로 메모이제이션
+  const onCourseMarkerClickCallback = useCallback(
+    (courseId: number) => {
+      if (onCourseMarkerClick) {
+        onCourseMarkerClick(courseId);
+      }
+    },
+    [onCourseMarkerClick]
+  );
+
+  const onMapLoadCallback = useCallback(
+    (map: kakao.maps.Map) => {
+      if (onMapLoad) {
+        onMapLoad(map);
+      }
+    },
+    [onMapLoad]
+  );
 
   // 지도 초기 위치 설정
   const getInitialLocation = async () => {
@@ -21,7 +56,6 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad }, ref) => {
       const location = await getUserLocation();
       return { location, isUserLocation: true };
     } catch {
-      // 위치 접근 거부 또는 실패시 부산 시청 좌표 사용
       console.log('부산 시청 좌표 사용:', BUSAN_CITY_HALL);
       return { location: BUSAN_CITY_HALL, isUserLocation: false };
     }
@@ -54,11 +88,6 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad }, ref) => {
       });
 
       centerDot.setMap(map);
-    } else {
-      // const marker = new window.kakao.maps.Marker({
-      //   position: position,
-      // });
-      // marker.setMap(map);
     }
   };
 
@@ -70,8 +99,6 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad }, ref) => {
 
         if (level !== undefined) {
           mapInstance.current.setLevel(level);
-
-          // zoom level 먼저 변경 후 위치 이동
           setTimeout(() => {
             if (mapInstance.current) {
               mapInstance.current.panTo(position);
@@ -84,11 +111,87 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad }, ref) => {
         console.error('MapView: mapInstance.current가 null입니다');
       }
     },
+
+    displayCourses: (courses: CourseData[], selectedCourseId?: number) => {
+      if (!mapInstance.current) {
+        console.error('MapView: 지도가 초기화되지 않았습니다');
+        return;
+      }
+
+      // 기존 코스 요소들 제거
+      clearMapElements(courseElements.current);
+
+      // 새로운 코스 데이터 변환
+      const coursesData = convertCoursesToMapData(courses, selectedCourseId);
+      currentCoursesData.current = coursesData;
+
+      console.log('변환된 코스 데이터:', coursesData);
+
+      // 지도에 코스들 그리기
+      courseElements.current = drawMultipleCoursesOnMap(mapInstance.current, coursesData);
+
+      console.log('그려진 요소들:', {
+        polylines: courseElements.current.polylines.length,
+        markers: courseElements.current.markers.length,
+      });
+
+      // 마커 클릭 이벤트 등록
+      courseElements.current.markers.forEach((marker, index) => {
+        const courseData = coursesData[index];
+        window.kakao.maps.event.addListener(marker, 'click', () => {
+          onCourseMarkerClickCallback(courseData.courseId);
+        });
+      });
+
+      // 모든 코스가 보이도록 지도 범위 조정
+      // if (coursesData.length > 0) {
+      //   setTimeout(() => {
+      //     if (mapInstance.current) {
+      //       fitMapToAllCourses(mapInstance.current, coursesData);
+      //     }
+      //   }, 100);
+      // }
+
+      // console.log(`${courses.length}개 코스 표시 완료`, coursesData);
+    },
+
+    updateSelectedCourse: (courseId: number) => {
+      if (!mapInstance.current || currentCoursesData.current.length === 0) {
+        console.error('MapView: 지도 또는 코스 데이터가 준비되지 않았습니다');
+        return;
+      }
+
+      // 선택 상태 업데이트
+      courseElements.current = updateCourseSelection(mapInstance.current, courseElements.current, currentCoursesData.current, courseId);
+
+      currentCoursesData.current = currentCoursesData.current.map(course => ({
+        ...course,
+        color: course.courseId === courseId ? '#4561FF' : '#71737E',
+        isSelected: course.courseId === courseId,
+      }));
+
+      // 마커 클릭 이벤트 재등록
+      courseElements.current.markers.forEach((marker, index) => {
+        const courseData = currentCoursesData.current[index];
+        window.kakao.maps.event.addListener(marker, 'click', () => {
+          onCourseMarkerClickCallback(courseData.courseId);
+        });
+      });
+
+      console.log(`코스 선택 변경: ${courseId}`);
+    },
+
+    clearAllCourses: () => {
+      clearMapElements(courseElements.current);
+      currentCoursesData.current = [];
+    },
   }));
 
   // 지도 초기화
   useEffect(() => {
-    if (!mapContainer.current) return;
+    if (!mapContainer.current || isMapInitialized.current) return;
+
+    console.log('지도 초기화 시작...');
 
     const mapScript = document.createElement('script');
     mapScript.async = true;
@@ -101,7 +204,7 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad }, ref) => {
       if (window.kakao && window.kakao.maps) {
         window.kakao.maps.load(async () => {
           const container = mapContainer.current;
-          if (!container) return;
+          if (!container || isMapInitialized.current) return;
 
           const { location: initialLocation, isUserLocation: isCurrentUserLocation } = await getInitialLocation();
 
@@ -112,6 +215,7 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad }, ref) => {
 
           const map = new window.kakao.maps.Map(container, options);
           mapInstance.current = map;
+          isMapInitialized.current = true; // 초기화 완료 표시
 
           // 위치에 마커 표시
           addLocationMarker(map, initialLocation, isCurrentUserLocation);
@@ -120,9 +224,7 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad }, ref) => {
           console.log('사용자 위치 여부:', isCurrentUserLocation);
 
           // 부모 컴포넌트에 map 인스턴스 전달
-          if (onMapLoad) {
-            onMapLoad(map);
-          }
+          onMapLoadCallback(map);
         });
       } else {
         console.error('Kakao maps object not found');
@@ -145,8 +247,12 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad }, ref) => {
       if (document.head.contains(mapScript)) {
         document.head.removeChild(mapScript);
       }
+
+      // 정리
+      clearMapElements(courseElements.current);
+      isMapInitialized.current = false;
     };
-  }, [onMapLoad]);
+  }, []);
 
   return <MapContainer ref={mapContainer} />;
 });
