@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import type { CourseDetailResponse } from '@/types/course';
@@ -9,6 +10,7 @@ interface CourseRouteMapProps {
 }
 
 const CourseRouteMap = ({ courseDetail }: CourseRouteMapProps) => {
+  const [t] = useTranslation();
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<kakao.maps.Map | null>(null);
   const polyline = useRef<kakao.maps.Polyline | null>(null);
@@ -86,7 +88,7 @@ const CourseRouteMap = ({ courseDetail }: CourseRouteMapProps) => {
     <MapContainer>
       {!isMapLoaded && (
         <LoadingOverlay>
-          <LoadingText>지도를 불러오는 중...</LoadingText>
+          <LoadingText>{t('courseDetail.loadingMap')}</LoadingText>
         </LoadingOverlay>
       )}
       <MapDiv ref={mapContainer} isLoaded={isMapLoaded} />
