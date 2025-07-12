@@ -6,7 +6,7 @@ import type { CourseData } from '@/types/course';
 
 import HeartIconSrc from '@/assets/icons/heart-default.svg';
 // import HeartIconFilledSrc from '@/assets/icons/heart-filled.svg';
-import TempThumbnailImgSrc from '@/assets/images/temp-thumbnail.png';
+import DefaultThumbnailImgSrc from '@/assets/images/thumbnail-default.png';
 
 interface CourseItemProps {
   course: CourseData;
@@ -43,7 +43,7 @@ const CourseItem = ({ course, index, isSelected, onBookmarkClick }: CourseItemPr
           {/* 현재는 모든 코스가 북마크되지 않은 상태로 처리 */}
           <img src={HeartIconSrc} alt="북마크" />
         </BookmarkButton>
-        <Thumbnail src={TempThumbnailImgSrc} alt="코스 썸네일" />
+        <Thumbnail src={course.thumbnailUrl || DefaultThumbnailImgSrc} alt="코스 썸네일" />
         <CourseStats>
           {course.distance}km · {course.duration}
           {t('minutes')} · {course.maxElevation}m
