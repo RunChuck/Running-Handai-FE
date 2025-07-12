@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import type { CourseDetailResponse } from '@/types/course';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 import DistanceIconSrc from '@/assets/icons/course-distance.svg';
 import TimeIconSrc from '@/assets/icons/course-time.svg';
@@ -15,6 +16,7 @@ interface CourseTabProps {
 
 const CourseTab = ({ courseDetail }: CourseTabProps) => {
   const [t] = useTranslation();
+  const isMobile = useIsMobile();
 
   const courseInfoItems = [
     {
@@ -46,18 +48,31 @@ const CourseTab = ({ courseDetail }: CourseTabProps) => {
     },
   ];
 
+  const getItemRows = () => {
+    if (isMobile) {
+      return [courseInfoItems.slice(0, 3), courseInfoItems.slice(3, 5)];
+    }
+    return [courseInfoItems];
+  };
+
+  const itemRows = getItemRows();
+
   return (
     <Container>
-      <CourseInfoWrapper>
-        {courseInfoItems.map((item, index) => (
-          <CourseInfoItemGroup key={index}>
-            <CourseInfoItem>
-              <img src={item.icon} alt={item.alt} />
-              <span>{item.label}</span>
-              {item.isSpecial && <CourseLevel>{item.value}</CourseLevel>}
-            </CourseInfoItem>
-            {index < courseInfoItems.length - 1 && <Divider />}
-          </CourseInfoItemGroup>
+      <CourseInfoWrapper isMobile={isMobile}>
+        {itemRows.map((row, rowIndex) => (
+          <CourseInfoRow key={rowIndex}>
+            {row.map((item, index) => (
+              <CourseInfoItemGroup key={`${rowIndex}-${index}`}>
+                <CourseInfoItem>
+                  <img src={item.icon} alt={item.alt} />
+                  <span>{item.label}</span>
+                  {item.isSpecial && <CourseLevel>{item.value}</CourseLevel>}
+                </CourseInfoItem>
+                {index < row.length - 1 && <Divider />}
+              </CourseInfoItemGroup>
+            ))}
+          </CourseInfoRow>
         ))}
       </CourseInfoWrapper>
 
@@ -84,14 +99,21 @@ const Container = styled.div`
   padding: var(--spacing-24) var(--spacing-16) var(--spacing-40);
 `;
 
-const CourseInfoWrapper = styled.div`
+const CourseInfoWrapper = styled.div<{ isMobile: boolean }>`
   display: flex;
+  flex-direction: ${({ isMobile }) => (isMobile ? 'column' : 'row')};
   align-items: center;
   justify-content: center;
   background-color: var(--surface-surface-highlight3, #f7f8fa);
-  gap: var(--spacing-12);
+  gap: ${({ isMobile }) => (isMobile ? 'var(--spacing-8)' : 'var(--spacing-12)')};
   padding: var(--spacing-12);
   border-radius: 4px;
+`;
+
+const CourseInfoRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-12);
 `;
 
 const CourseInfoItemGroup = styled.div`
@@ -124,7 +146,6 @@ const CourseAnalysisContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* justify-content: center; */
   padding: var(--spacing-16);
   gap: var(--spacing-8);
   border-radius: 4px;
@@ -140,7 +161,7 @@ const CourseAnalysisContainer = styled.div`
     right: 0;
     bottom: 0;
     border-radius: 4px;
-    padding: 1px; /* 테두리 두께 */
+    padding: 1px;
     background: linear-gradient(90deg, #c310ff 0%, #002bff 100%);
     mask:
       linear-gradient(#fff 0 0) content-box,
