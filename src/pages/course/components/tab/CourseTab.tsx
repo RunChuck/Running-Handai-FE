@@ -123,11 +123,34 @@ const CourseLevel = styled.span`
 const CourseAnalysisContainer = styled.div`
   display: flex;
   flex-direction: column;
-
+  align-items: center;
+  /* justify-content: center; */
   padding: var(--spacing-16);
   gap: var(--spacing-8);
   border-radius: 4px;
-  border: 1px solid #c310ff;
+  position: relative;
+  background: white;
+
+  /* 그라데이션 테두리 효과 */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 4px;
+    padding: 1px; /* 테두리 두께 */
+    background: linear-gradient(90deg, #c310ff 0%, #002bff 100%);
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask-composite: xor;
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+  }
 `;
 
 const CourseAnalysisTitle = styled.span`
@@ -136,12 +159,14 @@ const CourseAnalysisTitle = styled.span`
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-align: center;
+  position: relative;
+  z-index: 1;
 `;
 
 const CourseAnalysisContent = styled.div`
   display: flex;
   flex-direction: column;
+  width: 100%;
   gap: var(--spacing-4);
   padding-left: var(--spacing-16);
   ${theme.typography.body2};
