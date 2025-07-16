@@ -93,6 +93,18 @@ export const GlobalStyles = () => (
         box-sizing: border-box;
       }
 
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        overscroll-behavior: none;
+        overflow: hidden;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+      }
+
       html {
         height: 100%;
         font-size: 16px;
@@ -124,6 +136,8 @@ export const GlobalStyles = () => (
         position: relative;
         background-color: var(--surface-surface-default, #ffffff);
         min-height: 100vh; /* 모바일과 웹 모두 min-height 사용 */
+        height: 100%;
+        // overflow: hidden;
 
         @media (min-width: 601px) {
           box-shadow: var(--shadow-lg);
