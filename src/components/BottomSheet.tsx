@@ -16,6 +16,7 @@ interface BottomSheetProps {
     isFiltered: boolean;
   };
   floatButtons?: ReactNode;
+  onHeightChange?: (height: number) => void;
 }
 
 export interface BottomSheetRef {
@@ -25,7 +26,7 @@ export interface BottomSheetRef {
 const SNAP_HEIGHTS = [0.9, 0.6, 42 / window.innerHeight]; // 90%, 60%, 42px
 const INITIAL_SNAP = 1; // 60%
 
-const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(({ children, titleData, floatButtons }, ref) => {
+const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(({ children, titleData, floatButtons, onHeightChange }, ref) => {
   const [t] = useTranslation();
   const [currentSnap, setCurrentSnap] = useState(INITIAL_SNAP);
   const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
@@ -36,14 +37,14 @@ const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(({ children, ti
   // 터치 이벤트 처리를 위한 useEffect 추가
   useEffect(() => {
     const preventScroll = (e: TouchEvent) => {
-      if (isDragging) {
+      if (isDragging && e.cancelable) {
         e.preventDefault();
       }
     };
 
     // 터치무브 이벤트에 대한 기본 동작 방지
     document.body.addEventListener('touchmove', preventScroll, { passive: false });
-    
+
     return () => {
       document.body.removeEventListener('touchmove', preventScroll);
     };
@@ -83,6 +84,9 @@ const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(({ children, ti
     const targetHeight = viewportHeight * SNAP_HEIGHTS[snapIndex];
     setCurrentSnap(snapIndex);
 
+    // 애니메이션 시작 전에 즉시 높이 변경 알림
+    onHeightChange?.(targetHeight);
+
     controls.start({
       height: targetHeight,
       transition: {
@@ -99,7 +103,7 @@ const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(({ children, ti
     const currentRatio = currentHeight / viewportHeight;
 
     // 드래그 민감도 향상
-    const VELOCITY_THRESHOLD = 50; // 속도 임계값 
+    const VELOCITY_THRESHOLD = 50; // 속도 임계값
     const DRAG_THRESHOLD = 0.1; // 드래그 거리 임계값 (뷰포트 높이의 10%)
 
     if (Math.abs(velocity) > VELOCITY_THRESHOLD) {
@@ -161,6 +165,9 @@ const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(({ children, ti
 
     // 즉시 높이 적용
     controls.set({ height: newHeight });
+
+    // 드래그 중 실시간 높이 변경 알림
+    onHeightChange?.(newHeight);
   };
 
   // 드래그 종료
@@ -180,7 +187,9 @@ const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(({ children, ti
 
   // 초기 위치 설정
   useEffect(() => {
-    snapTo(INITIAL_SNAP);
+    if (viewportHeight > 0) {
+      snapTo(INITIAL_SNAP);
+    }
   }, [viewportHeight]);
 
   return (
@@ -206,7 +215,7 @@ const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(({ children, ti
           </DragArea>
           <ContentArea>
             <TitleWrapper>
-              <div style={{ width: '28px'}} />
+              <div style={{ width: '28px' }} />
               <Title>
                 {finalTitleData.prefix && <FilterText>{finalTitleData.prefix}&nbsp;</FilterText>}
                 <BaseText>{finalTitleData.suffix}</BaseText>

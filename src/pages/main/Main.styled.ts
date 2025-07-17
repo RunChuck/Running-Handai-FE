@@ -13,9 +13,9 @@ export const Container = styled.div`
   overflow: hidden;
 `;
 
-export const MapContainer = styled.div`
+export const MapContainer = styled.div<{ bottomSheetHeight: number }>`
   width: 100%;
-  height: 100%;
+  height: ${({ bottomSheetHeight }) => `calc(100% - ${bottomSheetHeight}px)`};
 `;
 
 export const CourseGrid = styled.div`
