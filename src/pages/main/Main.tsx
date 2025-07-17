@@ -26,6 +26,7 @@ const Main = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [bottomSheetHeight, setBottomSheetHeight] = useState(0);
   const [selectedFilter, setSelectedFilter] = useState<{
     type: 'nearby' | 'area' | 'theme';
     value?: AreaCode | ThemeCode;
@@ -93,6 +94,10 @@ const Main = () => {
     if (mapRef.current) {
       mapRef.current.updateSelectedCourse(courseId);
     }
+  };
+
+  const handleBottomSheetHeightChange = (height: number) => {
+    setBottomSheetHeight(height);
   };
 
   const getBottomSheetTitle = () => {
@@ -191,14 +196,16 @@ const Main = () => {
 
   return (
     <S.Container>
-      <MapView ref={mapRef} onCourseMarkerClick={handleCourseMarkerClick} />
+      <S.MapContainer bottomSheetHeight={bottomSheetHeight}>
+        <MapView ref={mapRef} onCourseMarkerClick={handleCourseMarkerClick} containerHeight={window.innerHeight - bottomSheetHeight} />
+      </S.MapContainer>
 
       <FloatButton onClick={handleMenuClick} position={{ top: 16, left: 16 }} size="large" variant="rounded">
         <img src={MenuIconSrc} alt={t('menu')} width={24} height={24} />
       </FloatButton>
 
       {!isModalOpen && (
-        <BottomSheet titleData={getBottomSheetTitle()} floatButtons={floatButtons}>
+        <BottomSheet titleData={getBottomSheetTitle()} floatButtons={floatButtons} onHeightChange={handleBottomSheetHeightChange}>
           {renderCourseList()}
         </BottomSheet>
       )}

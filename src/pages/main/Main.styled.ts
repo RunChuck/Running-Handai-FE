@@ -2,13 +2,20 @@ import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 export const Container = styled.div`
   width: 100%;
+  max-width: 600px;
   height: 100vh;
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0 auto;
+  overflow: hidden;
 `;
 
-export const MapContainer = styled.div`
+export const MapContainer = styled.div<{ bottomSheetHeight: number }>`
   width: 100%;
-  height: 100%;
+  height: ${({ bottomSheetHeight }) => `calc(100% - ${bottomSheetHeight}px)`};
 `;
 
 export const CourseGrid = styled.div`

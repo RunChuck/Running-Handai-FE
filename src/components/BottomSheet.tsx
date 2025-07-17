@@ -1,10 +1,11 @@
-import { forwardRef, useImperativeHandle, useRef } from 'react';
+import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ReactNode } from 'react';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
+import { motion, useAnimation } from 'framer-motion';
+import type { PanInfo } from 'framer-motion';
 
-import { Sheet, type SheetRef } from 'react-modal-sheet';
 import PenIconSrc from '@/assets/icons/pen-24px.svg';
 
 interface BottomSheetProps {
@@ -15,19 +16,48 @@ interface BottomSheetProps {
     isFiltered: boolean;
   };
   floatButtons?: ReactNode;
+  onHeightChange?: (height: number) => void;
 }
 
 export interface BottomSheetRef {
   snapTo: (index: number) => void;
 }
 
-const snapPoints = [window.innerHeight * 0.9, window.innerHeight * 0.6, 32]; // max, default, min
-const initialSnap = 1; // 60%
+const SNAP_HEIGHTS = [0.9, 0.6, 42 / window.innerHeight]; // 90%, 60%, 42px
+const INITIAL_SNAP = 1; // 60%
 
-const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(({ children, titleData, floatButtons }, ref) => {
+const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(({ children, titleData, floatButtons, onHeightChange }, ref) => {
   const [t] = useTranslation();
-  const isOpen = true;
-  const sheetRef = useRef<SheetRef>(null);
+  const [currentSnap, setCurrentSnap] = useState(INITIAL_SNAP);
+  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+  const controls = useAnimation();
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  // 터치 이벤트 처리를 위한 useEffect 추가
+  useEffect(() => {
+    const preventScroll = (e: TouchEvent) => {
+      if (isDragging && e.cancelable) {
+        e.preventDefault();
+      }
+    };
+
+    // 터치무브 이벤트에 대한 기본 동작 방지
+    document.body.addEventListener('touchmove', preventScroll, { passive: false });
+
+    return () => {
+      document.body.removeEventListener('touchmove', preventScroll);
+    };
+  }, [isDragging]);
+
+  // 드래그 시작 시 body에 overflow hidden 적용
+  useEffect(() => {
+    if (isDragging) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  }, [isDragging]);
 
   const defaultTitleData = {
     prefix: '',
@@ -37,46 +67,169 @@ const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(({ children, ti
 
   const finalTitleData = titleData || defaultTitleData;
 
+  // 뷰포트 높이 변경 감지
+  useEffect(() => {
+    const handleResize = () => {
+      setViewportHeight(window.innerHeight);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // 스냅 포인트로 이동
+  const snapTo = (snapIndex: number) => {
+    if (snapIndex < 0 || snapIndex >= SNAP_HEIGHTS.length) return;
+
+    const targetHeight = viewportHeight * SNAP_HEIGHTS[snapIndex];
+    setCurrentSnap(snapIndex);
+
+    // 애니메이션 시작 전에 즉시 높이 변경 알림
+    onHeightChange?.(targetHeight);
+
+    controls.start({
+      height: targetHeight,
+      transition: {
+        type: 'spring',
+        damping: 25,
+        stiffness: 300,
+        mass: 0.5,
+      },
+    });
+  };
+
+  // 가장 가까운 스냅 포인트 찾기
+  const findClosestSnap = (currentHeight: number, velocity: number = 0) => {
+    const currentRatio = currentHeight / viewportHeight;
+
+    // 드래그 민감도 향상
+    const VELOCITY_THRESHOLD = 50; // 속도 임계값
+    const DRAG_THRESHOLD = 0.1; // 드래그 거리 임계값 (뷰포트 높이의 10%)
+
+    if (Math.abs(velocity) > VELOCITY_THRESHOLD) {
+      if (velocity > 0 && currentSnap < SNAP_HEIGHTS.length - 1) {
+        return currentSnap + 1;
+      } else if (velocity < 0 && currentSnap > 0) {
+        return currentSnap - 1;
+      }
+    }
+
+    // 현재 스냅 포인트와의 거리 계산
+    const currentSnapHeight = SNAP_HEIGHTS[currentSnap];
+    const distanceFromCurrentSnap = Math.abs(currentRatio - currentSnapHeight);
+
+    if (distanceFromCurrentSnap > DRAG_THRESHOLD) {
+      if (currentRatio > currentSnapHeight && currentSnap < SNAP_HEIGHTS.length - 1) {
+        return currentSnap + 1;
+      }
+      if (currentRatio < currentSnapHeight && currentSnap > 0) {
+        return currentSnap - 1;
+      }
+    }
+
+    let closestSnap = 0;
+    let minDistance = Math.abs(SNAP_HEIGHTS[0] - currentRatio);
+
+    for (let i = 1; i < SNAP_HEIGHTS.length; i++) {
+      const distance = Math.abs(SNAP_HEIGHTS[i] - currentRatio);
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestSnap = i;
+      }
+    }
+
+    return closestSnap;
+  };
+
+  // 드래그 시작
+  const handleDragStart = () => {
+    setIsDragging(true);
+  };
+
+  // 드래그 중
+  const handleDrag = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    if (!sheetRef.current) return;
+
+    const sheetElement = sheetRef.current;
+    const currentHeight = sheetElement.offsetHeight;
+    const deltaY = info.delta.y * 1.5; // 드래그 반응성 향상
+
+    // 새로운 높이 계산 (드래그 방향과 높이 변화 반대)
+    const newHeight = Math.max(
+      42, // 최소 높이 42px로 고정
+      Math.min(
+        viewportHeight * 0.9, // 최대 높이
+        currentHeight - deltaY // 위로 드래그하면 높이 증가, 아래로 드래그하면 높이 감소
+      )
+    );
+
+    // 즉시 높이 적용
+    controls.set({ height: newHeight });
+
+    // 드래그 중 실시간 높이 변경 알림
+    onHeightChange?.(newHeight);
+  };
+
+  // 드래그 종료
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    setIsDragging(false);
+
+    if (!sheetRef.current) return;
+
+    const currentHeight = sheetRef.current.offsetHeight;
+    const newSnap = findClosestSnap(currentHeight, info.velocity.y);
+    snapTo(newSnap);
+  };
+
   useImperativeHandle(ref, () => ({
-    snapTo: (index: number) => {
-      sheetRef.current?.snapTo(index);
-    },
+    snapTo,
   }));
 
+  // 초기 위치 설정
+  useEffect(() => {
+    if (viewportHeight > 0) {
+      snapTo(INITIAL_SNAP);
+    }
+  }, [viewportHeight]);
+
   return (
-    <Sheet
-      ref={sheetRef}
-      isOpen={isOpen}
-      onClose={() => {}}
-      snapPoints={snapPoints}
-      initialSnap={initialSnap}
-      disableDrag={false}
-      mountPoint={document.body}
-    >
-      <Container>
+    <>
+      <SheetContainer
+        ref={sheetRef}
+        drag="y"
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={0}
+        dragMomentum={false}
+        onDragStart={handleDragStart}
+        onDrag={handleDrag}
+        onDragEnd={handleDragEnd}
+        animate={controls}
+        initial={{ height: viewportHeight * SNAP_HEIGHTS[INITIAL_SNAP] }}
+        isDragging={isDragging}
+      >
         {floatButtons && <FloatButtonWrapper>{floatButtons}</FloatButtonWrapper>}
 
-        <Sheet.Header>
-          <Header>
+        <SheetContent>
+          <DragArea>
             <DragHandle />
-          </Header>
-        </Sheet.Header>
+          </DragArea>
+          <ContentArea>
+            <TitleWrapper>
+              <div style={{ width: '28px' }} />
+              <Title>
+                {finalTitleData.prefix && <FilterText>{finalTitleData.prefix}&nbsp;</FilterText>}
+                <BaseText>{finalTitleData.suffix}</BaseText>
+              </Title>
+              <PenButton>
+                <img src={PenIconSrc} alt="코스 등록" width={20} height={20} />
+              </PenButton>
+            </TitleWrapper>
 
-        <Sheet.Content>
-          <TitleWrapper>
-            <div />
-            <Title>
-              {finalTitleData.prefix && <FilterText>{finalTitleData.prefix}&nbsp;</FilterText>}
-              <BaseText>{finalTitleData.suffix}</BaseText>
-            </Title>
-            <PenButton>
-              <img src={PenIconSrc} alt="코스 등록" width={20} height={20} />
-            </PenButton>
-          </TitleWrapper>
-          <Content>{children}</Content>
-        </Sheet.Content>
-      </Container>
-    </Sheet>
+            <ScrollableContent>{children}</ScrollableContent>
+          </ContentArea>
+        </SheetContent>
+      </SheetContainer>
+    </>
   );
 });
 
@@ -84,42 +237,65 @@ BottomSheet.displayName = 'BottomSheet';
 
 export default BottomSheet;
 
-const Container = styled(Sheet.Container)`
-  max-width: 600px;
-  margin: 0 auto;
-  left: 0;
-  right: 0;
-  position: relative;
-
-  &.react-modal-sheet-container {
-    border-top-left-radius: 16px !important;
-    border-top-right-radius: 16px !important;
-    box-shadow: 0px -4px 16px 0px rgba(0, 0, 0, 0.08) !important;
-  }
-`;
-
 const FloatButtonWrapper = styled.div`
   position: absolute;
   top: -16px;
   left: 0;
   right: 0;
   z-index: 10;
-  pointer-events: none; /* 컨테이너는 클릭 X */
+  pointer-events: none;
 
   & > * {
     pointer-events: auto;
   }
 `;
 
-const Header = styled.div`
-  padding: var(--spacing-12) var(--spacing-24);
+const SheetContainer = styled(motion.div)<{ isDragging: boolean }>`
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+  max-width: 600px;
+  margin: 0 auto;
+
+  /* 하드웨어 가속 */
+  transform: translateZ(0);
+  will-change: transform;
+
+  cursor: ${props => (props.isDragging ? 'grabbing' : 'auto')};
+  
+  /* 터치 동작 제어 */
+  touch-action: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+`;
+
+const SheetContent = styled.div`
   background: var(--surface-surface-default);
   border-radius: 16px 16px 0 0;
-  min-height: auto;
+  height: 100%;
   display: flex;
   flex-direction: column;
+  box-shadow: 0px -4px 16px 0px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+`;
+
+const DragArea = styled.div`
+  padding: var(--spacing-12) var(--spacing-24) var(--spacing-24);
+  display: flex;
   justify-content: center;
   align-items: center;
+  cursor: grab;
+  touch-action: pan-y;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  flex-shrink: 0;
+
+  &:active {
+    cursor: grabbing;
+  }
 `;
 
 const DragHandle = styled.div`
@@ -128,16 +304,26 @@ const DragHandle = styled.div`
   background: var(--GrayScale-gray300);
   border-radius: 50px;
   transition: background-color 0.2s ease;
-  &:hover {
+
+  ${DragArea}:hover & {
     background: var(--GrayScale-gray400);
   }
+`;
+
+const ContentArea = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
 `;
 
 const TitleWrapper = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 var(--spacing-16);
+  padding: 0 var(--spacing-16) var(--spacing-16);
+  flex-shrink: 0;
 `;
 
 const Title = styled.h2`
@@ -154,28 +340,41 @@ const FilterText = styled.span`
 const BaseText = styled.span`
   color: var(--text-text-title, #1c1c1c);
 `;
+
 const PenButton = styled.button`
   background: none;
   border: none;
   cursor: pointer;
+  padding: var(--spacing-4);
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: var(--surface-surface-highlight);
+  }
 `;
 
-const Content = styled.div`
-  padding: var(--spacing-24) var(--spacing-16) var(--spacing-16) var(--spacing-16);
-  background: var(--surface-surface-default);
-  min-height: 300px;
+const ScrollableContent = styled.div`
+  flex: 1;
   overflow-y: auto;
+  padding: 0 var(--spacing-16) var(--spacing-40);
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  min-height: 0;
+
   &::-webkit-scrollbar {
     width: 4px;
   }
+
   &::-webkit-scrollbar-track {
     background: transparent;
   }
+
   &::-webkit-scrollbar-thumb {
     background: var(--GrayScale-gray300);
     border-radius: 2px;
   }
+
   &::-webkit-scrollbar-thumb:hover {
     background: var(--GrayScale-gray400);
   }

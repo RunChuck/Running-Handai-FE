@@ -22,14 +22,16 @@ export interface MapViewRef {
 interface MapViewProps {
   onMapLoad?: (map: kakao.maps.Map) => void;
   onCourseMarkerClick?: (courseId: number) => void;
+  containerHeight?: number;
 }
 
-const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarkerClick }, ref) => {
+const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarkerClick, containerHeight }, ref) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<kakao.maps.Map | null>(null);
   const courseElements = useRef<CourseMapElements>({ polylines: [], markers: [] });
   const currentCoursesData = useRef<MultiCourseMapData[]>([]);
-  const isMapInitialized = useRef(false); // 지도 초기화 상태 추가
+  const isMapInitialized = useRef(false);
+  const resizeObserver = useRef<ResizeObserver | null>(null);
 
   // 콜백 함수들을 useCallback으로 메모이제이션
   const onCourseMarkerClickCallback = useCallback(
@@ -185,7 +187,32 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
       clearMapElements(courseElements.current);
       currentCoursesData.current = [];
     },
+
+    // 지도 크기 재조정 함수
+    recenterMap: () => {
+      if (mapInstance.current) {
+        const center = mapInstance.current.getCenter();
+        const level = mapInstance.current.getLevel();
+
+        mapInstance.current.relayout();
+        mapInstance.current.setCenter(center);
+        mapInstance.current.setLevel(level);
+      }
+    },
   }));
+
+  // containerHeight 변경 시 지도 크기 재조정
+  useEffect(() => {
+    if (mapInstance.current && containerHeight !== undefined) {
+      const center = mapInstance.current.getCenter();
+      const level = mapInstance.current.getLevel();
+
+      // 지도 재레이아웃 및 중심점 유지
+      mapInstance.current.relayout();
+      mapInstance.current.setCenter(center);
+      mapInstance.current.setLevel(level);
+    }
+  }, [containerHeight]);
 
   // 지도 초기화
   useEffect(() => {
@@ -251,17 +278,22 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
       // 정리
       clearMapElements(courseElements.current);
       isMapInitialized.current = false;
+
+      // ResizeObserver 정리
+      if (resizeObserver.current) {
+        resizeObserver.current.disconnect();
+      }
     };
   }, []);
 
-  return <MapContainer ref={mapContainer} />;
+  return <MapContainer ref={mapContainer} containerHeight={containerHeight} />;
 });
 
 MapView.displayName = 'MapView';
 
 export default MapView;
 
-const MapContainer = styled.div`
+const MapContainer = styled.div<{ containerHeight?: number }>`
   width: 100%;
-  height: 100%;
+  height: ${({ containerHeight }) => (containerHeight ? `${containerHeight + 12}px` : '100%')};
 `;

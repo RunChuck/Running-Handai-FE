@@ -20,7 +20,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://43.202.125.162',
+        target: process.env.VITE_API_ROOT,
         changeOrigin: true,
         secure: false,
       },
