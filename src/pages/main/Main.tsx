@@ -177,7 +177,13 @@ const Main = () => {
         </BottomSheet>
       )}
 
-      <CourseModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onAreaSelect={handleAreaSelect} onThemeSelect={handleThemeSelect} />
+      <CourseModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onAreaSelect={handleAreaSelect} 
+        onThemeSelect={handleThemeSelect}
+        selectedFilter={selectedFilter}
+      />
 
       <CommonModal
         isOpen={isLoginModalOpen}

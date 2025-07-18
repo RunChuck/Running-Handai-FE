@@ -23,6 +23,10 @@ interface CourseModalProps {
   onClose: () => void;
   onAreaSelect?: (area: AreaCode) => void;
   onThemeSelect?: (theme: ThemeCode) => void;
+  selectedFilter?: {
+    type: 'nearby' | 'area' | 'theme';
+    value?: AreaCode | ThemeCode;
+  };
 }
 
 const LOCATION_OPTIONS = [
@@ -42,7 +46,7 @@ const THEME_OPTIONS = [
   { key: 'DOWNTOWN', image: themeCity, zoom: 8 },
 ] as const;
 
-const CourseModal = ({ isOpen, onClose, onAreaSelect, onThemeSelect }: CourseModalProps) => {
+const CourseModal = ({ isOpen, onClose, onAreaSelect, onThemeSelect, selectedFilter }: CourseModalProps) => {
   const { t } = useTranslation();
   const { mapRef } = useMap();
 
@@ -101,7 +105,12 @@ const CourseModal = ({ isOpen, onClose, onAreaSelect, onThemeSelect }: CourseMod
             <Subtitle>{t('courseModal.location')}</Subtitle>
             <OptionGrid>
               {LOCATION_OPTIONS.map(option => (
-                <OptionButton key={option.key} backgroundImage={option.image} onClick={() => handleLocationSelect(option.key)}>
+                <OptionButton
+                  key={option.key}
+                  backgroundImage={option.image}
+                  onClick={() => handleLocationSelect(option.key)}
+                  isSelected={selectedFilter?.type === 'area' && selectedFilter?.value === option.key}
+                >
                   {t(`location.${option.key.toLowerCase()}`)}
                 </OptionButton>
               ))}
@@ -112,7 +121,12 @@ const CourseModal = ({ isOpen, onClose, onAreaSelect, onThemeSelect }: CourseMod
             <Subtitle>{t('courseModal.theme')}</Subtitle>
             <OptionGrid>
               {THEME_OPTIONS.map(option => (
-                <OptionButton key={option.key} backgroundImage={option.image} onClick={() => handleThemeSelect(option.key)}>
+                <OptionButton
+                  key={option.key}
+                  backgroundImage={option.image}
+                  onClick={() => handleThemeSelect(option.key)}
+                  isSelected={selectedFilter?.type === 'theme' && selectedFilter?.value === option.key}
+                >
                   {t(`theme.${option.key.toLowerCase()}`)}
                 </OptionButton>
               ))}
@@ -218,14 +232,14 @@ const OptionGrid = styled.div`
   gap: var(--spacing-8);
 `;
 
-const OptionButton = styled.button<{ backgroundImage: string }>`
+const OptionButton = styled.button<{ backgroundImage: string; isSelected?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
   width: 64px;
   height: 64px;
   white-space: pre-line;
-  border: 1px solid var(--line-line-002, #e0e0e0);
+  border: ${props => (props.isSelected ? '2px solid #4561FF' : 'none')};
   border-radius: 50%;
   background:
     linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.4) 100%),
