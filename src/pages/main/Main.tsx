@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import * as S from './Main.styled';
+import Lottie from 'lottie-react';
 
 import { useDebounce } from '@/hooks/useDebounce';
 import { useCourses } from '@/hooks/useCourses';
@@ -19,6 +20,7 @@ import CommonModal from '@/components/CommonModal';
 import LocationIconSrc from '@/assets/icons/location-icon.svg';
 import ArrowUprightIconSrc from '@/assets/icons/arrow-upright.svg';
 import MenuIconSrc from '@/assets/icons/menu-24px.svg';
+import LoadingMotion from '@/assets/animations/run-loading.json';
 
 const Main = () => {
   const [t] = useTranslation();
@@ -156,9 +158,10 @@ const Main = () => {
   const renderCourseList = () => {
     if (loading) {
       return (
-        <S.StatusContainer>
+        <S.LoadingContainer>
+          <Lottie animationData={LoadingMotion} style={{ width: 100, height: 100 }} loop={true} />
           <S.StatusText>{t('main.loading')}</S.StatusText>
-        </S.StatusContainer>
+        </S.LoadingContainer>
       );
     }
 

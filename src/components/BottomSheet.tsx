@@ -264,7 +264,7 @@ const SheetContainer = styled(motion.div)<{ isDragging: boolean }>`
   will-change: transform;
 
   cursor: ${props => (props.isDragging ? 'grabbing' : 'auto')};
-  
+
   /* 터치 동작 제어 */
   touch-action: none;
   -webkit-overflow-scrolling: touch;
@@ -322,7 +322,7 @@ const TitleWrapper = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 var(--spacing-16) var(--spacing-16);
+  padding: 0 var(--spacing-16);
   flex-shrink: 0;
 `;
 

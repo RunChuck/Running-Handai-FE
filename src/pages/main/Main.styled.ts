@@ -28,6 +28,14 @@ export const CourseGrid = styled.div`
   }
 `;
 
+export const LoadingContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-12);
+`;
+
 export const StatusContainer = styled.div`
   display: flex;
   align-items: center;
@@ -37,7 +45,7 @@ export const StatusContainer = styled.div`
 `;
 
 export const StatusText = styled.div`
-  ${theme.typography.body1}
+  ${theme.typography.body2}
   color: var(--text-text-secondary, #555555);
   text-align: center;
 `;

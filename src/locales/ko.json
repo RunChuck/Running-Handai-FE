@@ -35,7 +35,7 @@
   },
   "main": {
     "exploreCourses": "추천 코스 탐색",
-    "loading": "코스를 불러오는 중...🏃‍♂️",
+    "loading": "코스 정보를 불러오고 있어요.",
     "noCourses": "주변에 추천할 수 있는 코스가 없습니다 🥲",
     "loginMessage": "로그인하고\n마음에 드는 코스를 저장해보세요!",
     "simpleLogin": "간편 로그인 하기",
