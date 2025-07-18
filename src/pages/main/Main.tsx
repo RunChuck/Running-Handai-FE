@@ -218,8 +218,8 @@ const Main = () => {
           >
             {THEME_CARDS.map(card => (
               <S.ThemeCourseCard key={card.key} onClick={() => handleThemeCardClick(card.key)}>
-                <S.ThemeCourseCardTitle>{card.title}</S.ThemeCourseCardTitle>
-                <S.ThemeCourseCardText>{card.description}</S.ThemeCourseCardText>
+                <S.ThemeCourseCardTitle>{t(card.titleKey)}</S.ThemeCourseCardTitle>
+                <S.ThemeCourseCardText>{t(card.descriptionKey)}</S.ThemeCourseCardText>
               </S.ThemeCourseCard>
             ))}
           </S.ThemeCourseCardContainer>

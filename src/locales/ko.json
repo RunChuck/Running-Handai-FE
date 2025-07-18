@@ -31,7 +31,15 @@
     "sea": "바다",
     "riverside": "강변",
     "mountain": "산",
-    "downtown": "도심"
+    "downtown": "도심",
+    "seaCourse": "오션뷰 코스",
+    "seaDescription": "바다와 함께하는 러닝",
+    "mountainCourse": "트레일 코스",
+    "mountainDescription": "숲속을 달리는 러닝",
+    "downtownCourse": "도심 코스",
+    "downtownDescription": "도심 속에서 가볍게 러닝",
+    "riversideCourse": "강변 코스",
+    "riversideDescription": "강변을 따라 달리는 러닝"
   },
   "main": {
     "exploreCourses": "추천 코스 탐색",
