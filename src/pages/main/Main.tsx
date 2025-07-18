@@ -1,14 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import * as S from './Main.styled';
-import Lottie from 'lottie-react';
 
 import { useDebounce } from '@/hooks/useDebounce';
 import { useCourses } from '@/hooks/useCourses';
 import { getUserLocation } from '@/utils/geolocation';
 import { BUSAN_CITY_HALL } from '@/constants/locations';
-import { THEME_CARDS } from '@/constants/themes';
 import { useMap } from '@/contexts/MapContext';
 import type { AreaCode, ThemeCode } from '@/types/course';
 
@@ -16,13 +14,11 @@ import MapView from '@/components/MapView';
 import FloatButton from '@/components/FloatButton';
 import CourseModal from './components/CourseModal';
 import BottomSheet from '@/components/BottomSheet';
-import CourseItem from './components/CourseItem';
+import CourseList from './components/CourseList';
 import CommonModal from '@/components/CommonModal';
 import LocationIconSrc from '@/assets/icons/location-icon.svg';
 import ArrowUprightIconSrc from '@/assets/icons/arrow-upright.svg';
 import MenuIconSrc from '@/assets/icons/menu-24px.svg';
-import LoadingMotion from '@/assets/animations/run-loading.json';
-import NoCourseImgSrc from '@/assets/images/sad-emoji.png';
 
 const Main = () => {
   const [t] = useTranslation();
@@ -36,7 +32,6 @@ const Main = () => {
     value?: AreaCode | ThemeCode;
   }>({ type: 'nearby' });
   const [selectedCourseId, setSelectedCourseId] = useState<number | undefined>();
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const { courses, loading, error, fetchNearbyCourses, fetchCoursesByArea, fetchCoursesByTheme } = useCourses();
 
@@ -105,32 +100,6 @@ const Main = () => {
     setBottomSheetHeight(height);
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    const startX = e.pageX - container.offsetLeft;
-    const scrollLeft = container.scrollLeft;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const x = e.pageX - container.offsetLeft;
-      const walk = (x - startX) * 2;
-      container.scrollLeft = scrollLeft - walk;
-    };
-
-    const handleMouseUp = () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  };
-
-  const handleThemeCardClick = (themeKey: ThemeCode) => {
-    handleThemeSelect(themeKey);
-  };
-
   const getBottomSheetTitle = () => {
     if (selectedFilter.type === 'area' && selectedFilter.value) {
       return {
@@ -184,64 +153,6 @@ const Main = () => {
     </>
   );
 
-  const renderCourseList = () => {
-    if (loading) {
-      return (
-        <S.LoadingContainer>
-          <Lottie animationData={LoadingMotion} style={{ width: 100, height: 100 }} loop={true} />
-          <S.StatusText>{t('main.loading')}</S.StatusText>
-        </S.LoadingContainer>
-      );
-    }
-
-    if (error) {
-      return (
-        <S.ErrorContainer>
-          <img src={NoCourseImgSrc} alt={t('main.noCourses')} width={57} height={60} />
-          <S.StatusText>{error}</S.StatusText>
-          <S.RetryButton onClick={fetchNearbyCourses}>{t('retry')}</S.RetryButton>
-        </S.ErrorContainer>
-      );
-    }
-
-    if (courses.length === 0) {
-      return (
-        <S.StatusContainer>
-          <img src={NoCourseImgSrc} alt={t('main.noCourses')} width={57} height={60} />
-          <S.StatusText>{t('main.noCourses')}</S.StatusText>
-          <S.ThemeCourseCardContainer
-            ref={scrollContainerRef}
-            onWheel={e => {
-              e.currentTarget.scrollLeft += e.deltaY;
-            }}
-            onMouseDown={handleMouseDown}
-          >
-            {THEME_CARDS.map(card => (
-              <S.ThemeCourseCard key={card.key} onClick={() => handleThemeCardClick(card.key)}>
-                <S.ThemeCourseCardTitle>{t(card.titleKey)}</S.ThemeCourseCardTitle>
-                <S.ThemeCourseCardText>{t(card.descriptionKey)}</S.ThemeCourseCardText>
-              </S.ThemeCourseCard>
-            ))}
-          </S.ThemeCourseCardContainer>
-        </S.StatusContainer>
-      );
-    }
-
-    return (
-      <S.CourseGrid>
-        {courses.map((course, index) => (
-          <CourseItem
-            key={course.courseId}
-            course={course}
-            index={index}
-            isSelected={course.courseId === selectedCourseId}
-            onBookmarkClick={handleBookmarkClick}
-          />
-        ))}
-      </S.CourseGrid>
-    );
-  };
-
   return (
     <S.Container>
       <S.MapContainer bottomSheetHeight={bottomSheetHeight}>
@@ -254,7 +165,15 @@ const Main = () => {
 
       {!isModalOpen && (
         <BottomSheet titleData={getBottomSheetTitle()} floatButtons={floatButtons} onHeightChange={handleBottomSheetHeightChange}>
-          {renderCourseList()}
+          <CourseList
+            courses={courses}
+            loading={loading}
+            error={error}
+            selectedCourseId={selectedCourseId}
+            onBookmarkClick={handleBookmarkClick}
+            onThemeSelect={handleThemeSelect}
+            fetchNearbyCourses={fetchNearbyCourses}
+          />
         </BottomSheet>
       )}
 
