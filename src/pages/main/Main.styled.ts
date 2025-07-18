@@ -38,16 +38,21 @@ export const LoadingContainer = styled.div`
 
 export const StatusContainer = styled.div`
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
-  padding: var(--spacing-40);
-  height: 100%;
+  padding: var(--spacing-24) 0;
+  gap: var(--spacing-12);
+
+  img {
+    margin: 0 auto;
+  }
 `;
 
 export const StatusText = styled.div`
   ${theme.typography.body2}
   color: var(--text-text-secondary, #555555);
   text-align: center;
+  white-space: pre-line;
 `;
 
 export const ErrorContainer = styled.div`
@@ -55,8 +60,8 @@ export const ErrorContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-16);
-  padding: var(--spacing-40);
+  gap: var(--spacing-12);
+  padding: var(--spacing-24) 0;
 `;
 
 export const RetryButton = styled.button`
@@ -66,6 +71,7 @@ export const RetryButton = styled.button`
   border: none;
   border-radius: 4px;
   padding: var(--spacing-8) var(--spacing-16);
+  margin-top: var(--spacing-12);
   cursor: pointer;
   transition: all 0.2s ease;
 
@@ -77,4 +83,49 @@ export const RetryButton = styled.button`
   &:active {
     transform: translateY(0);
   }
+`;
+
+export const ThemeCourseCardContainer = styled.div`
+  display: flex;
+  gap: var(--spacing-8);
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  margin: 0 calc(-1 * var(--spacing-16));
+  padding: 0 var(--spacing-16);
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+`;
+
+export const ThemeCourseCard = styled.div`
+  min-width: 164px;
+  flex-shrink: 0;
+  height: 66px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  background: var(--surface-surface-highlight3, #f7f8fa);
+  padding: var(--spacing-12) var(--spacing-24);
+  margin-top: var(--spacing-12);
+  cursor: pointer;
+`;
+
+export const ThemeCourseCardTitle = styled.span`
+  ${theme.typography.caption1}
+  color: var(--text-text-title, #1c1c1c);
+`;
+
+export const ThemeCourseCardText = styled.span`
+  ${theme.typography.body2}
+  color: var(--text-text-secondary, #555555);
 `;

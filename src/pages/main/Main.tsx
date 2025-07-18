@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import * as S from './Main.styled';
@@ -21,6 +21,7 @@ import LocationIconSrc from '@/assets/icons/location-icon.svg';
 import ArrowUprightIconSrc from '@/assets/icons/arrow-upright.svg';
 import MenuIconSrc from '@/assets/icons/menu-24px.svg';
 import LoadingMotion from '@/assets/animations/run-loading.json';
+import NoCourseImgSrc from '@/assets/images/sad-emoji.png';
 
 const Main = () => {
   const [t] = useTranslation();
@@ -34,6 +35,7 @@ const Main = () => {
     value?: AreaCode | ThemeCode;
   }>({ type: 'nearby' });
   const [selectedCourseId, setSelectedCourseId] = useState<number | undefined>();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const { courses, loading, error, fetchNearbyCourses, fetchCoursesByArea, fetchCoursesByTheme } = useCourses();
 
@@ -102,6 +104,28 @@ const Main = () => {
     setBottomSheetHeight(height);
   };
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const startX = e.pageX - container.offsetLeft;
+    const scrollLeft = container.scrollLeft;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const x = e.pageX - container.offsetLeft;
+      const walk = (x - startX) * 2;
+      container.scrollLeft = scrollLeft - walk;
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+
   const getBottomSheetTitle = () => {
     if (selectedFilter.type === 'area' && selectedFilter.value) {
       return {
@@ -168,6 +192,7 @@ const Main = () => {
     if (error) {
       return (
         <S.ErrorContainer>
+          <img src={NoCourseImgSrc} alt={t('main.noCourses')} width={57} height={60} />
           <S.StatusText>{error}</S.StatusText>
           <S.RetryButton onClick={fetchNearbyCourses}>{t('retry')}</S.RetryButton>
         </S.ErrorContainer>
@@ -177,7 +202,32 @@ const Main = () => {
     if (courses.length === 0) {
       return (
         <S.StatusContainer>
+          <img src={NoCourseImgSrc} alt={t('main.noCourses')} width={57} height={60} />
           <S.StatusText>{t('main.noCourses')}</S.StatusText>
+          <S.ThemeCourseCardContainer
+            ref={scrollContainerRef}
+            onWheel={e => {
+              e.currentTarget.scrollLeft += e.deltaY;
+            }}
+            onMouseDown={handleMouseDown}
+          >
+            <S.ThemeCourseCard>
+              <S.ThemeCourseCardTitle>오션뷰 코스</S.ThemeCourseCardTitle>
+              <S.ThemeCourseCardText>바다와 함께하는 러닝</S.ThemeCourseCardText>
+            </S.ThemeCourseCard>
+            <S.ThemeCourseCard>
+              <S.ThemeCourseCardTitle>트레일 코스</S.ThemeCourseCardTitle>
+              <S.ThemeCourseCardText>숲속을 달리는 러닝</S.ThemeCourseCardText>
+            </S.ThemeCourseCard>
+            <S.ThemeCourseCard>
+              <S.ThemeCourseCardTitle>도심 코스</S.ThemeCourseCardTitle>
+              <S.ThemeCourseCardText>도심 속에서 가볍게 러닝</S.ThemeCourseCardText>
+            </S.ThemeCourseCard>
+            <S.ThemeCourseCard>
+              <S.ThemeCourseCardTitle>강변 코스</S.ThemeCourseCardTitle>
+              <S.ThemeCourseCardText>강변을 따라 달리는 러닝</S.ThemeCourseCardText>
+            </S.ThemeCourseCard>
+          </S.ThemeCourseCardContainer>
         </S.StatusContainer>
       );
     }
