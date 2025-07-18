@@ -8,6 +8,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { useCourses } from '@/hooks/useCourses';
 import { getUserLocation } from '@/utils/geolocation';
 import { BUSAN_CITY_HALL } from '@/constants/locations';
+import { THEME_CARDS } from '@/constants/themes';
 import { useMap } from '@/contexts/MapContext';
 import type { AreaCode, ThemeCode } from '@/types/course';
 
@@ -126,6 +127,10 @@ const Main = () => {
     document.addEventListener('mouseup', handleMouseUp);
   };
 
+  const handleThemeCardClick = (themeKey: ThemeCode) => {
+    handleThemeSelect(themeKey);
+  };
+
   const getBottomSheetTitle = () => {
     if (selectedFilter.type === 'area' && selectedFilter.value) {
       return {
@@ -211,22 +216,12 @@ const Main = () => {
             }}
             onMouseDown={handleMouseDown}
           >
-            <S.ThemeCourseCard>
-              <S.ThemeCourseCardTitle>오션뷰 코스</S.ThemeCourseCardTitle>
-              <S.ThemeCourseCardText>바다와 함께하는 러닝</S.ThemeCourseCardText>
-            </S.ThemeCourseCard>
-            <S.ThemeCourseCard>
-              <S.ThemeCourseCardTitle>트레일 코스</S.ThemeCourseCardTitle>
-              <S.ThemeCourseCardText>숲속을 달리는 러닝</S.ThemeCourseCardText>
-            </S.ThemeCourseCard>
-            <S.ThemeCourseCard>
-              <S.ThemeCourseCardTitle>도심 코스</S.ThemeCourseCardTitle>
-              <S.ThemeCourseCardText>도심 속에서 가볍게 러닝</S.ThemeCourseCardText>
-            </S.ThemeCourseCard>
-            <S.ThemeCourseCard>
-              <S.ThemeCourseCardTitle>강변 코스</S.ThemeCourseCardTitle>
-              <S.ThemeCourseCardText>강변을 따라 달리는 러닝</S.ThemeCourseCardText>
-            </S.ThemeCourseCard>
+            {THEME_CARDS.map(card => (
+              <S.ThemeCourseCard key={card.key} onClick={() => handleThemeCardClick(card.key)}>
+                <S.ThemeCourseCardTitle>{card.title}</S.ThemeCourseCardTitle>
+                <S.ThemeCourseCardText>{card.description}</S.ThemeCourseCardText>
+              </S.ThemeCourseCard>
+            ))}
           </S.ThemeCourseCardContainer>
         </S.StatusContainer>
       );
