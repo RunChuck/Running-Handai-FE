@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import Lottie from 'lottie-react';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import type { CourseDetailResponse } from '@/types/course';
 import { convertTrackPointsToRoute, drawRouteOnMap, fitMapToBounds } from '@/utils/trackPointUtils';
-
+import LoadingMotion from '@/assets/animations/run-loading.json';
 interface CourseRouteMapProps {
   courseDetail: CourseDetailResponse['data'];
 }
@@ -88,6 +89,7 @@ const CourseRouteMap = ({ courseDetail }: CourseRouteMapProps) => {
     <MapContainer>
       {!isMapLoaded && (
         <LoadingOverlay>
+          <Lottie animationData={LoadingMotion} style={{ width: 100, height: 100 }} loop={true} />
           <LoadingText>{t('courseDetail.loadingMap')}</LoadingText>
         </LoadingOverlay>
       )}
