@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
+import Lottie from 'lottie-react';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import * as S from '@/pages/main/Main.styled';
@@ -11,6 +12,8 @@ import Header from './components/Header';
 import Tabs from './components/Tabs';
 import CourseRouteMap from '@/components/CourseRouteMap';
 import ScrollIconSrc from '@/assets/icons/scroll-up.svg';
+import LoadingMotion from '@/assets/animations/run-loading.json';
+import NoCourseImgSrc from '@/assets/images/sad-emoji.png';
 
 const CourseDetail = () => {
   const [t] = useTranslation();
@@ -43,9 +46,10 @@ const CourseDetail = () => {
   if (loading) {
     return (
       <Container>
-        <S.StatusContainer>
+        <StatusContainer>
+          <Lottie animationData={LoadingMotion} style={{ width: 100, height: 100 }} loop={true} />
           <S.StatusText>{t('courseDetail.loading')}</S.StatusText>
-        </S.StatusContainer>
+        </StatusContainer>
       </Container>
     );
   }
@@ -53,10 +57,11 @@ const CourseDetail = () => {
   if (error) {
     return (
       <Container>
-        <S.StatusContainer>
+        <StatusContainer>
+          <img src={NoCourseImgSrc} alt={t('courseDetail.error')} width={57} height={60} />
           <S.StatusText>{error}</S.StatusText>
           <S.RetryButton onClick={() => window.location.reload()}>{t('courseDetail.retry')}</S.RetryButton>
-        </S.StatusContainer>
+        </StatusContainer>
       </Container>
     );
   }
@@ -101,6 +106,15 @@ const Container = styled.div`
   ::-webkit-scrollbar {
     display: none;
   }
+`;
+
+const StatusContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-12);
+  height: 100%;
 `;
 
 const ScrollButtonContainer = styled.div`
