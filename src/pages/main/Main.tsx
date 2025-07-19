@@ -14,7 +14,7 @@ import MapView from '@/components/MapView';
 import FloatButton from '@/components/FloatButton';
 import CourseModal from './components/CourseModal';
 import BottomSheet from '@/components/BottomSheet';
-import CourseItem from './components/CourseItem';
+import CourseList from './components/CourseList';
 import CommonModal from '@/components/CommonModal';
 import LocationIconSrc from '@/assets/icons/location-icon.svg';
 import ArrowUprightIconSrc from '@/assets/icons/arrow-upright.svg';
@@ -153,47 +153,6 @@ const Main = () => {
     </>
   );
 
-  const renderCourseList = () => {
-    if (loading) {
-      return (
-        <S.StatusContainer>
-          <S.StatusText>{t('main.loading')}</S.StatusText>
-        </S.StatusContainer>
-      );
-    }
-
-    if (error) {
-      return (
-        <S.ErrorContainer>
-          <S.StatusText>{error}</S.StatusText>
-          <S.RetryButton onClick={fetchNearbyCourses}>{t('retry')}</S.RetryButton>
-        </S.ErrorContainer>
-      );
-    }
-
-    if (courses.length === 0) {
-      return (
-        <S.StatusContainer>
-          <S.StatusText>{t('main.noCourses')}</S.StatusText>
-        </S.StatusContainer>
-      );
-    }
-
-    return (
-      <S.CourseGrid>
-        {courses.map((course, index) => (
-          <CourseItem
-            key={course.courseId}
-            course={course}
-            index={index}
-            isSelected={course.courseId === selectedCourseId}
-            onBookmarkClick={handleBookmarkClick}
-          />
-        ))}
-      </S.CourseGrid>
-    );
-  };
-
   return (
     <S.Container>
       <S.MapContainer bottomSheetHeight={bottomSheetHeight}>
@@ -206,11 +165,25 @@ const Main = () => {
 
       {!isModalOpen && (
         <BottomSheet titleData={getBottomSheetTitle()} floatButtons={floatButtons} onHeightChange={handleBottomSheetHeightChange}>
-          {renderCourseList()}
+          <CourseList
+            courses={courses}
+            loading={loading}
+            error={error}
+            selectedCourseId={selectedCourseId}
+            onBookmarkClick={handleBookmarkClick}
+            onThemeSelect={handleThemeSelect}
+            fetchNearbyCourses={fetchNearbyCourses}
+          />
         </BottomSheet>
       )}
 
-      <CourseModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onAreaSelect={handleAreaSelect} onThemeSelect={handleThemeSelect} />
+      <CourseModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onAreaSelect={handleAreaSelect} 
+        onThemeSelect={handleThemeSelect}
+        selectedFilter={selectedFilter}
+      />
 
       <CommonModal
         isOpen={isLoginModalOpen}

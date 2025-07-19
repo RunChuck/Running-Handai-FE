@@ -31,12 +31,21 @@
     "sea": "바다",
     "riverside": "강변",
     "mountain": "산",
-    "downtown": "도심"
+    "downtown": "도심",
+    "seaCourse": "오션뷰 코스",
+    "seaDescription": "바다와 함께하는 러닝",
+    "mountainCourse": "트레일 코스",
+    "mountainDescription": "숲속을 달리는 러닝",
+    "downtownCourse": "도심 코스",
+    "downtownDescription": "도심 속에서 가볍게 러닝",
+    "riversideCourse": "강변 코스",
+    "riversideDescription": "강변을 따라 달리는 러닝"
   },
   "main": {
     "exploreCourses": "추천 코스 탐색",
-    "loading": "코스를 불러오는 중...🏃‍♂️",
-    "noCourses": "주변에 추천할 수 있는 코스가 없습니다 🥲",
+    "loading": "코스 정보를 불러오고 있어요.",
+    "noCourses": "이 근처에는 추천 코스가 없어요.\n테마별 코스를 둘러보거나, 나만의 코스를 만들어보는 건 어떨까요?",
+    "noCourses.mobile": "이 근처에는 추천 코스가 없어요.\n테마별 코스를 둘러보거나,\n나만의 코스를 만들어보는 건 어떨까요?",
     "loginMessage": "로그인하고\n마음에 드는 코스를 저장해보세요!",
     "simpleLogin": "간편 로그인 하기",
     "bookmark": "명이 저장한 코스"
@@ -53,8 +62,8 @@
     "reviews": "리뷰"
   },
   "courseDetail": {
-    "loadingMap": "지도를 불러오는 중...",
-    "loading": "코스 정보를 불러오는 중...🏃‍♂️",
+    "loadingMap": "지도를 불러오고 있어요.",
+    "loading": "코스 상세 정보를 불러오는 중입니다.",
     "error": "코스 정보를 불러오는 중 오류가 발생했습니다 🥲",
     "retry": "다시 시도",
     "moreCourseInfo": "코스 정보 더보기",

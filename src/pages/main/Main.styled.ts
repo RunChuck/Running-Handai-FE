@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
+
 export const Container = styled.div`
   width: 100%;
   max-width: 600px;
@@ -28,27 +29,11 @@ export const CourseGrid = styled.div`
   }
 `;
 
-export const StatusContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--spacing-40);
-  height: 100%;
-`;
-
 export const StatusText = styled.div`
-  ${theme.typography.body1}
+  ${theme.typography.body2}
   color: var(--text-text-secondary, #555555);
   text-align: center;
-`;
-
-export const ErrorContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-16);
-  padding: var(--spacing-40);
+  white-space: pre-line;
 `;
 
 export const RetryButton = styled.button`
@@ -58,6 +43,7 @@ export const RetryButton = styled.button`
   border: none;
   border-radius: 4px;
   padding: var(--spacing-8) var(--spacing-16);
+  margin-top: var(--spacing-12);
   cursor: pointer;
   transition: all 0.2s ease;
 
