@@ -49,9 +49,8 @@ const CourseItem = ({ course, index, isSelected, onBookmarkClick }: CourseItemPr
           {t('minutes')} · {course.maxElevation}m
         </CourseStats>
       </ThumbnailWrapper>
-      {/* 임시로 북마크 수는 랜덤 값으로 표시 */}
       <BookmarkCount>
-        {Math.floor(Math.random() * 100) + 1}
+        {course.bookmarks}
         {t('main.bookmark')}
       </BookmarkCount>
     </ItemContainer>

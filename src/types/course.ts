@@ -8,10 +8,11 @@ export interface CourseTabItem {
 export interface CourseData {
   courseId: number;
   thumbnailUrl: string;
-  distanceFromUser: number;
   distance: number;
-  maxElevation: number;
   duration: number;
+  maxElevation: number;
+  distanceFromUser: number;
+  bookmarks: number;
   trackPoints?: TrackPoint[];
 }
 
