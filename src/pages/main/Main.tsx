@@ -5,6 +5,7 @@ import * as S from './Main.styled';
 
 import { useDebounce } from '@/hooks/useDebounce';
 import { useCourses } from '@/hooks/useCourses';
+import { useAuth } from '@/hooks/useAuth';
 import { getUserLocation } from '@/utils/geolocation';
 import { BUSAN_CITY_HALL } from '@/constants/locations';
 import { useMap } from '@/contexts/MapContext';
@@ -34,6 +35,7 @@ const Main = () => {
   const [selectedCourseId, setSelectedCourseId] = useState<number | undefined>();
 
   const { courses, loading, error, fetchNearbyCourses, fetchCoursesByArea, fetchCoursesByTheme } = useCourses();
+  const { isAuthenticated } = useAuth();
 
   // A코스 시작점으로 지도 이동
   const moveToFirstCourseStart = (fetchedCourses: CourseData[]) => {
@@ -71,8 +73,12 @@ const Main = () => {
   };
 
   const handleBookmarkClick = () => {
-    // TODO: 로그인 상태 확인 후 북마크 연결
-    setIsLoginModalOpen(true);
+    if (isAuthenticated) {
+      // TODO: 북마크 연결
+      console.log('북마크 토글');
+    } else {
+      setIsLoginModalOpen(true);
+    }
   };
 
   const handleLoginModalClose = () => {
