@@ -8,7 +8,7 @@ import { useCourses } from '@/hooks/useCourses';
 import { getUserLocation } from '@/utils/geolocation';
 import { BUSAN_CITY_HALL } from '@/constants/locations';
 import { useMap } from '@/contexts/MapContext';
-import type { AreaCode, ThemeCode } from '@/types/course';
+import type { AreaCode, ThemeCode, CourseData } from '@/types/course';
 
 import MapView from '@/components/MapView';
 import FloatButton from '@/components/FloatButton';
@@ -34,6 +34,14 @@ const Main = () => {
   const [selectedCourseId, setSelectedCourseId] = useState<number | undefined>();
 
   const { courses, loading, error, fetchNearbyCourses, fetchCoursesByArea, fetchCoursesByTheme } = useCourses();
+
+  // A코스 시작점으로 지도 이동
+  const moveToFirstCourseStart = (fetchedCourses: CourseData[]) => {
+    if (fetchedCourses && fetchedCourses.length > 0 && fetchedCourses[0].trackPoints && fetchedCourses[0].trackPoints.length > 0 && mapRef.current) {
+      const firstTrackPoint = fetchedCourses[0].trackPoints[0];
+      mapRef.current.moveToLocation(firstTrackPoint.lat, firstTrackPoint.lon, 7);
+    }
+  };
 
   const moveToCurrentLocationHandler = async () => {
     try {
@@ -71,22 +79,26 @@ const Main = () => {
     setIsLoginModalOpen(false);
   };
 
-  const handleAreaSelect = (area: AreaCode) => {
+  const handleAreaSelect = async (area: AreaCode) => {
     setSelectedFilter({ type: 'area', value: area });
     setSelectedCourseId(undefined);
     if (mapRef.current) {
       mapRef.current.clearAllCourses();
     }
-    fetchCoursesByArea(area);
+
+    const fetchedCourses = await fetchCoursesByArea(area);
+    moveToFirstCourseStart(fetchedCourses || []);
   };
 
-  const handleThemeSelect = (theme: ThemeCode) => {
+  const handleThemeSelect = async (theme: ThemeCode) => {
     setSelectedFilter({ type: 'theme', value: theme });
     setSelectedCourseId(undefined);
     if (mapRef.current) {
       mapRef.current.clearAllCourses();
     }
-    fetchCoursesByTheme(theme);
+
+    const fetchedCourses = await fetchCoursesByTheme(theme);
+    moveToFirstCourseStart(fetchedCourses || []);
   };
 
   const handleCourseMarkerClick = (courseId: number) => {
@@ -177,10 +189,10 @@ const Main = () => {
         </BottomSheet>
       )}
 
-      <CourseModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onAreaSelect={handleAreaSelect} 
+      <CourseModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onAreaSelect={handleAreaSelect}
         onThemeSelect={handleThemeSelect}
         selectedFilter={selectedFilter}
       />

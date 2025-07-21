@@ -1,8 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
-import { COURSE_LOCATIONS, THEME_LOCATIONS } from '@/constants/locations';
-import { useMap } from '@/contexts/MapContext';
 import type { AreaCode, ThemeCode } from '@/types/course';
 
 import BackIconSrc from '@/assets/icons/arrow-left-24px.svg';
@@ -48,41 +46,18 @@ const THEME_OPTIONS = [
 
 const CourseModal = ({ isOpen, onClose, onAreaSelect, onThemeSelect, selectedFilter }: CourseModalProps) => {
   const { t } = useTranslation();
-  const { mapRef } = useMap();
 
   const handleLocationSelect = (locationKey: string) => {
-    if (!mapRef.current) return;
-
-    // 지역 API 호출
     if (onAreaSelect) {
       onAreaSelect(locationKey as AreaCode);
-    }
-
-    if (locationKey in COURSE_LOCATIONS) {
-      const coordinates = COURSE_LOCATIONS[locationKey as keyof typeof COURSE_LOCATIONS];
-      const locationOption = LOCATION_OPTIONS.find(opt => opt.key === locationKey);
-      const zoomLevel = locationOption?.zoom || 7;
-
-      mapRef.current.moveToLocation(coordinates.lat, coordinates.lng, zoomLevel);
     }
 
     onClose();
   };
 
   const handleThemeSelect = (themeKey: string) => {
-    if (!mapRef.current) return;
-
-    // 테마 API 호출
     if (onThemeSelect) {
       onThemeSelect(themeKey as ThemeCode);
-    }
-
-    if (themeKey in THEME_LOCATIONS) {
-      const coordinates = THEME_LOCATIONS[themeKey as keyof typeof THEME_LOCATIONS];
-      const themeOption = THEME_OPTIONS.find(opt => opt.key === themeKey);
-      const zoomLevel = themeOption?.zoom || 7;
-
-      mapRef.current.moveToLocation(coordinates.lat, coordinates.lng, zoomLevel);
     }
 
     onClose();
