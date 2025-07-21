@@ -1,9 +1,3 @@
-export type OAuthProvider = 'kakao' | 'naver' | 'google';
-
-export interface LoginRequest {
-  provider: OAuthProvider;
-}
-
 export interface RefreshTokenRequest {
   refreshToken: string;
 }

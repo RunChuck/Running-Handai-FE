@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import * as S from './Login.styled';
 import { useIsMobile } from '@/hooks/useIsMobile';
-import { authAPI } from '@/api/auth';
 
 import Button from '@/components/Button';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
@@ -33,13 +32,8 @@ const Login = () => {
       backgroundColor: '#fff',
       icon: <img src={GoogleIconSrc} alt="Google" width="20" height="20" />,
       style: { color: 'var(--text-text-title, #1C1C1C)', border: '1px solid #dadce0' },
-      onClick: async () => {
-        try {
-          const result = await authAPI.initiateOAuthLogin('google');
-          console.log('구글 로그인 응답:', result);
-        } catch (error) {
-          console.error('구글 로그인 에러:', error);
-        }
+      onClick: () => {
+        window.location.href = `${import.meta.env.VITE_API_ROOT}/oauth2/authorization/google`;
       },
     },
     {
@@ -48,14 +42,8 @@ const Login = () => {
       backgroundColor: '#FEE500',
       icon: <img src={KakaoIconSrc} alt="Kakao" width="20" height="20" />,
       style: { color: 'var(--text-text-title, #1C1C1C)' },
-      onClick: async () => {
-        try {
-          console.log('API 호출 시작');
-          const result = await authAPI.initiateOAuthLogin('kakao');
-          console.log('카카오 로그인 응답:', result);
-        } catch (error) {
-          console.error('카카오 로그인 에러:', error);
-        }
+      onClick: () => {
+        window.location.href = `${import.meta.env.VITE_API_ROOT}/oauth2/authorization/kakao`;
       },
     },
     {
@@ -64,13 +52,8 @@ const Login = () => {
       backgroundColor: '#03C75A',
       icon: <img src={NaverIconSrc} alt="Naver" width="20" height="20" />,
       style: {},
-      onClick: async () => {
-        try {
-          const result = await authAPI.initiateOAuthLogin('naver');
-          console.log('네이버 로그인 응답:', result);
-        } catch (error) {
-          console.error('네이버 로그인 에러:', error);
-        }
+      onClick: () => {
+        window.location.href = `${import.meta.env.VITE_API_ROOT}/oauth2/authorization/naver`;
       },
     },
     {
