@@ -40,7 +40,7 @@ export const useCourses = () => {
     }
   };
 
-  const fetchCoursesByArea = async (area: AreaCode) => {
+  const fetchCoursesByArea = async (area: AreaCode): Promise<CourseData[] | undefined> => {
     try {
       setLoading(true);
       setError(null);
@@ -55,15 +55,17 @@ export const useCourses = () => {
 
       const response = await courseAPI.getCourses(request);
       setCourses(response.data);
+      return response.data;
     } catch (err) {
       setError('지역별 코스 조회에 실패했습니다.');
       console.error('지역별 코스 조회 실패:', err);
+      return undefined;
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchCoursesByTheme = async (theme: ThemeCode) => {
+  const fetchCoursesByTheme = async (theme: ThemeCode): Promise<CourseData[] | undefined> => {
     try {
       setLoading(true);
       setError(null);
@@ -78,9 +80,11 @@ export const useCourses = () => {
 
       const response = await courseAPI.getCourses(request);
       setCourses(response.data);
+      return response.data;
     } catch (err) {
       setError('테마별 코스 조회에 실패했습니다.');
       console.error('테마별 코스 조회 실패:', err);
+      return undefined;
     } finally {
       setLoading(false);
     }

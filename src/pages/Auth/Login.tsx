@@ -33,7 +33,7 @@ const Login = () => {
       icon: <img src={GoogleIconSrc} alt="Google" width="20" height="20" />,
       style: { color: 'var(--text-text-title, #1C1C1C)', border: '1px solid #dadce0' },
       onClick: () => {
-        // TODO: 구글 로그인
+        window.location.href = `${import.meta.env.VITE_API_ROOT}/oauth2/authorization/google`;
       },
     },
     {
@@ -43,7 +43,7 @@ const Login = () => {
       icon: <img src={KakaoIconSrc} alt="Kakao" width="20" height="20" />,
       style: { color: 'var(--text-text-title, #1C1C1C)' },
       onClick: () => {
-        // TODO: 카카오 로그인
+        window.location.href = `${import.meta.env.VITE_API_ROOT}/oauth2/authorization/kakao`;
       },
     },
     {
@@ -53,7 +53,7 @@ const Login = () => {
       icon: <img src={NaverIconSrc} alt="Naver" width="20" height="20" />,
       style: {},
       onClick: () => {
-        // TODO: 네이버 로그인
+        window.location.href = `${import.meta.env.VITE_API_ROOT}/oauth2/authorization/naver`;
       },
     },
     {

@@ -316,6 +316,7 @@ const ContentArea = styled.div`
   flex-direction: column;
   overflow: hidden;
   min-height: 0;
+  gap: var(--spacing-24);
 `;
 
 const TitleWrapper = styled.div`
