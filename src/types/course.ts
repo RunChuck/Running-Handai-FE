@@ -13,6 +13,7 @@ export interface CourseData {
   maxElevation: number;
   distanceFromUser: number;
   bookmarks: number;
+  isBookmarked: boolean;
   trackPoints?: TrackPoint[];
 }
 
@@ -58,6 +59,8 @@ interface CourseDetailData {
   minElevation: number;
   maxElevation: number;
   level: string;
+  bookmarks: number;
+  isBookmarked: boolean;
   roadConditions: string[];
   trackPoints: TrackPoint[];
 }

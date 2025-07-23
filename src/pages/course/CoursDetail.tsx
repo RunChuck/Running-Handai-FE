@@ -76,7 +76,7 @@ const CourseDetail = () => {
     <Container ref={scrollRef}>
       <Header
         title={title}
-        isBookmarked={false} // TODO: 북마크 상태 연결
+        isBookmarked={courseDetail.isBookmarked}
         onBack={handleBack}
         onShare={handleShare}
         onBookmarkToggle={handleBookmarkToggle}
