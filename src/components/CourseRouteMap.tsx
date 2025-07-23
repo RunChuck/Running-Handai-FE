@@ -96,12 +96,18 @@ const CourseRouteMap = memo(
           </LoadingOverlay>
         )}
         <MapDiv ref={mapContainer} isLoaded={isMapLoaded} />
+        <BookmarkLabel>
+          {courseDetail.bookmarks}
+          {t('main.bookmark')}
+        </BookmarkLabel>
       </MapContainer>
     );
   },
   (prevProps, nextProps) => {
-    // trackPoints가 같으면 리렌더링하지 않음!
-    return prevProps.courseDetail.trackPoints === nextProps.courseDetail.trackPoints;
+    return (
+      prevProps.courseDetail.trackPoints === nextProps.courseDetail.trackPoints &&
+      prevProps.courseDetail.bookmarks === nextProps.courseDetail.bookmarks
+    );
   }
 );
 
@@ -144,4 +150,16 @@ const LoadingOverlay = styled.div`
 const LoadingText = styled.div`
   ${theme.typography.body2}
   color: var(--text-text-secondary, #555555);
+`;
+
+const BookmarkLabel = styled.div`
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--Text-title, #1c1c1c);
+  ${theme.typography.body2}
+  z-index: 1;
 `;
