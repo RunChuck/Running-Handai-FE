@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { courseAPI } from '@/api/course';
-import type { CourseDetailResponse } from '@/types/course';
+import type { CourseDetailData } from '@/types/course';
 
 export const useCourseDetail = (courseId: number) => {
-  const [courseDetail, setCourseDetail] = useState<CourseDetailResponse['data'] | null>(null);
+  const [courseDetail, setCourseDetail] = useState<CourseDetailData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,6 +31,7 @@ export const useCourseDetail = (courseId: number) => {
 
   return {
     courseDetail,
+    setCourseDetail,
     loading,
     error,
   };

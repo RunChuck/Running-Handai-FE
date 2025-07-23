@@ -52,7 +52,7 @@ interface TrackPoint {
   ele: number;
 }
 
-interface CourseDetailData {
+export interface CourseDetailData {
   courseId: number;
   distance: number;
   duration: number;

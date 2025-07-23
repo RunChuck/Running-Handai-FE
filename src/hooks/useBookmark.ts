@@ -1,10 +1,15 @@
 import { useState } from 'react';
 import { courseAPI } from '@/api/course';
 import { useAuth } from './useAuth';
-import type { CourseData } from '@/types/course';
+import type { CourseData, CourseDetailData } from '@/types/course';
+
+type BookmarkUpdate = {
+  isBookmarked: boolean;
+  bookmarks: number;
+};
 
 interface UseBookmarkProps {
-  onUpdateCourse?: (courseId: number, updates: Partial<CourseData>) => void;
+  onUpdateCourse?: (courseId: number, updates: BookmarkUpdate) => void;
   onError?: (error: unknown) => void;
   onUnauthenticated?: () => void;
 }
@@ -13,7 +18,7 @@ export const useBookmark = ({ onUpdateCourse, onError, onUnauthenticated }: UseB
   const { isAuthenticated } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleBookmark = async (course: CourseData) => {
+  const handleBookmark = async (course: CourseData | CourseDetailData) => {
     if (!isAuthenticated) {
       onUnauthenticated?.();
       return;
