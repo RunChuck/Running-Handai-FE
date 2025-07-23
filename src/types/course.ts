@@ -72,3 +72,13 @@ export interface CourseDetailResponse {
   totalCount: number;
   data: CourseDetailData;
 }
+
+export interface BookmarkRequest {
+  courseId: number;
+}
+
+export interface BookmarkResponse {
+  statusCode: number;
+  responseCode: string;
+  message: string;
+}
