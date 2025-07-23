@@ -1,102 +1,117 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import Lottie from 'lottie-react';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
-import type { CourseDetailResponse } from '@/types/course';
+import type { CourseDetailData } from '@/types/course';
 import { convertTrackPointsToRoute, drawRouteOnMap, fitMapToBounds } from '@/utils/trackPointUtils';
 import LoadingMotion from '@/assets/animations/run-loading.json';
+
 interface CourseRouteMapProps {
-  courseDetail: CourseDetailResponse['data'];
+  courseDetail: CourseDetailData;
 }
 
-const CourseRouteMap = ({ courseDetail }: CourseRouteMapProps) => {
-  const [t] = useTranslation();
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<kakao.maps.Map | null>(null);
-  const polyline = useRef<kakao.maps.Polyline | null>(null);
-  const [isMapLoaded, setIsMapLoaded] = useState(false);
+const CourseRouteMap = memo(
+  ({ courseDetail }: CourseRouteMapProps) => {
+    const [t] = useTranslation();
+    const mapContainer = useRef<HTMLDivElement>(null);
+    const mapInstance = useRef<kakao.maps.Map | null>(null);
+    const polyline = useRef<kakao.maps.Polyline | null>(null);
+    const [isMapLoaded, setIsMapLoaded] = useState(false);
 
-  useEffect(() => {
-    if (!mapContainer.current) return;
+    useEffect(() => {
+      if (!mapContainer.current) return;
 
-    const mapScript = document.createElement('script');
-    mapScript.async = true;
-    mapScript.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_MAP_API_KEY}&autoload=false`;
+      const mapScript = document.createElement('script');
+      mapScript.async = true;
+      mapScript.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_MAP_API_KEY}&autoload=false`;
 
-    const onLoadKakaoMap = () => {
-      if (window.kakao && window.kakao.maps) {
-        window.kakao.maps.load(() => {
-          const container = mapContainer.current;
-          if (!container) return;
+      const onLoadKakaoMap = () => {
+        if (window.kakao && window.kakao.maps) {
+          window.kakao.maps.load(() => {
+            const container = mapContainer.current;
+            if (!container) return;
 
-          // 코스 데이터 변환
-          const route = convertTrackPointsToRoute(courseDetail);
+            // 코스 데이터 변환
+            const route = convertTrackPointsToRoute(courseDetail);
 
-          const options = {
-            center: new window.kakao.maps.LatLng(route.center.lat, route.center.lng),
-            level: 5,
-          };
+            const options = {
+              center: new window.kakao.maps.LatLng(route.center.lat, route.center.lng),
+              level: 5,
+            };
 
-          const map = new window.kakao.maps.Map(container, options);
-          mapInstance.current = map;
+            const map = new window.kakao.maps.Map(container, options);
+            mapInstance.current = map;
 
-          // 경로 그리기
-          if (route.points.length > 0) {
-            polyline.current = drawRouteOnMap(map, route);
+            // 경로 그리기
+            if (route.points.length > 0) {
+              polyline.current = drawRouteOnMap(map, route);
 
-            // 경로 조정 후 로딩 완료
-            setTimeout(() => {
-              fitMapToBounds(map, route);
+              // 경로 조정 후 로딩 완료
               setTimeout(() => {
-                setIsMapLoaded(true);
+                fitMapToBounds(map, route);
+                setTimeout(() => {
+                  setIsMapLoaded(true);
+                }, 100);
               }, 100);
-            }, 100);
-          } else {
-            setIsMapLoaded(true);
-          }
+            } else {
+              setIsMapLoaded(true);
+            }
 
-          console.log('코스 경로 지도 초기화 완료:', route);
-        });
-      }
-    };
+            console.log('코스 경로 지도 초기화 완료:', route);
+          });
+        }
+      };
 
-    const onErrorKakaoMap = (error: Event) => {
-      console.error('코스 경로 지도 로드 실패:', error);
-      setIsMapLoaded(true); // 에러 시에도 로딩 종료
-    };
+      const onErrorKakaoMap = (error: Event) => {
+        console.error('코스 경로 지도 로드 실패:', error);
+        setIsMapLoaded(true); // 에러 시에도 로딩 종료
+      };
 
-    mapScript.addEventListener('load', onLoadKakaoMap);
-    mapScript.addEventListener('error', onErrorKakaoMap);
+      mapScript.addEventListener('load', onLoadKakaoMap);
+      mapScript.addEventListener('error', onErrorKakaoMap);
 
-    document.head.appendChild(mapScript);
+      document.head.appendChild(mapScript);
 
-    return () => {
-      mapScript.removeEventListener('load', onLoadKakaoMap);
-      mapScript.removeEventListener('error', onErrorKakaoMap);
-      if (document.head.contains(mapScript)) {
-        document.head.removeChild(mapScript);
-      }
+      return () => {
+        mapScript.removeEventListener('load', onLoadKakaoMap);
+        mapScript.removeEventListener('error', onErrorKakaoMap);
+        if (document.head.contains(mapScript)) {
+          document.head.removeChild(mapScript);
+        }
 
-      // 폴리라인 정리
-      if (polyline.current) {
-        polyline.current.setMap(null);
-      }
-    };
-  }, [courseDetail]);
+        // 폴리라인 정리
+        if (polyline.current) {
+          polyline.current.setMap(null);
+        }
+      };
+    }, [courseDetail.trackPoints]); // trackPoints만 의존성으로 사용
 
-  return (
-    <MapContainer>
-      {!isMapLoaded && (
-        <LoadingOverlay>
-          <Lottie animationData={LoadingMotion} style={{ width: 100, height: 100 }} loop={true} />
-          <LoadingText>{t('courseDetail.loadingMap')}</LoadingText>
-        </LoadingOverlay>
-      )}
-      <MapDiv ref={mapContainer} isLoaded={isMapLoaded} />
-    </MapContainer>
-  );
-};
+    return (
+      <MapContainer>
+        {!isMapLoaded && (
+          <LoadingOverlay>
+            <Lottie animationData={LoadingMotion} style={{ width: 100, height: 100 }} loop={true} />
+            <LoadingText>{t('courseDetail.loadingMap')}</LoadingText>
+          </LoadingOverlay>
+        )}
+        <MapDiv ref={mapContainer} isLoaded={isMapLoaded} />
+        <BookmarkLabel>
+          {courseDetail.bookmarks}
+          {t('main.bookmark')}
+        </BookmarkLabel>
+      </MapContainer>
+    );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.courseDetail.trackPoints === nextProps.courseDetail.trackPoints &&
+      prevProps.courseDetail.bookmarks === nextProps.courseDetail.bookmarks
+    );
+  }
+);
+
+CourseRouteMap.displayName = 'CourseRouteMap';
 
 export default CourseRouteMap;
 
@@ -135,4 +150,16 @@ const LoadingOverlay = styled.div`
 const LoadingText = styled.div`
   ${theme.typography.body2}
   color: var(--text-text-secondary, #555555);
+`;
+
+const BookmarkLabel = styled.div`
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--Text-title, #1c1c1c);
+  ${theme.typography.body2}
+  z-index: 1;
 `;

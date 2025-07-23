@@ -13,6 +13,7 @@ export interface CourseData {
   maxElevation: number;
   distanceFromUser: number;
   bookmarks: number;
+  isBookmarked: boolean;
   trackPoints?: TrackPoint[];
 }
 
@@ -51,13 +52,15 @@ interface TrackPoint {
   ele: number;
 }
 
-interface CourseDetailData {
+export interface CourseDetailData {
   courseId: number;
   distance: number;
   duration: number;
   minElevation: number;
   maxElevation: number;
   level: string;
+  bookmarks: number;
+  isBookmarked: boolean;
   roadConditions: string[];
   trackPoints: TrackPoint[];
 }
@@ -68,4 +71,14 @@ export interface CourseDetailResponse {
   message: string;
   totalCount: number;
   data: CourseDetailData;
+}
+
+export interface BookmarkRequest {
+  courseId: number;
+}
+
+export interface BookmarkResponse {
+  statusCode: number;
+  responseCode: string;
+  message: string;
 }

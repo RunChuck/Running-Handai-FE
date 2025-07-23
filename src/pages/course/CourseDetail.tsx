@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import Lottie from 'lottie-react';
@@ -7,10 +7,12 @@ import { theme } from '@/styles/theme';
 import * as S from '@/pages/main/Main.styled';
 import useScrollToTop from '@/hooks/useScrollToTop';
 import { useCourseDetail } from '@/hooks/useCourseDetail';
+import { useBookmark } from '@/hooks/useBookmark';
 
 import Header from './components/Header';
 import Tabs from './components/Tabs';
 import CourseRouteMap from '@/components/CourseRouteMap';
+import CommonModal from '@/components/CommonModal';
 import ScrollIconSrc from '@/assets/icons/scroll-up.svg';
 import LoadingMotion from '@/assets/animations/run-loading.json';
 import NoCourseImgSrc from '@/assets/images/sad-emoji.png';
@@ -19,11 +21,26 @@ const CourseDetail = () => {
   const [t] = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   const { scrollRef, scrollToTop, showScrollButton } = useScrollToTop();
 
   const courseId = parseInt(id || '0', 10);
-  const { courseDetail, loading, error } = useCourseDetail(courseId);
+  const { courseDetail, loading, error, setCourseDetail } = useCourseDetail(courseId);
+  const { handleBookmark } = useBookmark({
+    onUpdateCourse: (_, updates) => {
+      if (courseDetail) {
+        setCourseDetail({
+          ...courseDetail,
+          isBookmarked: updates.isBookmarked,
+          bookmarks: updates.bookmarks,
+        });
+      }
+    },
+    onUnauthenticated: () => {
+      setIsLoginModalOpen(true);
+    },
+  });
 
   useEffect(() => {
     if (!courseId) {
@@ -40,7 +57,13 @@ const CourseDetail = () => {
   };
 
   const handleBookmarkToggle = () => {
-    // TODO: 북마크 기능
+    if (courseDetail) {
+      handleBookmark(courseDetail);
+    }
+  };
+
+  const handleLoginModalClose = () => {
+    setIsLoginModalOpen(false);
   };
 
   if (loading) {
@@ -76,7 +99,7 @@ const CourseDetail = () => {
     <Container ref={scrollRef}>
       <Header
         title={title}
-        isBookmarked={false} // TODO: 북마크 상태 연결
+        isBookmarked={courseDetail.isBookmarked}
         onBack={handleBack}
         onShare={handleShare}
         onBookmarkToggle={handleBookmarkToggle}
@@ -91,6 +114,15 @@ const CourseDetail = () => {
           <ScrollToTop>{t('courseDetail.scrollToTop')}</ScrollToTop>
         </ScrollButtonContainer>
       )}
+
+      <CommonModal
+        isOpen={isLoginModalOpen}
+        onClose={handleLoginModalClose}
+        onConfirm={() => navigate('/')}
+        content={t('main.loginMessage')}
+        cancelText={t('cancel')}
+        confirmText={t('main.simpleLogin')}
+      />
     </Container>
   );
 };

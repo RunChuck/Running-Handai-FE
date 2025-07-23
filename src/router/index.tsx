@@ -3,7 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import Login from '@/pages/auth/Login';
 import Auth from '@/pages/auth/Auth';
 import Main from '@/pages/main/Main';
-import CourseDetail from '@/pages/course/CoursDetail';
+import CourseDetail from '@/pages/course/CourseDetail';
 import Test from '@/pages/temp/Test';
 
 const AppRoutes = () => {

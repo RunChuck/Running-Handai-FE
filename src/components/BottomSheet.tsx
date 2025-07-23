@@ -364,19 +364,9 @@ const ScrollableContent = styled.div`
   min-height: 0;
 
   &::-webkit-scrollbar {
-    width: 4px;
+    display: none;
   }
 
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: var(--GrayScale-gray300);
-    border-radius: 2px;
-  }
-
-  &::-webkit-scrollbar-thumb:hover {
-    background: var(--GrayScale-gray400);
-  }
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 `;
