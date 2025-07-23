@@ -5,7 +5,7 @@ import * as S from './Main.styled';
 
 import { useDebounce } from '@/hooks/useDebounce';
 import { useCourses } from '@/hooks/useCourses';
-import { useAuth } from '@/hooks/useAuth';
+import { useBookmark } from '@/hooks/useBookmark';
 import { getUserLocation } from '@/utils/geolocation';
 import { BUSAN_CITY_HALL } from '@/constants/locations';
 import { useMap } from '@/contexts/MapContext';
@@ -33,9 +33,17 @@ const Main = () => {
     value?: AreaCode | ThemeCode;
   }>({ type: 'nearby' });
   const [selectedCourseId, setSelectedCourseId] = useState<number | undefined>();
+  const [localCourses, setLocalCourses] = useState<CourseData[]>([]);
 
   const { courses, loading, error, fetchNearbyCourses, fetchCoursesByArea, fetchCoursesByTheme } = useCourses();
-  const { isAuthenticated } = useAuth();
+  const { handleBookmark } = useBookmark({
+    onUpdateCourse: (courseId, updates) => {
+      setLocalCourses(prevCourses => prevCourses.map(course => (course.courseId === courseId ? { ...course, ...updates } : course)));
+    },
+    onUnauthenticated: () => {
+      setIsLoginModalOpen(true);
+    },
+  });
 
   // A코스 시작점으로 지도 이동
   const moveToFirstCourseStart = (fetchedCourses: CourseData[]) => {
@@ -72,13 +80,8 @@ const Main = () => {
     // TODO: 메뉴 기능 구현
   };
 
-  const handleBookmarkClick = () => {
-    if (isAuthenticated) {
-      // TODO: 북마크 연결
-      console.log('북마크 토글');
-    } else {
-      setIsLoginModalOpen(true);
-    }
+  const handleBookmarkClick = (course: CourseData) => {
+    handleBookmark(course);
   };
 
   const handleLoginModalClose = () => {
@@ -144,19 +147,27 @@ const Main = () => {
 
   // 필터링된 경우에만 코스 표시
   useEffect(() => {
-    if (courses.length > 0 && mapRef.current) {
-      if (selectedFilter.type === 'area' || selectedFilter.type === 'theme') {
-        const defaultSelectedId = selectedCourseId || courses[0]?.courseId;
-        setSelectedCourseId(defaultSelectedId);
+    if (!mapRef.current) return;
 
-        mapRef.current.displayCourses(courses, defaultSelectedId);
+    if (selectedFilter.type === 'area' || selectedFilter.type === 'theme') {
+      if (courses.length > 0) {
+        const firstCourseId = courses[0].courseId;
+        setSelectedCourseId(firstCourseId);
+        mapRef.current.displayCourses(courses, firstCourseId);
       } else {
-        // nearby인 경우 코스 제거
-        mapRef.current.clearAllCourses();
         setSelectedCourseId(undefined);
+        mapRef.current.clearAllCourses();
       }
+    } else {
+      // nearby인 경우 코스 제거
+      setSelectedCourseId(undefined);
+      mapRef.current.clearAllCourses();
     }
   }, [courses, mapRef, selectedFilter.type]);
+
+  useEffect(() => {
+    setLocalCourses(courses);
+  }, [courses]);
 
   const floatButtons = (
     <>
@@ -184,7 +195,7 @@ const Main = () => {
       {!isModalOpen && (
         <BottomSheet titleData={getBottomSheetTitle()} floatButtons={floatButtons} onHeightChange={handleBottomSheetHeightChange}>
           <CourseList
-            courses={courses}
+            courses={localCourses}
             loading={loading}
             error={error}
             selectedCourseId={selectedCourseId}

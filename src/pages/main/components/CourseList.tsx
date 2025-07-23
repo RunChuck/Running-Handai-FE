@@ -18,7 +18,7 @@ interface CourseListProps {
   loading: boolean;
   error: string | null;
   selectedCourseId?: number;
-  onBookmarkClick: () => void;
+  onBookmarkClick: (course: CourseData) => void;
   onThemeSelect: (theme: ThemeCode) => void;
   fetchNearbyCourses: () => void;
 }
@@ -103,7 +103,7 @@ const CourseList = ({ courses, loading, error, selectedCourseId, onBookmarkClick
           course={course}
           index={index}
           isSelected={course.courseId === selectedCourseId}
-          onBookmarkClick={onBookmarkClick}
+          onBookmarkClick={() => onBookmarkClick(course)}
         />
       ))}
     </S.CourseGrid>
