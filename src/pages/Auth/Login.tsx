@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import * as S from './Login.styled';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { useAuth } from '@/hooks/useAuth';
 
 import Button from '@/components/Button';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
@@ -18,7 +19,7 @@ const Login = () => {
   const navigate = useNavigate();
   const [isAutoLoginChecked, setIsAutoLoginChecked] = useState(false);
   const isMobile = useIsMobile();
-
+  const { isAuthenticated } = useAuth();
   const handleAutoLoginToggle = () => {
     setIsAutoLoginChecked(!isAutoLoginChecked);
   };
@@ -68,6 +69,12 @@ const Login = () => {
       onClick: () => navigate('/main'),
     },
   ];
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/main');
+    }
+  }, [isAuthenticated]);
 
   return (
     <S.Container>

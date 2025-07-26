@@ -1,4 +1,4 @@
-import { useEffect, useRef, forwardRef, useImperativeHandle, useCallback } from 'react';
+import { useEffect, useRef, forwardRef, useImperativeHandle, useCallback, useState } from 'react';
 import styled from '@emotion/styled';
 import { BUSAN_CITY_HALL, DEFAULT_MAP_LEVEL } from '@/constants/locations';
 import { getUserLocation, type LocationCoords } from '@/utils/geolocation';
@@ -7,10 +7,12 @@ import {
   drawMultipleCoursesOnMap,
   updateCourseSelection,
   clearMapElements,
+  createMarkerClusterer,
   type CourseMapElements,
   type MultiCourseMapData,
 } from '@/utils/multiCourseUtils';
 import type { CourseData } from '@/types/course';
+import CoursePopover from './CoursePopover';
 
 export interface MapViewRef {
   moveToLocation: (lat: number, lng: number, level?: number) => void;
@@ -32,8 +34,14 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
   const currentCoursesData = useRef<MultiCourseMapData[]>([]);
   const isMapInitialized = useRef(false);
   const resizeObserver = useRef<ResizeObserver | null>(null);
+  const clusterer = useRef<kakao.maps.MarkerClusterer | null>(null);
 
-  // 콜백 함수들을 useCallback으로 메모이제이션
+  const [popover, setPopover] = useState<{
+    visible: boolean;
+    courses: Array<{ courseId: number; label: string; title: string }>;
+    position: { x: number; y: number };
+  }>({ visible: false, courses: [], position: { x: 0, y: 0 } });
+
   const onCourseMarkerClickCallback = useCallback(
     (courseId: number) => {
       if (onCourseMarkerClick) {
@@ -68,28 +76,36 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
     const position = new window.kakao.maps.LatLng(location.lat, location.lng);
 
     if (isUserLocation) {
-      const accuracyCircle = new window.kakao.maps.Circle({
-        center: position,
-        radius: 100,
-        strokeWeight: 0,
-        strokeOpacity: 0,
-        fillColor: '#0057FF',
-        fillOpacity: 0.2,
+      const accuracyOverlay = new window.kakao.maps.CustomOverlay({
+        position: position,
+        content: `
+          <div style="
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: rgba(0, 87, 255, 0.2);
+            border: 1px solid rgba(0, 87, 255, 0.3);
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          ">
+            <div style="
+              width: 16px;
+              height: 16px;
+              border-radius: 50%;
+              background-color: #FF460D;
+              border: 2px solid #FFF;
+              box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+            "></div>
+          </div>
+        `,
+        yAnchor: 0.5,
+        xAnchor: 0.5,
+        zIndex: 10,
       });
 
-      accuracyCircle.setMap(map);
-
-      const centerDot = new window.kakao.maps.Circle({
-        center: position,
-        radius: 8,
-        strokeWeight: 2,
-        strokeColor: '#FFF',
-        strokeOpacity: 1,
-        fillColor: '#FF460D',
-        fillOpacity: 1,
-      });
-
-      centerDot.setMap(map);
+      accuracyOverlay.setMap(map);
     }
   };
 
@@ -120,41 +136,54 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
         return;
       }
 
-      // 기존 코스 요소들 제거
+      // 기존 코스 요소들 및 클러스터러 제거
       clearMapElements(courseElements.current);
+      if (clusterer.current) {
+        clusterer.current.clear();
+      }
 
       // 새로운 코스 데이터 변환
       const coursesData = convertCoursesToMapData(courses, selectedCourseId);
       currentCoursesData.current = coursesData;
 
-      console.log('변환된 코스 데이터:', coursesData);
+      const handleClusterClick = (courses: Array<{ courseId: number; label: string; title: string }>, position: { x: number; y: number }) => {
+        // 지도 컨테이너 기준으로 위치 조정
+        const mapRect = mapContainer.current?.getBoundingClientRect();
+        let adjustedPosition = position;
+
+        if (mapRect) {
+          adjustedPosition = {
+            x: Math.min(Math.max(position.x, 60), mapRect.width - 60), // 지도 경계 내로 제한
+            y: Math.max(position.y, 40), // 상단 경계 고려
+          };
+        }
+
+        setPopover({
+          visible: true,
+          courses,
+          position: adjustedPosition,
+        });
+      };
 
       // 지도에 코스들 그리기
       courseElements.current = drawMultipleCoursesOnMap(mapInstance.current, coursesData);
 
-      console.log('그려진 요소들:', {
-        polylines: courseElements.current.polylines.length,
-        markers: courseElements.current.markers.length,
-      });
+      // 클러스터러 생성 및 마커 추가
+      clusterer.current = createMarkerClusterer(mapInstance.current, handleClusterClick, mapContainer.current);
+      if (clusterer.current) {
+        clusterer.current.addMarkers(courseElements.current.markers);
+      } else {
+        console.warn('클러스터러를 사용할 수 없어 기본 마커로 표시합니다');
+      }
 
-      // 마커 클릭 이벤트 등록
+      // 개별 마커 클릭 이벤트 등록
       courseElements.current.markers.forEach((marker, index) => {
         const courseData = coursesData[index];
         window.kakao.maps.event.addListener(marker, 'click', () => {
+          setPopover({ visible: false, courses: [], position: { x: 0, y: 0 } });
           onCourseMarkerClickCallback(courseData.courseId);
         });
       });
-
-      // 모든 코스가 보이도록 지도 범위 조정
-      // if (coursesData.length > 0) {
-      //   setTimeout(() => {
-      //     if (mapInstance.current) {
-      //       fitMapToAllCourses(mapInstance.current, coursesData);
-      //     }
-      //   }, 100);
-      // }
-
-      // console.log(`${courses.length}개 코스 표시 완료`, coursesData);
     },
 
     updateSelectedCourse: (courseId: number) => {
@@ -172,20 +201,31 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
         isSelected: course.courseId === courseId,
       }));
 
+      // 클러스터러에 새로운 마커들 추가
+      if (clusterer.current) {
+        clusterer.current.clear();
+        clusterer.current.addMarkers(courseElements.current.markers);
+      }
+
       // 마커 클릭 이벤트 재등록
       courseElements.current.markers.forEach((marker, index) => {
         const courseData = currentCoursesData.current[index];
         window.kakao.maps.event.addListener(marker, 'click', () => {
+          setPopover({ visible: false, courses: [], position: { x: 0, y: 0 } });
           onCourseMarkerClickCallback(courseData.courseId);
         });
       });
 
-      console.log(`코스 선택 변경: ${courseId}`);
+      // console.log(`코스 선택 변경: ${courseId}`);
     },
 
     clearAllCourses: () => {
       clearMapElements(courseElements.current);
+      if (clusterer.current) {
+        clusterer.current.clear();
+      }
       currentCoursesData.current = [];
+      setPopover({ visible: false, courses: [], position: { x: 0, y: 0 } });
     },
 
     // 지도 크기 재조정 함수
@@ -222,7 +262,7 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
 
     const mapScript = document.createElement('script');
     mapScript.async = true;
-    mapScript.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_MAP_API_KEY}&autoload=false`;
+    mapScript.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_MAP_API_KEY}&autoload=false&libraries=clusterer,drawing`;
 
     console.log('Loading script:', mapScript.src);
 
@@ -249,6 +289,9 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
 
           console.log('지도 초기화 완료. 중심 좌표:', initialLocation);
           console.log('사용자 위치 여부:', isCurrentUserLocation);
+
+          // 클러스터러 라이브러리 로드 확인
+          console.log('Kakao maps loaded. MarkerClusterer available:', !!window.kakao?.maps?.MarkerClusterer);
 
           // 부모 컴포넌트에 map 인스턴스 전달
           onMapLoadCallback(map);
@@ -286,12 +329,30 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
     };
   }, []);
 
-  return <MapContainer ref={mapContainer} containerHeight={containerHeight} />;
+  return (
+    <MapWrapper>
+      <MapContainer ref={mapContainer} containerHeight={containerHeight} />
+      {popover.visible && (
+        <CoursePopover
+          courses={popover.courses}
+          position={popover.position}
+          onSelect={onCourseMarkerClickCallback}
+          onClose={() => setPopover({ visible: false, courses: [], position: { x: 0, y: 0 } })}
+        />
+      )}
+    </MapWrapper>
+  );
 });
 
 MapView.displayName = 'MapView';
 
 export default MapView;
+
+const MapWrapper = styled.div`
+  position: relative;
+  width: 100%;
+  height: 100%;
+`;
 
 const MapContainer = styled.div<{ containerHeight?: number }>`
   width: 100%;

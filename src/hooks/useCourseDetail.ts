@@ -1,38 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { courseAPI } from '@/api/course';
+import { courseKeys } from '@/constants/queryKeys';
 import type { CourseDetailData } from '@/types/course';
 
 export const useCourseDetail = (courseId: number) => {
-  const [courseDetail, setCourseDetail] = useState<CourseDetailData | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    const fetchCourseDetail = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  const query = useQuery({
+    queryKey: courseKeys.detail(courseId),
+    queryFn: async (): Promise<CourseDetailData> => {
+      const response = await courseAPI.getCourseDetail(courseId);
+      return response.data;
+    },
+    enabled: !!courseId && courseId > 0,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
 
-        const response = await courseAPI.getCourseDetail(courseId);
-
-        setCourseDetail(response.data);
-      } catch (err) {
-        setError('코스 상세 정보를 불러오는데 실패했습니다.');
-        console.error('코스 상세 조회 실패:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (courseId) {
-      fetchCourseDetail();
-    }
-  }, [courseId]);
+  const setCourseDetail = (newData: CourseDetailData) => {
+    queryClient.setQueryData(courseKeys.detail(courseId), newData);
+  };
 
   return {
-    courseDetail,
+    courseDetail: query.data || null,
     setCourseDetail,
-    loading,
-    error,
+    loading: query.isLoading,
+    error: query.error?.message || null,
   };
 };
