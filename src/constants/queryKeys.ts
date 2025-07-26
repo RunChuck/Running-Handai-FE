@@ -1,8 +1,12 @@
 export const courseKeys = {
   all: ['courses'] as const,
-  lists: () => [...courseKeys.all, 'list'] as const,
-  list: (filter: string, params?: Record<string, unknown>) => 
-    [...courseKeys.lists(), { filter, ...params }] as const,
-  details: () => [...courseKeys.all, 'detail'] as const,
-  detail: (id: number) => [...courseKeys.details(), id] as const,
+  // 코스 목록 조회
+  nearby: (lat: number, lon: number) => 
+    [...courseKeys.all, 'list', { filter: 'NEARBY', lat, lon }] as const,
+  area: (area: string, lat: number, lon: number) => 
+    [...courseKeys.all, 'list', { filter: 'AREA', area, lat, lon }] as const,
+  theme: (theme: string, lat: number, lon: number) => 
+    [...courseKeys.all, 'list', { filter: 'THEME', theme, lat, lon }] as const,
+  // 코스 상세 조회
+  detail: (id: number) => [...courseKeys.all, 'detail', id] as const,
 };
