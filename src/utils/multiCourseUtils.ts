@@ -111,7 +111,7 @@ export const createMarkerClusterer = (
         width: '26px',
         height: '26px',
         background: '#4561FF',
-        borderRadius: '16px',
+        borderRadius: '50%',
         color: '#FFF',
         textAlign: 'center',
         fontWeight: '600',
@@ -235,7 +235,7 @@ export const fitMapToAllCourses = (map: kakao.maps.Map, coursesData: MultiCourse
 /**
  * React 컴포넌트를 활용한 SVG 마커 이미지 생성
  */
-const createMarkerImageDataURL = (label: string, color: string, isSelected: boolean): string => {
+const createMarkerImageDataURL = (label: string, _color: string, isSelected: boolean): string => {
   // React 컴포넌트를 HTML 문자열로 렌더링
   const svgString = renderToString(CustomMarker({ label, isSelected }));
 

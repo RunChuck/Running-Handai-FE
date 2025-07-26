@@ -1,22 +1,5 @@
 declare global {
-  interface Window {
-    kakao: {
-      maps: {
-        load: (callback: () => void) => void;
-        Map: typeof kakao.maps.Map;
-        LatLng: typeof kakao.maps.LatLng;
-        Polyline: typeof kakao.maps.Polyline;
-        LatLngBounds: typeof kakao.maps.LatLngBounds;
-        Marker: typeof kakao.maps.Marker;
-        InfoWindow: typeof kakao.maps.InfoWindow;
-        Circle: typeof kakao.maps.Circle;
-        event: typeof kakao.maps.event;
-      };
-    };
-  }
-}
-
-declare namespace kakao.maps {
+  namespace kakao.maps {
   export class Map {
     constructor(container: HTMLElement, options: MapOptions);
     setBounds(bounds: LatLngBounds): void;
@@ -122,14 +105,73 @@ declare namespace kakao.maps {
     constructor(x: number, y: number);
   }
 
+  export class CustomOverlay {
+    constructor(options: CustomOverlayOptions);
+    setMap(map: Map | null): void;
+    setPosition(position: LatLng): void;
+    setContent(content: string | HTMLElement): void;
+    setVisible(visible: boolean): void;
+    setZIndex(zIndex: number): void;
+  }
+
+  export interface CustomOverlayOptions {
+    clickable?: boolean;
+    content?: string | HTMLElement;
+    map?: Map;
+    position?: LatLng;
+    xAnchor?: number;
+    yAnchor?: number;
+    zIndex?: number;
+  }
+
+  export class MarkerClusterer {
+    constructor(options: MarkerClustererOptions);
+    addMarkers(markers: Marker[]): void;
+    removeMarkers(markers: Marker[]): void;
+    clear(): void;
+    redraw(): void;
+  }
+
+  export interface MarkerClustererOptions {
+    map: Map;
+    averageCenter?: boolean;
+    minLevel?: number;
+    disableClickZoom?: boolean;
+    gridSize?: number;
+    minClusterSize?: number;
+    maxLevel?: number;
+    texts?: string[];
+    calculator?: number[];
+    styles?: ClusterStyle[];
+  }
+
+  export interface ClusterStyle {
+    width: string;
+    height: string;
+    background: string;
+    borderRadius?: string;
+    color?: string;
+    textAlign?: string;
+    fontWeight?: string;
+    fontSize?: string;
+    lineHeight?: string;
+    border?: string;
+    boxShadow?: string;
+    display?: string;
+    alignItems?: string;
+    justifyContent?: string;
+    minWidth?: string;
+    minHeight?: string;
+  }
+
   export namespace event {
     export function addListener(
-      target: Map | Marker | Circle | InfoWindow,
+      target: Map | Marker | Circle | InfoWindow | MarkerClusterer,
       type: string,
       handler: (...args: unknown[]) => void
     ): void;
     export function removeListener(
-      target: Map | Marker | Circle | InfoWindow,
+      target: Map | Marker | Circle | InfoWindow | MarkerClusterer,
       type: string,
       handler: (...args: unknown[]) => void
     ): void;
@@ -152,6 +194,26 @@ declare namespace kakao.maps {
     ZERO_RESULT = 'ZERO_RESULT',
     ERROR = 'ERROR',
   }
-}
+  }
 
-export {};
+  interface Window {
+    kakao: {
+      maps: {
+        load: (callback: () => void) => void;
+        Map: typeof kakao.maps.Map;
+        LatLng: typeof kakao.maps.LatLng;
+        Polyline: typeof kakao.maps.Polyline;
+        LatLngBounds: typeof kakao.maps.LatLngBounds;
+        Marker: typeof kakao.maps.Marker;
+        InfoWindow: typeof kakao.maps.InfoWindow;
+        Circle: typeof kakao.maps.Circle;
+        event: typeof kakao.maps.event;
+        CustomOverlay: typeof kakao.maps.CustomOverlay;
+        Size: typeof kakao.maps.Size;
+        Point: typeof kakao.maps.Point;
+        MarkerImage: typeof kakao.maps.MarkerImage;
+        MarkerClusterer: typeof kakao.maps.MarkerClusterer;
+      };
+    };
+  }
+}

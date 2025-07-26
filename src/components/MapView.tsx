@@ -169,7 +169,7 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
       courseElements.current = drawMultipleCoursesOnMap(mapInstance.current, coursesData);
 
       // 클러스터러 생성 및 마커 추가
-      clusterer.current = createMarkerClusterer(mapInstance.current, handleClusterClick, mapContainer.current);
+      clusterer.current = createMarkerClusterer(mapInstance.current, handleClusterClick, mapContainer.current || undefined);
       if (clusterer.current) {
         clusterer.current.addMarkers(courseElements.current.markers);
       } else {

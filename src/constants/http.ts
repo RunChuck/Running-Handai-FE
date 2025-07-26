@@ -107,7 +107,7 @@ client.interceptors.response.use(
             return client(config);
           } catch (refreshError) {
             isRefreshing = false;
-            processQueue(refreshError, null);
+            processQueue(refreshError, undefined);
 
             // 리프레시 토큰도 만료된 경우 로그아웃 처리
             localStorage.removeItem('accessToken');

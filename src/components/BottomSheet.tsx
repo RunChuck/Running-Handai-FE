@@ -147,7 +147,7 @@ const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(({ children, ti
   };
 
   // 드래그 중
-  const handleDrag = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+  const handleDrag = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     if (!sheetRef.current) return;
 
     const sheetElement = sheetRef.current;
@@ -171,7 +171,7 @@ const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(({ children, ti
   };
 
   // 드래그 종료
-  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+  const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     setIsDragging(false);
 
     if (!sheetRef.current) return;
