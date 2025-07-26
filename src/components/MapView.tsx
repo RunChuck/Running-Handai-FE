@@ -76,28 +76,36 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
     const position = new window.kakao.maps.LatLng(location.lat, location.lng);
 
     if (isUserLocation) {
-      const accuracyCircle = new window.kakao.maps.Circle({
-        center: position,
-        radius: 100,
-        strokeWeight: 0,
-        strokeOpacity: 0,
-        fillColor: '#0057FF',
-        fillOpacity: 0.2,
+      const accuracyOverlay = new window.kakao.maps.CustomOverlay({
+        position: position,
+        content: `
+          <div style="
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: rgba(0, 87, 255, 0.2);
+            border: 1px solid rgba(0, 87, 255, 0.3);
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          ">
+            <div style="
+              width: 16px;
+              height: 16px;
+              border-radius: 50%;
+              background-color: #FF460D;
+              border: 2px solid #FFF;
+              box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+            "></div>
+          </div>
+        `,
+        yAnchor: 0.5,
+        xAnchor: 0.5,
+        zIndex: 10,
       });
 
-      accuracyCircle.setMap(map);
-
-      const centerDot = new window.kakao.maps.Circle({
-        center: position,
-        radius: 8,
-        strokeWeight: 2,
-        strokeColor: '#FFF',
-        strokeOpacity: 1,
-        fillColor: '#FF460D',
-        fillOpacity: 1,
-      });
-
-      centerDot.setMap(map);
+      accuracyOverlay.setMap(map);
     }
   };
 
