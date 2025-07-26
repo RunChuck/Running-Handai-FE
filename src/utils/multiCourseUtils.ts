@@ -65,8 +65,8 @@ export const drawMultipleCoursesOnMap = (map: kakao.maps.Map, coursesData: Multi
 
     // 커스텀 마커 이미지 생성
     const markerImageSrc = createMarkerImageDataURL(courseData.label, courseData.color, courseData.isSelected);
-    const imageSize = new window.kakao.maps.Size(26, 32); // SVG 원본 크기 사용
-    const imageOption = { offset: new window.kakao.maps.Point(13, 32) }; // 마커 끝점이 좌표에 맞도록 조정
+    const imageSize = new window.kakao.maps.Size(26, 32);
+    const imageOption = { offset: new window.kakao.maps.Point(13, 32) };
     const markerImage = new window.kakao.maps.MarkerImage(markerImageSrc, imageSize, imageOption);
 
     const marker = new window.kakao.maps.Marker({
@@ -75,11 +75,110 @@ export const drawMultipleCoursesOnMap = (map: kakao.maps.Map, coursesData: Multi
       title: `${courseData.label}코스`,
     });
 
+    // 마커에 코스 데이터 저장 (클러스터 클릭시 사용)
+    (marker as unknown as { courseData: MultiCourseMapData }).courseData = courseData;
+
     marker.setMap(map);
     markers.push(marker);
   });
 
   return { polylines, markers };
+};
+
+/**
+ * 마커 클러스터러 생성
+ */
+export const createMarkerClusterer = (
+  map: kakao.maps.Map,
+  onClusterClick?: (courses: Array<{ courseId: number; label: string; title: string }>, position: { x: number; y: number }) => void,
+  mapContainer?: HTMLElement
+): kakao.maps.MarkerClusterer | null => {
+  // 클러스터러 라이브러리가 로드되었는지 확인
+  if (!window.kakao?.maps?.MarkerClusterer) {
+    console.error('MarkerClusterer 라이브러리 로드 오류');
+    return null;
+  }
+
+  const clusterer = new window.kakao.maps.MarkerClusterer({
+    map: map,
+    averageCenter: true,
+    minLevel: 1,
+    disableClickZoom: true, // 확대 비활성화하여 바로 팝오버 표시
+    minClusterSize: 2,
+    gridSize: 40, // 반경 40px 내 마커들 클러스터링
+    styles: [
+      {
+        width: '26px',
+        height: '26px',
+        background: '#4561FF',
+        borderRadius: '16px',
+        color: '#FFF',
+        textAlign: 'center',
+        fontWeight: '600',
+        fontSize: '14px',
+        lineHeight: '24px',
+        border: '1px solid #1B37D3',
+        boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+      },
+    ],
+  });
+
+  // 클러스터 클릭 이벤트
+  if (onClusterClick) {
+    window.kakao.maps.event.addListener(clusterer, 'clusterclick', (cluster: kakao.maps.Cluster) => {
+      showClusterPopover(cluster, onClusterClick, map, mapContainer);
+    });
+  }
+
+  return clusterer;
+};
+
+/**
+ * 클러스터 클릭시 팝오버 표시
+ */
+const showClusterPopover = (
+  cluster: kakao.maps.Cluster,
+  onClusterClick: (courses: Array<{ courseId: number; label: string; title: string }>, position: { x: number; y: number }) => void,
+  map: kakao.maps.Map,
+  mapContainer?: HTMLElement
+) => {
+  const markers = cluster.getMarkers();
+  const courses = markers.map((marker: kakao.maps.Marker & { courseData?: MultiCourseMapData }) => ({
+    courseId: marker.courseData.courseId,
+    label: marker.courseData.label,
+    title: `${marker.courseData.label}코스`,
+  }));
+
+  // 클러스터 중심점을 지도 내부 좌표로 변환
+  const clusterPosition = cluster.getCenter();
+  const mapBounds = map.getBounds();
+
+  // 지도 경계 내에서의 상대적 위치 계산 (0~1 비율)
+  const swLatLng = mapBounds.getSouthWest();
+  const neLatLng = mapBounds.getNorthEast();
+
+  const latRange = neLatLng.getLat() - swLatLng.getLat();
+  const lngRange = neLatLng.getLng() - swLatLng.getLng();
+
+  const relativeX = (clusterPosition.getLng() - swLatLng.getLng()) / lngRange;
+  const relativeY = (neLatLng.getLat() - clusterPosition.getLat()) / latRange; // Y축은 반전
+
+  // 실제 지도 컨테이너 크기 가져오기
+  let mapWidth = 600;
+  let mapHeight = 400;
+
+  if (mapContainer) {
+    const rect = mapContainer.getBoundingClientRect();
+    mapWidth = rect.width;
+    mapHeight = rect.height;
+  }
+
+  const position = {
+    x: relativeX * mapWidth,
+    y: relativeY * mapHeight - 26, // 클러스터 위쪽에 표시
+  };
+
+  onClusterClick(courses, position);
 };
 
 /**
