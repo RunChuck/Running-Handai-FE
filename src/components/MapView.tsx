@@ -85,10 +85,10 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
             border-radius: 50%;
             background-color: rgba(0, 87, 255, 0.2);
             border: 1px solid rgba(0, 87, 255, 0.3);
-            transform: translate(-50%, -50%);
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
           ">
             <div style="
               width: 16px;
