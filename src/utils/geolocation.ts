@@ -21,8 +21,8 @@ export interface GeolocationOptions {
 export const getUserLocation = (
   options: GeolocationOptions = {
     enableHighAccuracy: true,
-    timeout: 10000,
-    maximumAge: 600000, // 10분
+    timeout: 15000,
+    maximumAge: 300000, // 5분
   }
 ): Promise<LocationCoords> => {
   return new Promise((resolve, reject) => {
@@ -32,15 +32,34 @@ export const getUserLocation = (
       return;
     }
 
+    let hasSucceeded = false;
+    let errorTimeout: NodeJS.Timeout | null = null;
+
     navigator.geolocation.getCurrentPosition(
       position => {
         const { latitude, longitude } = position.coords;
         console.log('사용자 위치 조회 성공:', { lat: latitude, lng: longitude });
+        hasSucceeded = true;
+        
+        // 에러 타이머가 있다면 클리어
+        if (errorTimeout) {
+          clearTimeout(errorTimeout);
+          errorTimeout = null;
+        }
+        
         resolve({ lat: latitude, lng: longitude });
       },
       error => {
         console.warn('위치 조회 실패:', error.message);
-        reject(error);
+        
+        // 에러 발생 후 1초 기다려서 성공했는지 확인
+        errorTimeout = setTimeout(() => {
+          if (!hasSucceeded) {
+            // 1초 후에도 성공하지 않았다면 진짜 에러로 처리
+            reject(error);
+          }
+          errorTimeout = null;
+        }, 1000);
       },
       options
     );
