@@ -1,8 +1,12 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
+import { useAuth } from '@/hooks/useAuth';
 
+import CommonModal from '@/components/CommonModal';
+import ReviewModal from '@/components/ReviewModal';
 import StarIconSrc from '@/assets/icons/star-default.svg';
 import StarFilledIconSrc from '@/assets/icons/star-filled.svg';
 import StarHalfIconSrc from '@/assets/icons/star-half.svg';
@@ -10,26 +14,47 @@ import { calculateRatingFromPosition } from '@/utils/starRating';
 
 const ReviewTab = () => {
   const [t] = useTranslation();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [rating, setRating] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [previewRating, setPreviewRating] = useState(0);
-
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const getClientX = (event: React.MouseEvent | React.TouchEvent): number => {
     return 'touches' in event ? event.touches[0].clientX : event.clientX;
+  };
+
+  const checkAuthAndExecute = (callback: () => void): boolean => {
+    if (!isAuthenticated) {
+      setIsLoginModalOpen(true);
+      return false;
+    }
+    callback();
+    return true;
+  };
+
+  const handleLoginModalClose = () => {
+    setIsLoginModalOpen(false);
   };
 
   const handleStarClick = (starIndex: number, event: React.MouseEvent<HTMLImageElement>) => {
     if (isDragging) return;
 
-    const rect = event.currentTarget.getBoundingClientRect();
-    const clickX = event.clientX - rect.left;
-    const starWidth = rect.width;
-    const isLeftHalf = clickX < starWidth / 2;
+    checkAuthAndExecute(() => {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const clickX = event.clientX - rect.left;
+      const starWidth = rect.width;
+      const isLeftHalf = clickX < starWidth / 2;
 
-    setRating(starIndex + (isLeftHalf ? 0.5 : 1));
+      setRating(starIndex + (isLeftHalf ? 0.5 : 1));
+      setIsReviewModalOpen(true);
+    });
   };
 
   const handleStart = (event: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+    if (!checkAuthAndExecute(() => {})) return;
+
     setIsDragging(true);
     const rect = event.currentTarget.getBoundingClientRect();
     const clientX = getClientX(event);
@@ -49,14 +74,17 @@ const ReviewTab = () => {
   const handleEnd = (event?: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
     if (!isDragging) return;
 
-    if (event) {
-      const rect = event.currentTarget.getBoundingClientRect();
-      const clientX = getClientX(event);
-      const newRating = calculateRatingFromPosition(clientX, rect);
-      setRating(newRating);
-    } else {
-      setRating(previewRating);
-    }
+    checkAuthAndExecute(() => {
+      if (event) {
+        const rect = event.currentTarget.getBoundingClientRect();
+        const clientX = getClientX(event);
+        const newRating = calculateRatingFromPosition(clientX, rect);
+        setRating(newRating);
+      } else {
+        setRating(previewRating);
+      }
+      setIsReviewModalOpen(true);
+    });
 
     setIsDragging(false);
     setPreviewRating(0);
@@ -96,6 +124,23 @@ const ReviewTab = () => {
           })}
         </RatingIconWrapper>
       </RatingContainer>
+
+      <CommonModal
+        isOpen={isLoginModalOpen}
+        onClose={handleLoginModalClose}
+        onConfirm={() => navigate('/')}
+        content={t('modal.reviewModal.loginMessage')}
+        cancelText={t('cancel')}
+        confirmText={t('main.simpleLogin')}
+      />
+
+      <ReviewModal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        onConfirm={() => setIsReviewModalOpen(false)}
+        content={t('modal.reviewModal.loginMessage')}
+        confirmText={t('modal.reviewModal.confirm')}
+      />
     </Container>
   );
 };
