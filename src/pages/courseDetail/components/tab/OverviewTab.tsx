@@ -1,8 +1,8 @@
 import type { CourseTabType, CourseDetailResponse } from '@/types/course';
 
-import CourseSection from '../sections.tsx/CourseSection';
-import ReviewSection from '../sections.tsx/ReviewSection';
-import AttractionSection from '../sections.tsx/AttractionSection';
+import CourseSection from './overview/CourseSection';
+import ReviewSection from './overview/ReviewSection';
+import AttractionSection from './overview/AttractionSection';
 import styled from '@emotion/styled';
 
 interface OverviewTabProps {
