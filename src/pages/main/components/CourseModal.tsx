@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
@@ -46,6 +47,15 @@ const THEME_OPTIONS = [
 
 const CourseModal = ({ isOpen, onClose, onAreaSelect, onThemeSelect, selectedFilter }: CourseModalProps) => {
   const { t } = useTranslation();
+
+  useEffect(() => {
+    const allImages = [...LOCATION_OPTIONS.map(option => option.image), ...THEME_OPTIONS.map(option => option.image), BackIconSrc];
+
+    allImages.forEach(src => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, []);
 
   const handleLocationSelect = (locationKey: string) => {
     if (onAreaSelect) {
@@ -131,7 +141,7 @@ const Overlay = styled.div`
 const ModalContainer = styled.div`
   width: 100%;
   max-width: 600px;
-  height: 100vh;
+  height: 100dvh;
   background: var(--surface-surface-default, #fff);
   display: flex;
   flex-direction: column;
