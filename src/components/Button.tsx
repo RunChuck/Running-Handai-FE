@@ -22,8 +22,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const ButtonBase = styled.button<ButtonProps>`
   display: inline-flex;
   align-items: center;
-  border-radius: ${({ borderRadius }) =>
-    typeof borderRadius === 'number' ? `${borderRadius}px` : borderRadius || '4px'};
+  border-radius: ${({ borderRadius }) => (typeof borderRadius === 'number' ? `${borderRadius}px` : borderRadius || '8px')};
   border: ${({ border }) => border || 'none'};
   transition: all 0.2s ease-in-out;
   cursor: pointer;
@@ -87,8 +86,7 @@ const ButtonBase = styled.button<ButtonProps>`
   }
 
   &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+    background-color: var(--text-text-disabled, #bbbbbb);
     transform: none;
   }
 `;

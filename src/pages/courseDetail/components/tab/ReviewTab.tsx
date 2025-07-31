@@ -138,7 +138,6 @@ const ReviewTab = () => {
         isOpen={isReviewModalOpen}
         onClose={() => setIsReviewModalOpen(false)}
         onConfirm={() => setIsReviewModalOpen(false)}
-        content={t('modal.reviewModal.loginMessage')}
         confirmText={t('modal.reviewModal.confirm')}
       />
     </Container>

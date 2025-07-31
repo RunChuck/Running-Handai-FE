@@ -60,7 +60,9 @@
     "reviewModal": {
       "title": "리뷰 작성",
       "confirm": "작성 완료",
-      "loginMessage": "로그인하고\n리뷰를 남겨보세요!"
+      "loginMessage": "로그인하고\n리뷰를 남겨보세요!",
+      "placeholder": "다른 러너들을 위해 코스에 대한 후기를 남겨주세요!\n작성 내용은 해당 코스 상세 리뷰에 노출 됩니다!",
+      "warning": "* 욕설, 비방이 포함된 리뷰는 경고 없이 삭제됩니다."
     }
   },
   "courseDetail": {
