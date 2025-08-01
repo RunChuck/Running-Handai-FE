@@ -60,7 +60,7 @@ const ReviewTab = () => {
           setIsReviewModalOpen(false);
         }}
         confirmText={t('modal.reviewModal.confirm')}
-        mode="edit"
+        mode="create"
         initialRating={rating}
       />
     </Container>

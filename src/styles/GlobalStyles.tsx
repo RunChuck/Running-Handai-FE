@@ -186,7 +186,7 @@ export const GlobalStyles = () => (
         outline: none;
 
         &:disabled {
-          cursor: not-allowed;
+          cursor: default;
           opacity: 0.6;
         }
       }

@@ -5,22 +5,41 @@ import { theme } from '@/styles/theme';
 import Button from './Button';
 
 import CloseIconSrc from '@/assets/icons/close-24px.svg';
+import StarRating from './StarRating';
+
+type ReviewModalMode = 'create' | 'edit';
 
 interface ReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (reviewText: string) => void;
+  onConfirm: (reviewText: string, rating?: number) => void;
   confirmText: string;
   placeholder?: string;
+  mode?: ReviewModalMode;
+  initialRating?: number;
+  initialReviewText?: string;
 }
 
-const ReviewModal = ({ isOpen, onClose, onConfirm, confirmText }: ReviewModalProps) => {
+const ReviewModal = ({ 
+  isOpen, 
+  onClose, 
+  onConfirm, 
+  confirmText, 
+  mode = 'create',
+  initialRating = 0,
+  initialReviewText = ''
+}: ReviewModalProps) => {
   const [t] = useTranslation();
-  const [reviewText, setReviewText] = useState('');
+  const [reviewText, setReviewText] = useState(initialReviewText);
+  const [rating, setRating] = useState(initialRating);
+
 
   const handleConfirm = () => {
-    onConfirm(reviewText);
+    onConfirm(reviewText, mode === 'edit' ? rating : undefined);
   };
+
+  const isTextOverLimit = reviewText.length > 2000;
+  const isButtonDisabled = reviewText.length === 0 || (mode === 'edit' && rating === 0) || isTextOverLimit;
 
   if (!isOpen) return null;
 
@@ -32,18 +51,30 @@ const ReviewModal = ({ isOpen, onClose, onConfirm, confirmText }: ReviewModalPro
         </CloseButton>
         <Title>{t('modal.reviewModal.title')}</Title>
 
-        <TextareaWrapper>
+        {mode === 'edit' && (
+          <StarRating
+            rating={rating}
+            onRatingChange={setRating}
+            label={t('modal.reviewModal.editRating')}
+            padding={16}
+          />
+        )}
+
+        <TextareaWrapper $isOverLimit={isTextOverLimit}>
           <Textarea
             value={reviewText}
             onChange={e => setReviewText(e.target.value)}
             placeholder={t('modal.reviewModal.placeholder')}
             maxLength={2000}
           />
-          <CharacterCount>{reviewText.length}/2000</CharacterCount>
+          <CharacterCount $isOverLimit={isTextOverLimit}>
+            {reviewText.length}
+            <div style={{ color: 'var(--text-text-secondary, #757575)' }}>/2000</div>
+          </CharacterCount>
         </TextareaWrapper>
 
         <Warning>{t('modal.reviewModal.warning')}</Warning>
-        <Button fullWidth disabled={reviewText.length === 0} onClick={handleConfirm}>
+        <Button fullWidth disabled={isButtonDisabled} onClick={handleConfirm}>
           {confirmText}
         </Button>
       </ModalContainer>
@@ -110,26 +141,28 @@ const Title = styled.div`
   text-align: center;
 `;
 
-const TextareaWrapper = styled.div`
+const TextareaWrapper = styled.div<{ $isOverLimit: boolean }>`
   position: relative;
   width: 100%;
   height: 100%;
-  padding: 0 0 32px 0;
+  padding: 0 0 37px 0;
   border-radius: 8px;
-  border: 1px solid var(--line-line-001, #eee);
+  border: 1px solid ${({ $isOverLimit }) => 
+    $isOverLimit ? 'var(--system-error, #ff0010)' : 'var(--line-line-001, #eee)'};
   background: var(--surface-surface-highlight3, #f7f8fa);
   box-sizing: border-box;
 
   &:focus-within {
-    border-color: var(--primary-primary, #4261ff);
+    border-color: ${({ $isOverLimit }) => 
+      $isOverLimit ? 'var(--system-error, #ff0010)' : 'var(--primary-primary, #4261ff)'};
   }
 `;
 
 const Textarea = styled.textarea`
   width: 100%;
   height: 100%;
-  min-height: 173px;
-  padding: var(--spacing-16);
+  min-height: 159px;
+  padding: var(--spacing-16) var(--spacing-16) 0 var(--spacing-16);
   border: none;
   background: transparent;
   resize: none;
@@ -147,12 +180,16 @@ const Textarea = styled.textarea`
   }
 `;
 
-const CharacterCount = styled.div`
+const CharacterCount = styled.div<{ $isOverLimit: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 2px;
   position: absolute;
   bottom: 16px;
   right: 16px;
   ${theme.typography.body2}
-  color: var(--text-text-secondary, #757575);
+  color: ${({ $isOverLimit }) => 
+    $isOverLimit ? 'var(--system-error, #ff0010)' : 'var(--text-text-secondary, #757575)'};
 `;
 
 const Warning = styled.div`
