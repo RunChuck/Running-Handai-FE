@@ -93,12 +93,10 @@ const CourseDetail = () => {
     return null;
   }
 
-  const title = `${t('course')} ${courseDetail.courseId}`;
-
   return (
     <Container ref={scrollRef}>
       <Header
-        title={title}
+        title={courseDetail.courseName}
         isBookmarked={courseDetail.isBookmarked}
         onBack={handleBack}
         onShare={handleShare}
