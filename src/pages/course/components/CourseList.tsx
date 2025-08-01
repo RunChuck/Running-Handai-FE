@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import Lottie from 'lottie-react';
 import styled from '@emotion/styled';
-import * as S from '../Main.styled';
+import * as S from '../Course.styled';
 import { theme } from '@/styles/theme';
 import { useIsMobile } from '@/hooks/useIsMobile';
 

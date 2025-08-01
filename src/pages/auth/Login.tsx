@@ -66,13 +66,13 @@ const Login = () => {
         color: isMobile ? 'var(--text-text-inverse, #fff)' : 'var(--text-text-title, #1C1C1C)',
         border: isMobile ? '1px solid #fff' : 'none',
       },
-      onClick: () => navigate('/main'),
+      onClick: () => navigate('/course'),
     },
   ];
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/main');
+      navigate('/course');
     }
   }, [isAuthenticated]);
 

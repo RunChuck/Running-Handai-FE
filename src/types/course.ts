@@ -54,6 +54,7 @@ interface TrackPoint {
 
 export interface CourseDetailData {
   courseId: number;
+  courseName: string;
   distance: number;
   duration: number;
   minElevation: number;

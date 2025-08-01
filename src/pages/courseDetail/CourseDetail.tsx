@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Lottie from 'lottie-react';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
-import * as S from '@/pages/main/Main.styled';
+import * as S from '@/pages/course/Course.styled';
 import useScrollToTop from '@/hooks/useScrollToTop';
 import { useCourseDetail } from '@/hooks/useCourseDetail';
 import { useBookmark } from '@/hooks/useBookmark';
@@ -44,7 +44,7 @@ const CourseDetail = () => {
 
   useEffect(() => {
     if (!courseId) {
-      navigate('/main', { replace: true });
+      navigate('/course', { replace: true });
     }
   }, [courseId, navigate]);
 
@@ -93,12 +93,10 @@ const CourseDetail = () => {
     return null;
   }
 
-  const title = `${t('course')} ${courseDetail.courseId}`;
-
   return (
     <Container ref={scrollRef}>
       <Header
-        title={title}
+        title={courseDetail.courseName}
         isBookmarked={courseDetail.isBookmarked}
         onBack={handleBack}
         onShare={handleShare}

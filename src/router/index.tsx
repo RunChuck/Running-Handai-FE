@@ -2,8 +2,8 @@ import { Routes, Route } from 'react-router-dom';
 
 import Login from '@/pages/auth/Login';
 import Auth from '@/pages/auth/Auth';
-import Main from '@/pages/main/Main';
-import CourseDetail from '@/pages/course/CourseDetail';
+import Course from '@/pages/course/Course';
+import CourseDetail from '@/pages/courseDetail/CourseDetail';
 import Test from '@/pages/temp/Test';
 
 const AppRoutes = () => {
@@ -11,7 +11,7 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/" element={<Login />} />
       <Route path="/auth" element={<Auth />} />
-      <Route path="/main" element={<Main />} />
+      <Route path="/course" element={<Course />} />
       <Route path="/course-detail/:id" element={<CourseDetail />} />
       <Route path="/test" element={<Test />} />
     </Routes>

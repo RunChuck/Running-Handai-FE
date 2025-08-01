@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import * as S from './Main.styled';
+import * as S from './Course.styled';
 
 import { useDebounce } from '@/hooks/useDebounce';
 import { useCourses } from '@/hooks/useCourses';
@@ -21,7 +21,7 @@ import LocationIconSrc from '@/assets/icons/location-icon.svg';
 import ArrowUprightIconSrc from '@/assets/icons/arrow-upright.svg';
 import MenuIconSrc from '@/assets/icons/menu-24px.svg';
 
-const Main = () => {
+const Course = () => {
   const [t] = useTranslation();
   const { mapRef } = useMap();
   const navigate = useNavigate();
@@ -226,4 +226,4 @@ const Main = () => {
   );
 };
 
-export default Main;
+export default Course;

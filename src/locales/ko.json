@@ -51,18 +51,29 @@
     "simpleLogin": "간편 로그인 하기",
     "bookmark": "명이 저장한 코스"
   },
-  "courseModal": {
+  "modal": {
+    "courseModal": {
     "title": "추천 코스 탐색",
     "location": "어디로 가시나요?",
-    "theme": "어떤 테마로 원하세요?"
+      "theme": "어떤 테마로 원하세요?"
+    },
+    "reviewModal": {
+      "title": "리뷰 작성",
+      "confirm": "작성 완료",
+      "loginMessage": "로그인하고\n리뷰를 남겨보세요!",
+      "placeholder": "다른 러너들을 위해 코스에 대한 후기를 남겨주세요!\n작성 내용은 해당 코스 상세 리뷰에 노출 됩니다!",
+      "warning": "* 욕설, 비방이 포함된 리뷰는 경고 없이 삭제됩니다.",
+      "edit": "리뷰 수정",
+      "editRating": "이 코스는 어떠셨나요?"
+    }
   },
-  "tabs": {
+  "courseDetail": {
+    "tabs": {
     "overview": "전체",
     "course": "코스",
     "attractions": "즐길거리",
     "reviews": "리뷰"
-  },
-  "courseDetail": {
+    },
     "loadingMap": "지도를 불러오고 있어요.",
     "loading": "코스 상세 정보를 불러오는 중입니다.",
     "error": "코스 정보를 불러오는 중 오류가 발생했습니다 🥲",
@@ -71,6 +82,8 @@
     "moreAttractions": "즐길거리 더보기",
     "firstReviewer": "코스의 첫번째 리뷰어가 되어주세요!",
     "aiCourseAnalysis": "AI 코스 분석 (추정)",
-    "scrollToTop": "맨 위로"
+    "scrollToTop": "맨 위로",
+    "moreReviews": "...더보기",
+    "collapse": "접기"
   }
 }

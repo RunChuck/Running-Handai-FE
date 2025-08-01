@@ -14,10 +14,10 @@ interface CourseTabProps {
 }
 
 const TAB_ITEMS: CourseTabItem[] = [
-  { key: 'overview', label: 'tabs.overview' },
-  { key: 'course', label: 'tabs.course' },
-  { key: 'attractions', label: 'tabs.attractions' },
-  { key: 'reviews', label: 'tabs.reviews' },
+  { key: 'overview', label: 'courseDetail.tabs.overview' },
+  { key: 'course', label: 'courseDetail.tabs.course' },
+  { key: 'attractions', label: 'courseDetail.tabs.attractions' },
+  { key: 'reviews', label: 'courseDetail.tabs.reviews' },
 ];
 
 const Tabs = ({ courseDetail }: CourseTabProps) => {

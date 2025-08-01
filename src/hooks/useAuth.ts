@@ -39,7 +39,7 @@ export const useAuth = () => {
 
     try {
       if (isAuthenticated()) {
-        navigate('/main', { replace: true });
+        navigate('/course', { replace: true });
         return;
       }
 
@@ -55,7 +55,7 @@ export const useAuth = () => {
 
       if (accessToken) {
         setToken(accessToken, refreshToken || undefined);
-        navigate('/main', { replace: true });
+        navigate('/course', { replace: true });
       } else {
         setState({ isLoading: false, error: '토큰을 받지 못했습니다.' });
       }

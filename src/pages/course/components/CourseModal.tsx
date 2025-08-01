@@ -82,12 +82,12 @@ const CourseModal = ({ isOpen, onClose, onAreaSelect, onThemeSelect, selectedFil
           <BackButton onClick={onClose}>
             <img src={BackIconSrc} alt="뒤로가기" />
           </BackButton>
-          <Title>🏃‍♂️ {t('courseModal.title')}</Title>
+          <Title>🏃‍♂️ {t('modal.courseModal.title')}</Title>
         </Header>
 
         <Content>
           <Section>
-            <Subtitle>{t('courseModal.location')}</Subtitle>
+            <Subtitle>{t('modal.courseModal.location')}</Subtitle>
             <OptionGrid>
               {LOCATION_OPTIONS.map(option => (
                 <OptionButton
@@ -103,7 +103,7 @@ const CourseModal = ({ isOpen, onClose, onAreaSelect, onThemeSelect, selectedFil
           </Section>
 
           <Section>
-            <Subtitle>{t('courseModal.theme')}</Subtitle>
+            <Subtitle>{t('modal.courseModal.theme')}</Subtitle>
             <OptionGrid>
               {THEME_OPTIONS.map(option => (
                 <OptionButton
