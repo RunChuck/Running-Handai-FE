@@ -2,29 +2,19 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
-import { theme } from '@/styles/theme';
 import { useAuth } from '@/hooks/useAuth';
 
+import StarRating from '@/components/StarRating';
 import CommonModal from '@/components/CommonModal';
 import ReviewModal from '@/components/ReviewModal';
-import StarIconSrc from '@/assets/icons/star-default.svg';
-import StarFilledIconSrc from '@/assets/icons/star-filled.svg';
-import StarHalfIconSrc from '@/assets/icons/star-half.svg';
-import { calculateRatingFromPosition } from '@/utils/starRating';
 
 const ReviewTab = () => {
   const [t] = useTranslation();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const [rating, setRating] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [previewRating, setPreviewRating] = useState(0);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const getClientX = (event: React.MouseEvent | React.TouchEvent): number => {
-    return 'touches' in event ? event.touches[0].clientX : event.clientX;
-  };
-
   const checkAuthAndExecute = (callback: () => void): boolean => {
     if (!isAuthenticated) {
       setIsLoginModalOpen(true);
@@ -38,92 +28,20 @@ const ReviewTab = () => {
     setIsLoginModalOpen(false);
   };
 
-  const handleStarClick = (starIndex: number, event: React.MouseEvent<HTMLImageElement>) => {
-    if (isDragging) return;
-
+  const handleRatingChange = (newRating: number) => {
     checkAuthAndExecute(() => {
-      const rect = event.currentTarget.getBoundingClientRect();
-      const clickX = event.clientX - rect.left;
-      const starWidth = rect.width;
-      const isLeftHalf = clickX < starWidth / 2;
-
-      setRating(starIndex + (isLeftHalf ? 0.5 : 1));
+      setRating(newRating);
       setIsReviewModalOpen(true);
     });
-  };
-
-  const handleStart = (event: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
-    if (!checkAuthAndExecute(() => {})) return;
-
-    setIsDragging(true);
-    const rect = event.currentTarget.getBoundingClientRect();
-    const clientX = getClientX(event);
-    const newRating = calculateRatingFromPosition(clientX, rect);
-    setPreviewRating(newRating);
-  };
-
-  const handleMove = (event: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
-    if (!isDragging) return;
-
-    const rect = event.currentTarget.getBoundingClientRect();
-    const clientX = getClientX(event);
-    const newRating = calculateRatingFromPosition(clientX, rect);
-    setPreviewRating(newRating);
-  };
-
-  const handleEnd = (event?: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
-    if (!isDragging) return;
-
-    checkAuthAndExecute(() => {
-      if (event) {
-        const rect = event.currentTarget.getBoundingClientRect();
-        const clientX = getClientX(event);
-        const newRating = calculateRatingFromPosition(clientX, rect);
-        setRating(newRating);
-      } else {
-        setRating(previewRating);
-      }
-      setIsReviewModalOpen(true);
-    });
-
-    setIsDragging(false);
-    setPreviewRating(0);
   };
 
   return (
     <Container>
-      <RatingContainer>
-        <RatingText>{t('courseDetail.firstReviewer')}</RatingText>
-        <RatingIconWrapper
-          onMouseDown={handleStart}
-          onMouseMove={handleMove}
-          onMouseUp={handleEnd}
-          onMouseLeave={() => {
-            if (isDragging) {
-              setIsDragging(false);
-              setPreviewRating(0);
-            }
-          }}
-          onTouchStart={handleStart}
-          onTouchMove={handleMove}
-          onTouchEnd={() => handleEnd()}
-        >
-          {[...Array(5)].map((_, index) => {
-            const currentRating = isDragging ? previewRating : rating;
-            const isFullStar = index < Math.floor(currentRating);
-            const isHalfStar = index === Math.floor(currentRating) && currentRating % 1 === 0.5;
-
-            let starSrc = StarIconSrc;
-            if (isFullStar) {
-              starSrc = StarFilledIconSrc;
-            } else if (isHalfStar) {
-              starSrc = StarHalfIconSrc;
-            }
-
-            return <StarIcon key={index} src={starSrc} alt="star" onClick={event => handleStarClick(index, event)} draggable={false} />;
-          })}
-        </RatingIconWrapper>
-      </RatingContainer>
+      <StarRating
+        rating={rating}
+        onRatingChange={handleRatingChange}
+        label={t('courseDetail.firstReviewer')}
+      />
 
       <CommonModal
         isOpen={isLoginModalOpen}
@@ -137,8 +55,13 @@ const ReviewTab = () => {
       <ReviewModal
         isOpen={isReviewModalOpen}
         onClose={() => setIsReviewModalOpen(false)}
-        onConfirm={() => setIsReviewModalOpen(false)}
+        onConfirm={(reviewText, reviewRating) => {
+          console.log('Review submitted:', { reviewText, rating: reviewRating || rating });
+          setIsReviewModalOpen(false);
+        }}
         confirmText={t('modal.reviewModal.confirm')}
+        mode="edit"
+        initialRating={rating}
       />
     </Container>
   );
@@ -152,37 +75,3 @@ const Container = styled.div`
   padding: var(--spacing-24) var(--spacing-16);
 `;
 
-const RatingContainer = styled.div`
-  background-color: var(--surface-surface-highlight3, #f7f8fa);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border-radius: 4px;
-  padding: var(--spacing-24);
-  gap: var(--spacing-4);
-`;
-
-const RatingText = styled.span`
-  ${theme.typography.body2};
-  color: var(--text-text-secondary, #555555);
-`;
-
-const StarIcon = styled.img`
-  transition: transform 0.1s ease;
-  cursor: pointer;
-
-  &:hover {
-    transform: scale(1.1);
-  }
-`;
-
-const RatingIconWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-4);
-  user-select: none;
-  touch-action: none;
-  padding: var(--spacing-8);
-  margin: calc(var(--spacing-8) * -1);
-`;
