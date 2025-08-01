@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 
+// import ReviewModal from './ReviewModal';
+import { Dropdown, DropdownItem } from './Dropdown';
 import StarFilledIconSrc from '@/assets/icons/star-filled.svg';
 import ProfileIconSrc from '@/assets/icons/profile-default.svg';
 import MoreIconSrc from '@/assets/icons/more-24px.svg';
@@ -26,6 +28,14 @@ const ReviewItem = ({ nickname, rating, date, review, isMyReview }: ReviewItemPr
     }
   };
 
+  const handleEditClick = () => {
+    // TODO: 수정 모달 열기
+  };
+
+  const handleDeleteClick = () => {
+    // TODO: 삭제 확인 모달 열기
+  };
+
   return (
     <Container>
       <UserInfo>
@@ -34,9 +44,12 @@ const ReviewItem = ({ nickname, rating, date, review, isMyReview }: ReviewItemPr
           {isMyReview && <img src={ProfileIconSrc} alt="profile" width={14} height={14} />}
         </NicknameWrapper>
         {isMyReview && (
-          <MoreButton>
-            <img src={MoreIconSrc} alt="more" width={24} height={24} />
-          </MoreButton>
+          <Dropdown trigger={<img src={MoreIconSrc} alt="more" width={24} height={24} />}>
+            <DropdownItem onClick={handleEditClick}>{t('edit')}</DropdownItem>
+            <DropdownItem onClick={handleDeleteClick} variant="danger">
+              {t('delete')}
+            </DropdownItem>
+          </Dropdown>
         )}
       </UserInfo>
       <RatingWrapper>
@@ -85,18 +98,6 @@ const NicknameWrapper = styled.div`
   display: flex;
   align-items: center;
   gap: var(--spacing-4);
-`;
-
-const MoreButton = styled.button`
-  background: none;
-  border: none;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background: var(--surface-surface-highlight);
-  }
 `;
 
 const UserNickname = styled.span`

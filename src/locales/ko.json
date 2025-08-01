@@ -11,6 +11,8 @@
   "level": "난이도",
   "attractions": "즐길거리",
   "review": "리뷰",
+  "edit": "수정",
+  "delete": "삭제",
   "login": {
     "google": "Google 로그인",
     "kakao": "Kakao 로그인",
