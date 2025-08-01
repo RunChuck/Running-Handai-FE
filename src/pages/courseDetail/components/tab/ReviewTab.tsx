@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import StarRating from '@/components/StarRating';
 import CommonModal from '@/components/CommonModal';
 import ReviewModal from '@/components/ReviewModal';
+import ReviewList from '@/components/ReviewList';
 
 const ReviewTab = () => {
   const [t] = useTranslation();
@@ -37,11 +38,8 @@ const ReviewTab = () => {
 
   return (
     <Container>
-      <StarRating
-        rating={rating}
-        onRatingChange={handleRatingChange}
-        label={t('courseDetail.firstReviewer')}
-      />
+      <StarRating rating={rating} onRatingChange={handleRatingChange} label={t('courseDetail.firstReviewer')} />
+      <ReviewList />
 
       <CommonModal
         isOpen={isLoginModalOpen}
