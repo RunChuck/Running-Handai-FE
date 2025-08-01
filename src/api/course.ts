@@ -15,12 +15,12 @@ export const courseAPI = {
   },
 
   bookmarkCourse: async (request: BookmarkRequest) => {
-    const response = await http.post<BookmarkResponse>(`/api/bookmarks/${request.courseId}`, request);
+    const response = await http.post<BookmarkResponse>(`${PREFIX}/${request.courseId}/bookmarks`, request);
     return response.data;
   },
 
   deleteBookmarkCourse: async (request: BookmarkRequest) => {
-    const response = await http.delete<BookmarkResponse>(`/api/bookmarks/${request.courseId}`, { data: request });
+    const response = await http.delete<BookmarkResponse>(`${PREFIX}/${request.courseId}/bookmarks`, { data: request });
     return response.data;
   },
 };
