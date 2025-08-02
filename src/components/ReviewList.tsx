@@ -14,10 +14,14 @@ interface ReviewListProps {
 }
 
 const ReviewList = ({ courseId }: ReviewListProps) => {
-  const { reviewData, editReviewAsync } = useReviews({ courseId });
+  const { reviewData, editReviewAsync, deleteReviewAsync } = useReviews({ courseId });
 
   const handleEditReview = async (reviewId: number, stars?: number, contents?: string) => {
     await editReviewAsync({ reviewId, stars, contents });
+  };
+
+  const handleDeleteReview = async (reviewId: number) => {
+    await deleteReviewAsync({ reviewId });
   };
 
   const renderStars = (rating: number) => {
@@ -57,6 +61,7 @@ const ReviewList = ({ courseId }: ReviewListProps) => {
           review={item.contents}
           isMyReview={item.isMyReview}
           onEditReview={handleEditReview}
+          onDeleteReview={handleDeleteReview}
         />
       ))}
     </Container>

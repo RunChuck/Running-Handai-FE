@@ -3,8 +3,9 @@ import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 
-import ReviewModal from './ReviewModal';
 import { Dropdown, DropdownItem } from './Dropdown';
+import ReviewModal from './ReviewModal';
+import CommonModal from './CommonModal';
 import StarFilledIconSrc from '@/assets/icons/star-filled.svg';
 import ProfileIconSrc from '@/assets/icons/profile-default.svg';
 import MoreIconSrc from '@/assets/icons/more-24px.svg';
@@ -17,14 +18,15 @@ interface ReviewItemProps {
   review: string;
   isMyReview: boolean;
   onEditReview?: (reviewId: number, stars?: number, contents?: string) => Promise<void>;
+  onDeleteReview?: (reviewId: number) => Promise<void>;
 }
 
-const ReviewItem = ({ reviewId, nickname, rating, date, review, isMyReview, onEditReview }: ReviewItemProps) => {
+const ReviewItem = ({ reviewId, nickname, rating, date, review, isMyReview, onEditReview, onDeleteReview }: ReviewItemProps) => {
   const [t] = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [needsTruncation, setNeedsTruncation] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const checkTextOverflow = (element: HTMLDivElement | null) => {
     if (element) {
       setNeedsTruncation(element.scrollHeight > element.clientHeight);
@@ -36,7 +38,7 @@ const ReviewItem = ({ reviewId, nickname, rating, date, review, isMyReview, onEd
   };
 
   const handleDeleteClick = () => {
-    // TODO: 삭제 확인 모달 열기
+    setIsDeleteModalOpen(true);
   };
 
   const handleEditConfirm = async (reviewText: string, newRating?: number) => {
@@ -55,6 +57,17 @@ const ReviewItem = ({ reviewId, nickname, rating, date, review, isMyReview, onEd
 
   const handleEditModalClose = () => {
     setIsEditModalOpen(false);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (onDeleteReview) {
+      try {
+        await onDeleteReview(reviewId);
+        setIsDeleteModalOpen(false);
+      } catch (error) {
+        console.error('Failed to delete review:', error);
+      }
+    }
   };
 
   return (
@@ -103,6 +116,14 @@ const ReviewItem = ({ reviewId, nickname, rating, date, review, isMyReview, onEd
         mode="edit"
         initialRating={rating}
         initialReviewText={review}
+      />
+      <CommonModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        content={t('modal.reviewModal.deleteWarning')}
+        cancelText={t('modal.reviewModal.deleteCancel')}
+        confirmText={t('modal.reviewModal.deleteConfirm')}
       />
     </Container>
   );

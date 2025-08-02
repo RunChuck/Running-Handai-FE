@@ -3,7 +3,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { reviewAPI } from '@/api/review';
 import { reviewKeys } from '@/constants/queryKeys';
 import { useAuth } from '@/hooks/useAuth';
-import type { ReviewData, CreateReviewRequest, CreateReviewResponse, EditReviewRequest, EditReviewResponse } from '@/types/review';
+import type {
+  ReviewData,
+  CreateReviewRequest,
+  CreateReviewResponse,
+  EditReviewRequest,
+  EditReviewResponse,
+  DeleteReviewRequest,
+  DeleteReviewResponse,
+} from '@/types/review';
 
 interface UseReviewsProps {
   courseId: number;
@@ -30,6 +38,13 @@ interface UseReviewsReturn {
   isEditing: boolean;
   editError: string | null;
   isEditSuccess: boolean;
+
+  // 리뷰 삭제
+  deleteReview: (request: DeleteReviewRequest) => void;
+  deleteReviewAsync: (request: DeleteReviewRequest) => Promise<DeleteReviewResponse>;
+  isDeleting: boolean;
+  deleteError: string | null;
+  isDeleteSuccess: boolean;
 
   // 폼 상태
   rating: number;
@@ -92,6 +107,21 @@ export const useReviews = ({ courseId, onLoginRequired }: UseReviewsProps): UseR
     },
     onError: error => {
       console.error('Failed to edit review:', error);
+    },
+  });
+
+  // 리뷰 삭제
+  const deleteMutation = useMutation({
+    mutationFn: async (request: DeleteReviewRequest) => {
+      return await reviewAPI.deleteReview(request);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: reviewKeys.list(courseId),
+      });
+    },
+    onError: error => {
+      console.error('Failed to delete review:', error);
     },
   });
 
@@ -162,6 +192,13 @@ export const useReviews = ({ courseId, onLoginRequired }: UseReviewsProps): UseR
     isEditing: editMutation.isPending,
     editError: editMutation.error?.message || null,
     isEditSuccess: editMutation.isSuccess,
+
+    // 리뷰 삭제
+    deleteReview: deleteMutation.mutate,
+    deleteReviewAsync: deleteMutation.mutateAsync,
+    isDeleting: deleteMutation.isPending,
+    deleteError: deleteMutation.error?.message || null,
+    isDeleteSuccess: deleteMutation.isSuccess,
 
     // 폼 상태
     rating,
