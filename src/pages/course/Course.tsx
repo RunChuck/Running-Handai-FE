@@ -152,15 +152,15 @@ const Course = () => {
     if (selectedFilter.type === 'area' || selectedFilter.type === 'theme') {
       if (courses.length > 0) {
         const firstCourseId = courses[0].courseId;
-        setSelectedCourseId(prev => prev !== firstCourseId ? firstCourseId : prev);
+        setSelectedCourseId(prevId => prevId === firstCourseId ? prevId : firstCourseId);
         mapRef.current.displayCourses(courses, firstCourseId);
       } else {
-        setSelectedCourseId(prev => prev !== undefined ? undefined : prev);
+        setSelectedCourseId(prevId => prevId === undefined ? prevId : undefined);
         mapRef.current.clearAllCourses();
       }
     } else {
       // nearby인 경우 코스 제거
-      setSelectedCourseId(prev => prev !== undefined ? undefined : prev);
+      setSelectedCourseId(prevId => prevId === undefined ? prevId : undefined);
       mapRef.current.clearAllCourses();
     }
   }, [courses, selectedFilter.type]);

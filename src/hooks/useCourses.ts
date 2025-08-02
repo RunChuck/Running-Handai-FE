@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { courseAPI } from '@/api/course';
 import { courseKeys } from '@/constants/queryKeys';
@@ -153,8 +153,12 @@ export const useCourses = () => {
     [userLocation, queryClient]
   );
 
+  const courses = useMemo(() => {
+    return (query.data as CourseResponse)?.data || [];
+  }, [query.data]);
+
   return {
-    courses: (query.data as CourseResponse)?.data || [],
+    courses,
     loading: query.isLoading,
     error: query.error?.message || null,
     fetchNearbyCourses,
