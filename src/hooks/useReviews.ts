@@ -1,10 +1,53 @@
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { reviewAPI } from '@/api/review';
 import { reviewKeys } from '@/constants/queryKeys';
-import type { ReviewData, CreateReviewRequest } from '@/types/review';
+import { useAuth } from '@/hooks/useAuth';
+import type { ReviewData, CreateReviewRequest, CreateReviewResponse } from '@/types/review';
 
-export const useReviews = (courseId: number) => {
-  const query = useQuery({
+interface UseReviewsProps {
+  courseId: number;
+  onLoginRequired?: () => void;
+}
+
+interface UseReviewsReturn {
+  // 데이터 조회
+  reviewData: ReviewData | null;
+  loading: boolean;
+  error: string | null;
+  refetch: () => void;
+
+  // 리뷰 생성
+  createReview: (request: CreateReviewRequest) => void;
+  createReviewAsync: (request: CreateReviewRequest) => Promise<CreateReviewResponse>;
+  isCreating: boolean;
+  createError: string | null;
+  isCreateSuccess: boolean;
+
+  // 폼 상태
+  rating: number;
+  isReviewModalOpen: boolean;
+  isLoginModalOpen: boolean;
+
+  // 폼 핸들러
+  handleRatingChange: (rating: number) => void;
+  handleReviewSubmit: (reviewText: string, reviewRating?: number) => Promise<void>;
+  handleLoginModalClose: () => void;
+  handleReviewModalClose: () => void;
+  checkAuthAndExecute: (callback: () => void) => boolean;
+}
+
+export const useReviews = ({ courseId, onLoginRequired }: UseReviewsProps): UseReviewsReturn => {
+  const { isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
+
+  // 폼 상태
+  const [rating, setRating] = useState(0);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+
+  // 리뷰 목록 조회
+  const reviewQuery = useQuery({
     queryKey: reviewKeys.list(courseId),
     queryFn: async (): Promise<ReviewData> => {
       const response = await reviewAPI.getReviews({ courseId });
@@ -15,23 +58,12 @@ export const useReviews = (courseId: number) => {
     gcTime: 10 * 60 * 1000,
   });
 
-  return {
-    reviewData: query.data || null,
-    loading: query.isLoading,
-    error: query.error?.message || null,
-    refetch: query.refetch,
-  };
-};
-
-export const useCreateReview = () => {
-  const queryClient = useQueryClient();
-
-  const mutation = useMutation({
+  // 리뷰 생성
+  const createMutation = useMutation({
     mutationFn: async (request: CreateReviewRequest) => {
       return await reviewAPI.createReview(request);
     },
     onSuccess: (_, variables) => {
-      // 해당 코스의 리뷰 목록 무효화하여 새로고침
       queryClient.invalidateQueries({
         queryKey: reviewKeys.list(variables.courseId),
       });
@@ -41,11 +73,77 @@ export const useCreateReview = () => {
     },
   });
 
+  // 인증 체크
+  const checkAuthAndExecute = (callback: () => void): boolean => {
+    if (!isAuthenticated) {
+      if (onLoginRequired) {
+        onLoginRequired();
+      } else {
+        setIsLoginModalOpen(true);
+      }
+      return false;
+    }
+    callback();
+    return true;
+  };
+
+  // 모달 핸들러
+  const handleLoginModalClose = () => {
+    setIsLoginModalOpen(false);
+  };
+
+  const handleReviewModalClose = () => {
+    if (!createMutation.isPending) {
+      setIsReviewModalOpen(false);
+    }
+  };
+
+  const handleRatingChange = (newRating: number) => {
+    checkAuthAndExecute(() => {
+      setRating(newRating);
+      setIsReviewModalOpen(true);
+    });
+  };
+
+  const handleReviewSubmit = async (reviewText: string, reviewRating?: number) => {
+    try {
+      await createMutation.mutateAsync({
+        courseId,
+        stars: reviewRating || rating,
+        contents: reviewText,
+      });
+      setIsReviewModalOpen(false);
+      setRating(0);
+    } catch (error) {
+      console.error('Failed to create review:', error);
+      throw error;
+    }
+  };
+
   return {
-    createReview: mutation.mutate,
-    createReviewAsync: mutation.mutateAsync,
-    loading: mutation.isPending,
-    error: mutation.error?.message || null,
-    isSuccess: mutation.isSuccess,
+    // 데이터 조회
+    reviewData: reviewQuery.data || null,
+    loading: reviewQuery.isLoading,
+    error: reviewQuery.error?.message || null,
+    refetch: reviewQuery.refetch,
+
+    // 리뷰 생성
+    createReview: createMutation.mutate,
+    createReviewAsync: createMutation.mutateAsync,
+    isCreating: createMutation.isPending,
+    createError: createMutation.error?.message || null,
+    isCreateSuccess: createMutation.isSuccess,
+
+    // 폼 상태
+    rating,
+    isReviewModalOpen,
+    isLoginModalOpen,
+
+    // 폼 핸들러
+    handleRatingChange,
+    handleReviewSubmit,
+    handleLoginModalClose,
+    handleReviewModalClose,
+    checkAuthAndExecute,
   };
 };
