@@ -1,14 +1,15 @@
 export interface ReviewData {
   starAverage: number;
   reviewCount: number;
-  reviewInfoDtoList: ReviewInfoDtoList[];
+  reviewInfoDtos: ReviewInfoDto[];
 }
 
-export interface ReviewInfoDtoList {
+export interface ReviewInfoDto {
   reviewId: number;
   stars: number;
   contents: string;
   writerNickname: string;
+  isMyReview: boolean;
   createdAt: string;
 }
 
@@ -35,7 +36,7 @@ export interface CreateReviewResponse {
   responseCode: string;
   message: string;
   totalCount: number;
-  data: ReviewInfoDtoList;
+  data: ReviewInfoDto;
 }
 
 export interface DeleteReviewRequest {
@@ -52,8 +53,8 @@ export interface DeleteReviewResponse {
 
 export interface EditReviewRequest {
   reviewId: number;
-  stars: number;
-  contents: string;
+  stars?: number;
+  contents?: string;
 }
 
 export interface EditReviewResponse {
@@ -61,5 +62,5 @@ export interface EditReviewResponse {
   responseCode: string;
   message: string;
   totalCount: number;
-  data: ReviewInfoDtoList;
+  data: ReviewInfoDto;
 }

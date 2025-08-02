@@ -19,7 +19,10 @@ export const reviewAPI = {
   },
 
   createReview: async (request: CreateReviewRequest) => {
-    const response = await http.post<CreateReviewResponse>(`${PREFIX}/${request.courseId}/reviews`, request);
+    const response = await http.post<CreateReviewResponse>(`${PREFIX}/${request.courseId}/reviews`, {
+      stars: request.stars,
+      contents: request.contents,
+    });
     return response.data;
   },
 
