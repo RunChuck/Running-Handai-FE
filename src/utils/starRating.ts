@@ -17,3 +17,32 @@ export const calculateRatingFromPosition = (clientX: number, containerRect: DOMR
   const newRating = Math.max(0, Math.min(maxRating, starIndex + (isLeftHalf ? 0.5 : 1)));
   return newRating;
 };
+
+export type StarType = 'filled' | 'half' | 'empty';
+
+export interface StarData {
+  type: StarType;
+  key: number;
+}
+
+/**
+ * 별점을 렌더링에 필요한 데이터 배열로 변환
+ * @param rating - 표시할 별점 (0-5)
+ * @returns 별 데이터 배열
+ */
+export const getStarData = (rating: number): StarData[] => {
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 > 0;
+  const stars: StarData[] = [];
+
+  for (let i = 0; i < 5; i++) {
+    if (i < fullStars) {
+      stars.push({ type: 'filled', key: i });
+    } else if (i === fullStars && hasHalfStar) {
+      stars.push({ type: 'half', key: i });
+    } else {
+      stars.push({ type: 'empty', key: i });
+    }
+  }
+  return stars;
+};

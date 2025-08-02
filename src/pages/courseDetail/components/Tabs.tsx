@@ -37,7 +37,7 @@ const Tabs = ({ courseDetail }: CourseTabProps) => {
       case 'attractions':
         return <AttractionsTab />;
       case 'reviews':
-        return <ReviewTab />;
+        return <ReviewTab courseId={courseDetail.courseId} />;
       default:
         return <OverviewTab onTabChange={handleTabChange} courseDetail={courseDetail} />;
     }

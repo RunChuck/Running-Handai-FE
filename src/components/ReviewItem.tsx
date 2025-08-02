@@ -3,31 +3,89 @@ import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 
+import { Dropdown, DropdownItem } from './Dropdown';
+import ReviewModal from './ReviewModal';
+import CommonModal from './CommonModal';
 import StarFilledIconSrc from '@/assets/icons/star-filled.svg';
-// import StarHalfIconSrc from '@/assets/icons/star-half.svg';
-// import StarIconSrc from '@/assets/icons/star-default.svg';
+import ProfileIconSrc from '@/assets/icons/profile-default.svg';
+import MoreIconSrc from '@/assets/icons/more-24px.svg';
 
 interface ReviewItemProps {
+  reviewId: number;
   nickname: string;
   rating: number;
   date: string;
   review: string;
+  isMyReview: boolean;
+  onEditReview?: (reviewId: number, stars?: number, contents?: string) => Promise<void>;
+  onDeleteReview?: (reviewId: number) => Promise<void>;
 }
 
-const ReviewItem = ({ nickname, rating, date, review }: ReviewItemProps) => {
+const ReviewItem = ({ reviewId, nickname, rating, date, review, isMyReview, onEditReview, onDeleteReview }: ReviewItemProps) => {
   const [t] = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [needsTruncation, setNeedsTruncation] = useState(false);
-
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const checkTextOverflow = (element: HTMLDivElement | null) => {
     if (element) {
       setNeedsTruncation(element.scrollHeight > element.clientHeight);
     }
   };
 
+  const handleEditClick = () => {
+    setIsEditModalOpen(true);
+  };
+
+  const handleDeleteClick = () => {
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleEditConfirm = async (reviewText: string, newRating?: number) => {
+    if (onEditReview) {
+      try {
+        const changedStars = newRating !== rating ? newRating : undefined;
+        const changedContents = reviewText !== review ? reviewText : undefined;
+
+        await onEditReview(reviewId, changedStars, changedContents);
+        setIsEditModalOpen(false);
+      } catch (error) {
+        console.error('Failed to edit review:', error);
+      }
+    }
+  };
+
+  const handleEditModalClose = () => {
+    setIsEditModalOpen(false);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (onDeleteReview) {
+      try {
+        await onDeleteReview(reviewId);
+        setIsDeleteModalOpen(false);
+      } catch (error) {
+        console.error('Failed to delete review:', error);
+      }
+    }
+  };
+
   return (
     <Container>
-      <UserNickname>{nickname}</UserNickname>
+      <UserInfo>
+        <NicknameWrapper>
+          <UserNickname>{nickname}</UserNickname>
+          {isMyReview && <img src={ProfileIconSrc} alt="profile" width={14} height={14} />}
+        </NicknameWrapper>
+        {isMyReview && (
+          <Dropdown trigger={<img src={MoreIconSrc} alt="more" width={24} height={24} />}>
+            <DropdownItem onClick={handleEditClick}>{t('edit')}</DropdownItem>
+            <DropdownItem onClick={handleDeleteClick} variant="danger">
+              {t('delete')}
+            </DropdownItem>
+          </Dropdown>
+        )}
+      </UserInfo>
       <RatingWrapper>
         <Rating>
           <img src={StarFilledIconSrc} alt="star" width={12} height={12} />
@@ -49,6 +107,24 @@ const ReviewItem = ({ nickname, rating, date, review }: ReviewItemProps) => {
           </ReviewTruncated>
         )}
       </ReviewWrapper>
+
+      <ReviewModal
+        isOpen={isEditModalOpen}
+        onClose={handleEditModalClose}
+        onConfirm={handleEditConfirm}
+        confirmText={t('modal.reviewModal.edit')}
+        mode="edit"
+        initialRating={rating}
+        initialReviewText={review}
+      />
+      <CommonModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        content={t('modal.reviewModal.deleteWarning')}
+        cancelText={t('modal.reviewModal.deleteCancel')}
+        confirmText={t('modal.reviewModal.deleteConfirm')}
+      />
     </Container>
   );
 };
@@ -61,6 +137,19 @@ const Container = styled.div`
   padding: var(--spacing-12) 0;
   gap: var(--spacing-4);
   border-top: 1px solid var(--line-line-001, #eeeeee);
+`;
+
+const UserInfo = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+`;
+
+const NicknameWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
 `;
 
 const UserNickname = styled.span`

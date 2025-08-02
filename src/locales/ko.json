@@ -11,6 +11,8 @@
   "level": "난이도",
   "attractions": "즐길거리",
   "review": "리뷰",
+  "edit": "수정",
+  "delete": "삭제",
   "login": {
     "google": "Google 로그인",
     "kakao": "Kakao 로그인",
@@ -64,7 +66,10 @@
       "placeholder": "다른 러너들을 위해 코스에 대한 후기를 남겨주세요!\n작성 내용은 해당 코스 상세 리뷰에 노출 됩니다!",
       "warning": "* 욕설, 비방이 포함된 리뷰는 경고 없이 삭제됩니다.",
       "edit": "리뷰 수정",
-      "editRating": "이 코스는 어떠셨나요?"
+      "editRating": "이 코스는 어떠셨나요?",
+      "deleteWarning": "리뷰를 삭제하면 되돌릴 수 없어요.\n정말 삭제할까요?",
+      "deleteConfirm": "네, 삭제할게요",
+      "deleteCancel": "취소"
     }
   },
   "courseDetail": {
@@ -81,6 +86,7 @@
     "moreCourseInfo": "코스 정보 더보기",
     "moreAttractions": "즐길거리 더보기",
     "firstReviewer": "코스의 첫번째 리뷰어가 되어주세요!",
+    "reviewRating": "이 코스는 어떠셨나요?",
     "aiCourseAnalysis": "AI 코스 분석 (추정)",
     "scrollToTop": "맨 위로",
     "moreReviews": "...더보기",
