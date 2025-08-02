@@ -1,48 +1,57 @@
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
+import { useReviews } from '@/hooks/useReviews';
+import { getStarData } from '@/utils/starRating';
+import { formatDate } from '@/utils/dateFormat';
+
 import ReviewItem from './ReviewItem';
-
 import StarFilledIconSrc from '@/assets/icons/star-filled.svg';
-// import StarHalfIconSrc from '@/assets/icons/star-half.svg';
-// import StarIconSrc from '@/assets/icons/star-default.svg';
+import StarHalfIconSrc from '@/assets/icons/star-half.svg';
+import StarIconSrc from '@/assets/icons/star-default.svg';
 
-const mock_data = [
-  {
-    id: 1,
-    nickname: '고양이최고',
-    rating: 4.5,
-    date: '2025.06.14',
-    review:
-      '바다 옆을 뛸 수 있어서 좋아요! 그런데 뱅뱅사거리 쯤 도로공사로 길이 좀 안좋네요 ㅠㅠ 그리고 근처 카페 coffee051 에서 커피 한 잔해도 좋을거같아요 뱅뱅 사거리 쯤 도로공사로 길이 좀 안좋네요 ㅠㅠ바다 옆을 뛸 수 있어서 좋아요! 그런데 뱅뱅사거리 쯤 도로공사로 길이 좀 안좋네요 ㅠㅠ 그리고 근처 카페 coffee051 에서 커피 한 잔해도 좋을거같아요 뱅뱅 사거리 쯤 도로공사로 길이 좀 안좋네요',
-  },
-  {
-    id: 2,
-    nickname: '고양이최고',
-    rating: 4.5,
-    date: '2025.06.14',
-    review:
-      '바다 옆을 뛸 수 있어서 좋아요! 그런데 뱅뱅사거리 쯤 도로공사로 길이 좀 안좋네요 ㅠㅠ 그리고 근처 카페 coffee051 에서 커피 한 잔해도 좋을거같아요 바다 옆을 뛸 수 있어서 좋아요! 그런데 뱅뱅사거리',
-  },
-];
+interface ReviewListProps {
+  courseId: number;
+}
 
-const ReviewList = () => {
+const ReviewList = ({ courseId }: ReviewListProps) => {
+  const { reviewData } = useReviews({ courseId });
+
+  const renderStars = (rating: number) => {
+    const starData = getStarData(rating);
+    return starData.map(star => {
+      let starSrc = StarIconSrc;
+      if (star.type === 'filled') {
+        starSrc = StarFilledIconSrc;
+      } else if (star.type === 'half') {
+        starSrc = StarHalfIconSrc;
+      }
+
+      return <img key={star.key} src={starSrc} alt={`${star.type}-star`} width={15} height={14} />;
+    });
+  };
+
+  if (!reviewData || reviewData.reviewCount === 0) {
+    return null;
+  }
+
   return (
     <Container>
       <ReviewInfoWrapper>
         <ReviewInfo>
-          <AverageRating>4.5</AverageRating>
-          <TotalReview>(52)</TotalReview>
+          <AverageRating>{reviewData.starAverage.toFixed(1)}</AverageRating>
+          <TotalReview>({reviewData.reviewCount})</TotalReview>
         </ReviewInfo>
-        <RatingWrapper>
-          <img src={StarFilledIconSrc} alt="star" width={15} height={14} />
-          <img src={StarFilledIconSrc} alt="star" width={15} height={14} />
-          <img src={StarFilledIconSrc} alt="star" width={15} height={14} />
-          <img src={StarFilledIconSrc} alt="star" width={15} height={14} />
-          <img src={StarFilledIconSrc} alt="star" width={15} height={14} />
-        </RatingWrapper>
+        <RatingWrapper>{renderStars(reviewData.starAverage)}</RatingWrapper>
       </ReviewInfoWrapper>
-      {mock_data.map(item => (
-        <ReviewItem key={item.id} nickname={item.nickname} rating={item.rating} date={item.date} review={item.review} />
+      {reviewData.reviewInfoDtos.map(item => (
+        <ReviewItem
+          key={item.reviewId}
+          nickname={item.writerNickname}
+          rating={item.stars}
+          date={formatDate(item.createdAt)}
+          review={item.contents}
+          isMyReview={item.isMyReview}
+        />
       ))}
     </Container>
   );

@@ -4,17 +4,18 @@ import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 
 import StarFilledIconSrc from '@/assets/icons/star-filled.svg';
-// import StarHalfIconSrc from '@/assets/icons/star-half.svg';
-// import StarIconSrc from '@/assets/icons/star-default.svg';
+import ProfileIconSrc from '@/assets/icons/profile-default.svg';
+import MoreIconSrc from '@/assets/icons/more-24px.svg';
 
 interface ReviewItemProps {
   nickname: string;
   rating: number;
   date: string;
   review: string;
+  isMyReview: boolean;
 }
 
-const ReviewItem = ({ nickname, rating, date, review }: ReviewItemProps) => {
+const ReviewItem = ({ nickname, rating, date, review, isMyReview }: ReviewItemProps) => {
   const [t] = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [needsTruncation, setNeedsTruncation] = useState(false);
@@ -27,7 +28,17 @@ const ReviewItem = ({ nickname, rating, date, review }: ReviewItemProps) => {
 
   return (
     <Container>
-      <UserNickname>{nickname}</UserNickname>
+      <UserInfo>
+        <NicknameWrapper>
+          <UserNickname>{nickname}</UserNickname>
+          {isMyReview && <img src={ProfileIconSrc} alt="profile" width={14} height={14} />}
+        </NicknameWrapper>
+        {isMyReview && (
+          <MoreButton>
+            <img src={MoreIconSrc} alt="more" width={24} height={24} />
+          </MoreButton>
+        )}
+      </UserInfo>
       <RatingWrapper>
         <Rating>
           <img src={StarFilledIconSrc} alt="star" width={12} height={12} />
@@ -61,6 +72,31 @@ const Container = styled.div`
   padding: var(--spacing-12) 0;
   gap: var(--spacing-4);
   border-top: 1px solid var(--line-line-001, #eeeeee);
+`;
+
+const UserInfo = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+`;
+
+const NicknameWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+`;
+
+const MoreButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: var(--surface-surface-highlight);
+  }
 `;
 
 const UserNickname = styled.span`
