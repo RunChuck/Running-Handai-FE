@@ -32,7 +32,10 @@ export const reviewAPI = {
   },
 
   editReview: async (request: EditReviewRequest) => {
-    const response = await http.put<EditReviewResponse>(`api/reviews/${request.reviewId}`, request);
+    const response = await http.patch<EditReviewResponse>(`api/reviews/${request.reviewId}`, {
+      stars: request.stars,
+      contents: request.contents,
+    });
     return response.data;
   },
 };

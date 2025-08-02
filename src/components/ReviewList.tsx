@@ -14,7 +14,11 @@ interface ReviewListProps {
 }
 
 const ReviewList = ({ courseId }: ReviewListProps) => {
-  const { reviewData } = useReviews({ courseId });
+  const { reviewData, editReviewAsync } = useReviews({ courseId });
+
+  const handleEditReview = async (reviewId: number, stars?: number, contents?: string) => {
+    await editReviewAsync({ reviewId, stars, contents });
+  };
 
   const renderStars = (rating: number) => {
     const starData = getStarData(rating);
@@ -46,11 +50,13 @@ const ReviewList = ({ courseId }: ReviewListProps) => {
       {reviewData.reviewInfoDtos.map(item => (
         <ReviewItem
           key={item.reviewId}
+          reviewId={item.reviewId}
           nickname={item.writerNickname}
           rating={item.stars}
           date={formatDate(item.createdAt)}
           review={item.contents}
           isMyReview={item.isMyReview}
+          onEditReview={handleEditReview}
         />
       ))}
     </Container>

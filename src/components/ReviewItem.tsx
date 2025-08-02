@@ -3,24 +3,27 @@ import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 
-// import ReviewModal from './ReviewModal';
+import ReviewModal from './ReviewModal';
 import { Dropdown, DropdownItem } from './Dropdown';
 import StarFilledIconSrc from '@/assets/icons/star-filled.svg';
 import ProfileIconSrc from '@/assets/icons/profile-default.svg';
 import MoreIconSrc from '@/assets/icons/more-24px.svg';
 
 interface ReviewItemProps {
+  reviewId: number;
   nickname: string;
   rating: number;
   date: string;
   review: string;
   isMyReview: boolean;
+  onEditReview?: (reviewId: number, stars?: number, contents?: string) => Promise<void>;
 }
 
-const ReviewItem = ({ nickname, rating, date, review, isMyReview }: ReviewItemProps) => {
+const ReviewItem = ({ reviewId, nickname, rating, date, review, isMyReview, onEditReview }: ReviewItemProps) => {
   const [t] = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [needsTruncation, setNeedsTruncation] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const checkTextOverflow = (element: HTMLDivElement | null) => {
     if (element) {
@@ -29,11 +32,29 @@ const ReviewItem = ({ nickname, rating, date, review, isMyReview }: ReviewItemPr
   };
 
   const handleEditClick = () => {
-    // TODO: 수정 모달 열기
+    setIsEditModalOpen(true);
   };
 
   const handleDeleteClick = () => {
     // TODO: 삭제 확인 모달 열기
+  };
+
+  const handleEditConfirm = async (reviewText: string, newRating?: number) => {
+    if (onEditReview) {
+      try {
+        const changedStars = newRating !== rating ? newRating : undefined;
+        const changedContents = reviewText !== review ? reviewText : undefined;
+
+        await onEditReview(reviewId, changedStars, changedContents);
+        setIsEditModalOpen(false);
+      } catch (error) {
+        console.error('Failed to edit review:', error);
+      }
+    }
+  };
+
+  const handleEditModalClose = () => {
+    setIsEditModalOpen(false);
   };
 
   return (
@@ -73,6 +94,16 @@ const ReviewItem = ({ nickname, rating, date, review, isMyReview }: ReviewItemPr
           </ReviewTruncated>
         )}
       </ReviewWrapper>
+
+      <ReviewModal
+        isOpen={isEditModalOpen}
+        onClose={handleEditModalClose}
+        onConfirm={handleEditConfirm}
+        confirmText={t('modal.reviewModal.edit')}
+        mode="edit"
+        initialRating={rating}
+        initialReviewText={review}
+      />
     </Container>
   );
 };

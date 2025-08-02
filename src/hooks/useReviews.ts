@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { reviewAPI } from '@/api/review';
 import { reviewKeys } from '@/constants/queryKeys';
 import { useAuth } from '@/hooks/useAuth';
-import type { ReviewData, CreateReviewRequest, CreateReviewResponse } from '@/types/review';
+import type { ReviewData, CreateReviewRequest, CreateReviewResponse, EditReviewRequest, EditReviewResponse } from '@/types/review';
 
 interface UseReviewsProps {
   courseId: number;
@@ -23,6 +23,13 @@ interface UseReviewsReturn {
   isCreating: boolean;
   createError: string | null;
   isCreateSuccess: boolean;
+
+  // 리뷰 수정
+  editReview: (request: EditReviewRequest) => void;
+  editReviewAsync: (request: EditReviewRequest) => Promise<EditReviewResponse>;
+  isEditing: boolean;
+  editError: string | null;
+  isEditSuccess: boolean;
 
   // 폼 상태
   rating: number;
@@ -70,6 +77,21 @@ export const useReviews = ({ courseId, onLoginRequired }: UseReviewsProps): UseR
     },
     onError: error => {
       console.error('Failed to create review:', error);
+    },
+  });
+
+  // 리뷰 수정
+  const editMutation = useMutation({
+    mutationFn: async (request: EditReviewRequest) => {
+      return await reviewAPI.editReview(request);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: reviewKeys.list(courseId),
+      });
+    },
+    onError: error => {
+      console.error('Failed to edit review:', error);
     },
   });
 
@@ -133,6 +155,13 @@ export const useReviews = ({ courseId, onLoginRequired }: UseReviewsProps): UseR
     isCreating: createMutation.isPending,
     createError: createMutation.error?.message || null,
     isCreateSuccess: createMutation.isSuccess,
+
+    // 리뷰 수정
+    editReview: editMutation.mutate,
+    editReviewAsync: editMutation.mutateAsync,
+    isEditing: editMutation.isPending,
+    editError: editMutation.error?.message || null,
+    isEditSuccess: editMutation.isSuccess,
 
     // 폼 상태
     rating,
