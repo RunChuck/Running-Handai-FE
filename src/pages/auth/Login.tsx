@@ -26,6 +26,8 @@ const Login = () => {
 
   const buttonSize = isMobile ? 'md' : 'lg';
 
+  const state = import.meta.env.DEV ? 'local' : 'prod';
+
   const loginButtons = [
     {
       id: 'google',
@@ -34,7 +36,7 @@ const Login = () => {
       icon: <img src={GoogleIconSrc} alt="Google" width="20" height="20" />,
       style: { color: 'var(--text-text-title, #1C1C1C)', border: '1px solid #dadce0' },
       onClick: () => {
-        window.location.href = `${import.meta.env.VITE_API_ROOT}/oauth2/authorization/google`;
+        window.location.href = `${import.meta.env.VITE_API_ROOT}/oauth2/authorization/google?state=${state}`;
       },
     },
     {
@@ -44,7 +46,7 @@ const Login = () => {
       icon: <img src={KakaoIconSrc} alt="Kakao" width="20" height="20" />,
       style: { color: 'var(--text-text-title, #1C1C1C)' },
       onClick: () => {
-        window.location.href = `${import.meta.env.VITE_API_ROOT}/oauth2/authorization/kakao`;
+        window.location.href = `${import.meta.env.VITE_API_ROOT}/oauth2/authorization/kakao?state=${state}`;
       },
     },
     {
@@ -54,7 +56,7 @@ const Login = () => {
       icon: <img src={NaverIconSrc} alt="Naver" width="20" height="20" />,
       style: {},
       onClick: () => {
-        window.location.href = `${import.meta.env.VITE_API_ROOT}/oauth2/authorization/naver`;
+        window.location.href = `${import.meta.env.VITE_API_ROOT}/oauth2/authorization/naver?state=${state}`;
       },
     },
     {
