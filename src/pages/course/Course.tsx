@@ -152,18 +152,18 @@ const Course = () => {
     if (selectedFilter.type === 'area' || selectedFilter.type === 'theme') {
       if (courses.length > 0) {
         const firstCourseId = courses[0].courseId;
-        setSelectedCourseId(firstCourseId);
+        setSelectedCourseId(prev => prev !== firstCourseId ? firstCourseId : prev);
         mapRef.current.displayCourses(courses, firstCourseId);
       } else {
-        setSelectedCourseId(undefined);
+        setSelectedCourseId(prev => prev !== undefined ? undefined : prev);
         mapRef.current.clearAllCourses();
       }
     } else {
       // nearby인 경우 코스 제거
-      setSelectedCourseId(undefined);
+      setSelectedCourseId(prev => prev !== undefined ? undefined : prev);
       mapRef.current.clearAllCourses();
     }
-  }, [courses, mapRef, selectedFilter.type]);
+  }, [courses, selectedFilter.type]);
 
   useEffect(() => {
     setLocalCourses(courses);
