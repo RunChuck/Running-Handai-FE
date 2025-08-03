@@ -17,6 +17,7 @@ import CourseModal from './components/CourseModal';
 import BottomSheet from '@/components/BottomSheet';
 import CourseList from './components/CourseList';
 import CommonModal from '@/components/CommonModal';
+import MetaTags from '@/components/MetaTags';
 import LocationIconSrc from '@/assets/icons/location-icon.svg';
 import ArrowUprightIconSrc from '@/assets/icons/arrow-upright.svg';
 import MenuIconSrc from '@/assets/icons/menu-24px.svg';
@@ -184,6 +185,7 @@ const Course = () => {
 
   return (
     <S.Container>
+      <MetaTags />
       <S.MapContainer bottomSheetHeight={bottomSheetHeight}>
         <MapView ref={mapRef} onCourseMarkerClick={handleCourseMarkerClick} containerHeight={window.innerHeight - bottomSheetHeight} />
       </S.MapContainer>
