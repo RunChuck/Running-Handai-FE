@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import * as S from './Section.styled';
 import { theme } from '@/styles/theme';
+import { formatDecimal } from '@/utils/format';
 import type { CourseTabType, CourseDetailResponse } from '@/types/course';
 
 import Button from '@/components/Button';
@@ -26,7 +27,7 @@ const CourseSection = ({ onTabChange, courseDetail }: CourseSectionProps) => {
     {
       icon: DistanceIconSrc,
       alt: 'distance',
-      label: `${courseDetail.distance % 1 === 0 ? courseDetail.distance : courseDetail.distance.toFixed(2)}km`,
+      label: `${formatDecimal(courseDetail.distance)}km`,
     },
     {
       icon: TimeIconSrc,
@@ -36,7 +37,7 @@ const CourseSection = ({ onTabChange, courseDetail }: CourseSectionProps) => {
     {
       icon: AltitudeIconSrc,
       alt: 'altitude',
-      label: `${t('max')}${courseDetail.maxElevation % 1 === 0 ? courseDetail.maxElevation : courseDetail.maxElevation.toFixed(2)}m`,
+      label: `${t('max')}${formatDecimal(courseDetail.maxElevation)}m`,
     },
   ];
 

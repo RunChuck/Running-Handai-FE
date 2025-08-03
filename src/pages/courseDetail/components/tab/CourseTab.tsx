@@ -3,6 +3,7 @@ import type { CourseDetailResponse } from '@/types/course';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { formatDecimal } from '@/utils/format';
 
 import DistanceIconSrc from '@/assets/icons/course-distance.svg';
 import TimeIconSrc from '@/assets/icons/course-time.svg';
@@ -22,7 +23,7 @@ const CourseTab = ({ courseDetail }: CourseTabProps) => {
     {
       icon: DistanceIconSrc,
       alt: 'distance',
-      label: `${courseDetail.distance % 1 === 0 ? courseDetail.distance : courseDetail.distance.toFixed(2)}km`,
+      label: `${formatDecimal(courseDetail.distance)}km`,
     },
     {
       icon: TimeIconSrc,
@@ -32,12 +33,12 @@ const CourseTab = ({ courseDetail }: CourseTabProps) => {
     {
       icon: MaxAltitudeIconSrc,
       alt: 'max altitude',
-      label: `${t('max')} ${courseDetail.maxElevation % 1 === 0 ? courseDetail.maxElevation : courseDetail.maxElevation.toFixed(2)}m`,
+      label: `${t('max')} ${formatDecimal(courseDetail.maxElevation)}m`,
     },
     {
       icon: MinAltitudeIconSrc,
       alt: 'min altitude',
-      label: `${t('min')} ${courseDetail.minElevation % 1 === 0 ? courseDetail.minElevation : courseDetail.minElevation.toFixed(2)}m`,
+      label: `${t('min')} ${formatDecimal(courseDetail.minElevation)}m`,
     },
     {
       icon: LevelIconSrc,

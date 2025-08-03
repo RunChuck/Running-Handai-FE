@@ -9,6 +9,7 @@ import * as S from '@/pages/course/Course.styled';
 import useScrollToTop from '@/hooks/useScrollToTop';
 import { useCourseDetail } from '@/hooks/useCourseDetail';
 import { useBookmark } from '@/hooks/useBookmark';
+import { formatCourseInfo } from '@/utils/format';
 import type { CourseData } from '@/types/course';
 
 import Header from './components/Header';
@@ -57,7 +58,6 @@ const CourseDetail = () => {
     navigate(-1);
   };
 
-
   const handleBookmarkToggle = () => {
     if (courseDetail) {
       handleBookmark(courseDetail);
@@ -71,7 +71,7 @@ const CourseDetail = () => {
   const getThumbnailUrl = (): string => {
     // 캐시된 코스 목록에서 썸네일 찾기
     const courseQueries = queryClient.getQueryCache().findAll({ queryKey: ['courses'] });
-    
+
     for (const query of courseQueries) {
       const courseData = query.state.data as { data: CourseData[] } | undefined;
       if (courseData?.data) {
@@ -81,7 +81,7 @@ const CourseDetail = () => {
         }
       }
     }
-    
+
     return DefaultThumbnailSrc;
   };
 
@@ -112,17 +112,13 @@ const CourseDetail = () => {
     return null;
   }
 
+  const formattedCourseInfo = formatCourseInfo(courseDetail);
+
   return (
     <Container ref={scrollRef}>
       <MetaTags
         title={courseDetail.courseName}
-        description={t('seo.courseDescription', {
-          distance: courseDetail.distance % 1 === 0 ? courseDetail.distance.toString() : courseDetail.distance.toFixed(2),
-          duration: courseDetail.duration,
-          maxElevation: courseDetail.maxElevation % 1 === 0 ? courseDetail.maxElevation.toString() : courseDetail.maxElevation.toFixed(2),
-          minElevation: courseDetail.minElevation % 1 === 0 ? courseDetail.minElevation.toString() : courseDetail.minElevation.toFixed(2),
-          level: courseDetail.level
-        })}
+        description={t('seo.courseDescription', formattedCourseInfo)}
         image={getThumbnailUrl()}
         url={window.location.href}
       />
@@ -131,6 +127,8 @@ const CourseDetail = () => {
         isBookmarked={courseDetail.isBookmarked}
         onBack={handleBack}
         onBookmarkToggle={handleBookmarkToggle}
+        courseDescription={t('seo.courseDescription', formattedCourseInfo)}
+        courseImageUrl={getThumbnailUrl()}
       />
       <CourseRouteMap courseDetail={courseDetail} />
       <Tabs courseDetail={courseDetail} />
