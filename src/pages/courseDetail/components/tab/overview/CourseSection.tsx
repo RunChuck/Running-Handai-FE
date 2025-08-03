@@ -26,7 +26,7 @@ const CourseSection = ({ onTabChange, courseDetail }: CourseSectionProps) => {
     {
       icon: DistanceIconSrc,
       alt: 'distance',
-      label: `${courseDetail.distance}km`,
+      label: `${courseDetail.distance % 1 === 0 ? courseDetail.distance : courseDetail.distance.toFixed(2)}km`,
     },
     {
       icon: TimeIconSrc,
@@ -36,7 +36,7 @@ const CourseSection = ({ onTabChange, courseDetail }: CourseSectionProps) => {
     {
       icon: AltitudeIconSrc,
       alt: 'altitude',
-      label: `${t('max')}${Math.round(courseDetail.maxElevation)}m`,
+      label: `${t('max')}${courseDetail.maxElevation % 1 === 0 ? courseDetail.maxElevation : courseDetail.maxElevation.toFixed(2)}m`,
     },
   ];
 
