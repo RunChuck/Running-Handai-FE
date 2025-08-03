@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { shareToKakao } from '@/utils/kakao';
 
 import KakaoIconSrc from '@/assets/icons/kakao-icon.svg';
 import CopyIconSrc from '@/assets/icons/copy-24px.svg';
@@ -7,12 +8,19 @@ interface SharePopoverProps {
   isOpen: boolean;
   onClose: () => void;
   courseTitle: string;
+  courseDescription: string;
+  courseImageUrl: string;
   courseUrl: string;
 }
 
-const SharePopover = ({ isOpen, onClose, courseTitle, courseUrl }: SharePopoverProps) => {
+const SharePopover = ({ isOpen, onClose, courseTitle, courseDescription, courseImageUrl, courseUrl }: SharePopoverProps) => {
   const handleKakaoShare = () => {
-    console.log('카카오톡 공유:', { courseTitle, courseUrl });
+    shareToKakao({
+      title: courseTitle,
+      description: courseDescription,
+      imageUrl: courseImageUrl,
+      webUrl: courseUrl,
+    });
     onClose();
   };
 

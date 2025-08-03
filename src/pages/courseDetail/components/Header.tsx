@@ -13,9 +13,11 @@ interface HeaderProps {
   isBookmarked?: boolean;
   onBack: () => void;
   onBookmarkToggle: () => void;
+  courseDescription?: string;
+  courseImageUrl?: string;
 }
 
-const Header = ({ title, isBookmarked = false, onBack, onBookmarkToggle }: HeaderProps) => {
+const Header = ({ title, isBookmarked = false, onBack, onBookmarkToggle, courseDescription = '', courseImageUrl = '' }: HeaderProps) => {
   const [isSharePopoverOpen, setIsSharePopoverOpen] = useState(false);
 
   const handleShareClick = () => {
@@ -39,7 +41,14 @@ const Header = ({ title, isBookmarked = false, onBack, onBookmarkToggle }: Heade
           <IconButton onClick={handleShareClick}>
             <img src={ShareIconSrc} alt="share" />
           </IconButton>
-          <SharePopover isOpen={isSharePopoverOpen} onClose={handleCloseSharePopover} courseTitle={title} courseUrl={window.location.href} />
+          <SharePopover
+            isOpen={isSharePopoverOpen}
+            onClose={handleCloseSharePopover}
+            courseTitle={title}
+            courseDescription={courseDescription}
+            courseImageUrl={courseImageUrl}
+            courseUrl={window.location.href}
+          />
         </ShareButtonContainer>
         <IconButton onClick={onBookmarkToggle}>
           <img src={isBookmarked ? HeartIconFilledSrc : HeartIconSrc} alt="bookmark" />
