@@ -1,5 +1,16 @@
 {
   "menu": "메뉴",
+  "seo": {
+    "title": "러닝한다이",
+    "description": "부산 러닝 코스 추천 서비스",
+    "courseDescription": "{{distance}}km · {{duration}}분 · 최고 {{maxElevation}}m · 최저 {{minElevation}}m · 난이도 {{level}}",
+    "units": {
+      "km": "km",
+      "minutes": "분",
+      "meters": "m",
+      "difficulty": "난이도"
+    }
+  },
   "cancel": "취소",
   "retry": "다시 시도",
   "currentLocation": "현재 위치",
