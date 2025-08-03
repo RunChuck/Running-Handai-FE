@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 
+import SharePopover from '@/components/SharePopover';
 import BackIconSrc from '@/assets/icons/arrow-left-24px.svg';
 import ShareIconSrc from '@/assets/icons/share-24px.svg';
 import HeartIconSrc from '@/assets/icons/heart-default.svg';
@@ -10,11 +12,20 @@ interface HeaderProps {
   title: string;
   isBookmarked?: boolean;
   onBack: () => void;
-  onShare: () => void;
   onBookmarkToggle: () => void;
 }
 
-const Header = ({ title, isBookmarked = false, onBack, onShare, onBookmarkToggle }: HeaderProps) => {
+const Header = ({ title, isBookmarked = false, onBack, onBookmarkToggle }: HeaderProps) => {
+  const [isSharePopoverOpen, setIsSharePopoverOpen] = useState(false);
+
+  const handleShareClick = () => {
+    setIsSharePopoverOpen(true);
+  };
+
+  const handleCloseSharePopover = () => {
+    setIsSharePopoverOpen(false);
+  };
+
   return (
     <Container>
       <IconButton onClick={onBack}>
@@ -24,9 +35,12 @@ const Header = ({ title, isBookmarked = false, onBack, onShare, onBookmarkToggle
         <Title>{title}</Title>
       </CenterSection>
       <RightSection>
-        <IconButton onClick={onShare}>
-          <img src={ShareIconSrc} alt="share" />
-        </IconButton>
+        <ShareButtonContainer>
+          <IconButton onClick={handleShareClick}>
+            <img src={ShareIconSrc} alt="share" />
+          </IconButton>
+          <SharePopover isOpen={isSharePopoverOpen} onClose={handleCloseSharePopover} courseTitle={title} courseUrl={window.location.href} />
+        </ShareButtonContainer>
         <IconButton onClick={onBookmarkToggle}>
           <img src={isBookmarked ? HeartIconFilledSrc : HeartIconSrc} alt="bookmark" />
         </IconButton>
@@ -86,4 +100,8 @@ const Title = styled.h1`
   color: var(--text-text-title);
   text-align: center;
   white-space: nowrap;
+`;
+
+const ShareButtonContainer = styled.div`
+  position: relative;
 `;

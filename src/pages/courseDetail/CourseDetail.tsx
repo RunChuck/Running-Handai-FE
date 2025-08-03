@@ -57,9 +57,6 @@ const CourseDetail = () => {
     navigate(-1);
   };
 
-  const handleShare = () => {
-    // TODO: 공유하기
-  };
 
   const handleBookmarkToggle = () => {
     if (courseDetail) {
@@ -133,7 +130,6 @@ const CourseDetail = () => {
         title={courseDetail.courseName}
         isBookmarked={courseDetail.isBookmarked}
         onBack={handleBack}
-        onShare={handleShare}
         onBookmarkToggle={handleBookmarkToggle}
       />
       <CourseRouteMap courseDetail={courseDetail} />
