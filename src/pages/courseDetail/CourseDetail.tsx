@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import Lottie from 'lottie-react';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
@@ -8,20 +9,25 @@ import * as S from '@/pages/course/Course.styled';
 import useScrollToTop from '@/hooks/useScrollToTop';
 import { useCourseDetail } from '@/hooks/useCourseDetail';
 import { useBookmark } from '@/hooks/useBookmark';
+import { formatCourseInfo } from '@/utils/format';
+import type { CourseData } from '@/types/course';
 
 import Header from './components/Header';
 import Tabs from './components/Tabs';
 import CourseRouteMap from '@/components/CourseRouteMap';
 import CommonModal from '@/components/CommonModal';
+import MetaTags from '@/components/MetaTags';
 import ScrollIconSrc from '@/assets/icons/scroll-up.svg';
 import LoadingMotion from '@/assets/animations/run-loading.json';
 import NoCourseImgSrc from '@/assets/images/sad-emoji.png';
+import DefaultThumbnailSrc from '@/assets/images/thumbnail-default.png';
 
 const CourseDetail = () => {
   const [t] = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const { scrollRef, scrollToTop, showScrollButton } = useScrollToTop();
 
@@ -52,10 +58,6 @@ const CourseDetail = () => {
     navigate(-1);
   };
 
-  const handleShare = () => {
-    // TODO: 공유하기
-  };
-
   const handleBookmarkToggle = () => {
     if (courseDetail) {
       handleBookmark(courseDetail);
@@ -64,6 +66,23 @@ const CourseDetail = () => {
 
   const handleLoginModalClose = () => {
     setIsLoginModalOpen(false);
+  };
+
+  const getThumbnailUrl = (): string => {
+    // 캐시된 코스 목록에서 썸네일 찾기
+    const courseQueries = queryClient.getQueryCache().findAll({ queryKey: ['courses'] });
+
+    for (const query of courseQueries) {
+      const courseData = query.state.data as { data: CourseData[] } | undefined;
+      if (courseData?.data) {
+        const course = courseData.data.find((c: CourseData) => c.courseId === courseId);
+        if (course?.thumbnailUrl) {
+          return course.thumbnailUrl;
+        }
+      }
+    }
+
+    return DefaultThumbnailSrc;
   };
 
   if (loading) {
@@ -93,14 +112,23 @@ const CourseDetail = () => {
     return null;
   }
 
+  const formattedCourseInfo = formatCourseInfo(courseDetail);
+
   return (
     <Container ref={scrollRef}>
+      <MetaTags
+        title={courseDetail.courseName}
+        description={t('seo.courseDescription', formattedCourseInfo)}
+        image={getThumbnailUrl()}
+        url={window.location.href}
+      />
       <Header
         title={courseDetail.courseName}
         isBookmarked={courseDetail.isBookmarked}
         onBack={handleBack}
-        onShare={handleShare}
         onBookmarkToggle={handleBookmarkToggle}
+        courseDescription={t('seo.courseDescription', formattedCourseInfo)}
+        courseImageUrl={getThumbnailUrl()}
       />
       <CourseRouteMap courseDetail={courseDetail} />
       <Tabs courseDetail={courseDetail} />
