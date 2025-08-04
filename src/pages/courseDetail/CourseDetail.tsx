@@ -20,7 +20,6 @@ import MetaTags from '@/components/MetaTags';
 import ScrollIconSrc from '@/assets/icons/scroll-up.svg';
 import LoadingMotion from '@/assets/animations/run-loading.json';
 import NoCourseImgSrc from '@/assets/images/sad-emoji.png';
-import DefaultThumbnailSrc from '@/assets/images/thumbnail-default.png';
 
 const CourseDetail = () => {
   const [t] = useTranslation();
@@ -77,12 +76,17 @@ const CourseDetail = () => {
       if (courseData?.data) {
         const course = courseData.data.find((c: CourseData) => c.courseId === courseId);
         if (course?.thumbnailUrl) {
+          // 썸네일 URL이 상대 경로인 경우 절대 URL로 변환
+          if (course.thumbnailUrl.startsWith('/')) {
+            return `${window.location.origin}${course.thumbnailUrl}`;
+          }
+          // 이미 절대 URL인 경우 그대로 반환
           return course.thumbnailUrl;
         }
       }
     }
-
-    return DefaultThumbnailSrc;
+    
+    return `${window.location.origin}/thumbnail-default.png`;
   };
 
   if (loading) {
