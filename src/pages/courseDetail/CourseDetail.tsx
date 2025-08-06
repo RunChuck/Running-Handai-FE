@@ -163,7 +163,7 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
-  padding-bottom: 40px;
+  padding-bottom: var(--spacing-32);
 `;
 
 const StatusContainer = styled.div`
