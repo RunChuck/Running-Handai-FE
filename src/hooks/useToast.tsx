@@ -28,7 +28,7 @@ export const useToast = () => {
     });
   };
 
-  const showSuccess = (
+  const showSuccessToast = (
     message: string,
     options?: {
       position?: ToastPosition;
@@ -38,7 +38,7 @@ export const useToast = () => {
     showToast(message, ToastType.SUCCESS, options);
   };
 
-  const showError = (
+  const showErrorToast = (
     message: string,
     options?: {
       position?: ToastPosition;
@@ -48,7 +48,7 @@ export const useToast = () => {
     showToast(message, ToastType.FAILED, options);
   };
 
-  const showInfo = (
+  const showInfoToast = (
     message: string,
     options?: {
       position?: ToastPosition;
@@ -58,7 +58,7 @@ export const useToast = () => {
     showToast(message, ToastType.INFO, options);
   };
 
-  const showWarning = (
+  const showWarningToast = (
     message: string,
     options?: {
       position?: ToastPosition;
@@ -71,9 +71,9 @@ export const useToast = () => {
   return {
     ...rest,
     showToast,
-    showSuccess,
-    showError,
-    showInfo,
-    showWarning,
+    showSuccessToast,
+    showErrorToast,
+    showInfoToast,
+    showWarningToast,
   };
 };

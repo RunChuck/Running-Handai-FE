@@ -24,12 +24,6 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
     };
 
     setToasts(prev => [...prev, newToast]);
-
-    if (newToast.duration && newToast.duration > 0) {
-      setTimeout(() => {
-        hideToast(id);
-      }, newToast.duration);
-    }
   }, []);
 
   const hideToast = useCallback((id: string) => {
