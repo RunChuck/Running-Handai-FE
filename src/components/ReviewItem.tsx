@@ -103,7 +103,7 @@ const ReviewItem = ({ reviewId, nickname, rating, date, review, isMyReview, onEd
         ) : (
           <ReviewTruncated>
             <Review ref={checkTextOverflow}>{review}</Review>
-            {needsTruncation && <ToggleButtonInline onClick={() => setIsExpanded(true)}>{t('courseDetail.moreReviews')}</ToggleButtonInline>}
+            {needsTruncation && <ToggleButtonInline onClick={() => setIsExpanded(true)}>{t('courseDetail.more')}</ToggleButtonInline>}
           </ReviewTruncated>
         )}
       </ReviewWrapper>
