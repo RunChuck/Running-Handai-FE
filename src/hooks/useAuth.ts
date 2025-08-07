@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useToast } from '@/hooks/useToast';
 
 interface AuthState {
   isLoading: boolean;
@@ -7,8 +9,10 @@ interface AuthState {
 }
 
 export const useAuth = () => {
+  const [t] = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { showSuccessToast, showErrorToast } = useToast();
   const [state, setState] = useState<AuthState>({
     isLoading: false,
     error: null,
@@ -50,20 +54,26 @@ export const useAuth = () => {
 
       if (error) {
         setState({ isLoading: false, error: error });
+        showErrorToast(error);
         return;
       }
 
       if (accessToken) {
         setToken(accessToken, refreshToken || undefined);
+        showSuccessToast(t('toast.loginSuccess'), { position: 'top' });
         navigate('/course', { replace: true });
       } else {
-        setState({ isLoading: false, error: '토큰을 받지 못했습니다.' });
+        const errorMsg = t('toast.loginFailed');
+        setState({ isLoading: false, error: errorMsg });
+        showErrorToast(errorMsg, { position: 'top' });
       }
     } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : t('toast.error');
       setState({
         isLoading: false,
-        error: err instanceof Error ? err.message : '인증 처리 중 오류가 발생했습니다.',
+        error: errorMsg,
       });
+      showErrorToast(errorMsg, { position: 'top' });
     }
   };
 
