@@ -162,13 +162,8 @@ export default CourseDetail;
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  height: 100dvh;
-  overflow-y: auto;
+  min-height: 100dvh;
   padding-bottom: 40px;
-
-  ::-webkit-scrollbar {
-    display: none;
-  }
 `;
 
 const StatusContainer = styled.div`

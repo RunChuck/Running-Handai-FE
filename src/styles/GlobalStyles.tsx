@@ -98,11 +98,11 @@ export const GlobalStyles = () => (
         margin: 0;
         padding: 0;
         overscroll-behavior: none;
-        overflow: hidden;
-        position: fixed;
+        overflow-y: auto;
+        overflow-x: hidden;
         width: 100%;
         height: 100%;
-        touch-action: none;
+        touch-action: pan-y;
       }
 
       html {
@@ -121,7 +121,7 @@ export const GlobalStyles = () => (
         font-weight: 400;
         line-height: 1.5;
         color: var(--text-text-title);
-        background-color: var(--surface-surface-tertiary, #eeeeee);
+        background-color: var(--GrayScale-gray050, #fafafa);
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         -webkit-tap-highlight-color: transparent;
@@ -136,8 +136,6 @@ export const GlobalStyles = () => (
         position: relative;
         background-color: var(--surface-surface-default, #ffffff);
         min-height: 100vh; /* 모바일과 웹 모두 min-height 사용 */
-        height: 100%;
-        // overflow: hidden;
 
         @media (min-width: 601px) {
           box-shadow: var(--shadow-lg);
@@ -149,22 +147,27 @@ export const GlobalStyles = () => (
         }
       }
 
-      /* TODO: 스크롤바 스타일링 수정 필요 */
-      ::-webkit-scrollbar {
-        width: 4px;
+      /* 스크롤바 스타일링 - 데스크톱에서만 표시 */
+      @media (min-width: 601px) {
+        ::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+          background: var(--GrayScale-gray400, #bbbbbb);
+          border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+          background: var(--GrayScale-gray500, #999999);
+        }
       }
 
-      ::-webkit-scrollbar-track {
-        background: transparent;
-      }
-
-      ::-webkit-scrollbar-thumb {
-        background: var(--line-line-002);
-        border-radius: 2px;
-      }
-
-      ::-webkit-scrollbar-thumb:hover {
-        background: var(--text-text-secondary);
+      /* 모바일에서는 스크롤바 숨기기 */
+      @media (max-width: 600px) {
+        ::-webkit-scrollbar {
+          display: none;
+        }
       }
 
       /* 링크 스타일 */
