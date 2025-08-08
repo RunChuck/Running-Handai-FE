@@ -3,13 +3,13 @@ export const formatDecimal = (value: number): string => {
   return value % 1 === 0 ? value.toString() : value.toFixed(2);
 };
 
-// 코스 정보 포맷팅
-export const formatCourseInfo = (courseData: { distance: number; duration: number; maxElevation: number; minElevation: number; level: string }) => {
+// 코스 정보 매핑
+export const mapCourseInfo = (courseData: { distance: number; duration: number; maxElevation: number; minElevation: number; level: string }) => {
   return {
-    distance: formatDecimal(courseData.distance),
+    distance: courseData.distance,
     duration: courseData.duration,
-    maxElevation: formatDecimal(courseData.maxElevation),
-    minElevation: formatDecimal(courseData.minElevation),
+    maxElevation: courseData.maxElevation,
+    minElevation: courseData.minElevation,
     level: courseData.level,
   };
 };
