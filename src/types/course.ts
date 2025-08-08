@@ -7,6 +7,7 @@ export interface CourseTabItem {
 
 export interface CourseData {
   courseId: number;
+  courseName: string;
   thumbnailUrl: string;
   distance: number;
   duration: number;

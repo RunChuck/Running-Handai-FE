@@ -48,10 +48,13 @@ const CourseItem = ({ course, index, isSelected, onBookmarkClick }: CourseItemPr
           {t('minutes')} · {course.maxElevation}m
         </CourseStats>
       </ThumbnailWrapper>
-      <BookmarkCount>
-        {course.bookmarks}
-        {t('main.bookmark')}
-      </BookmarkCount>
+      <CourseInfo>
+        <CourseName>{course.courseName}</CourseName>
+        <BookmarkCount>
+          {course.bookmarks}
+          {t('main.bookmark')}
+        </BookmarkCount>
+      </CourseInfo>
     </ItemContainer>
   );
 };
@@ -133,6 +136,22 @@ const CourseStats = styled.div`
   display: flex;
   align-items: flex-end;
   justify-content: center;
+`;
+
+const CourseInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+`;
+
+const CourseName = styled.div`
+  ${theme.typography.subtitle3}
+  color: var(--text-text-title, #1c1c1c);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+  width: 100%;
 `;
 
 const BookmarkCount = styled.div`
