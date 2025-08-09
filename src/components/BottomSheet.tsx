@@ -17,6 +17,7 @@ interface BottomSheetProps {
   };
   floatButtons?: ReactNode;
   onHeightChange?: (height: number) => void;
+  showAnimation?: boolean;
 }
 
 export interface BottomSheetRef {
@@ -26,212 +27,214 @@ export interface BottomSheetRef {
 const SNAP_HEIGHTS = [0.9, 0.6, 42 / window.innerHeight]; // 90%, 60%, 42px
 const INITIAL_SNAP = 1; // 60%
 
-const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(({ children, titleData, floatButtons, onHeightChange }, ref) => {
-  const [t] = useTranslation();
-  const [currentSnap, setCurrentSnap] = useState(INITIAL_SNAP);
-  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
-  const controls = useAnimation();
-  const sheetRef = useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
+const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
+  ({ children, titleData, floatButtons, onHeightChange, showAnimation = false }, ref) => {
+    const [t] = useTranslation();
+    const [currentSnap, setCurrentSnap] = useState(INITIAL_SNAP);
+    const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+    const controls = useAnimation();
+    const sheetRef = useRef<HTMLDivElement>(null);
+    const [isDragging, setIsDragging] = useState(false);
 
-  // 터치 이벤트 처리를 위한 useEffect 추가
-  useEffect(() => {
-    const preventScroll = (e: TouchEvent) => {
-      if (isDragging && e.cancelable) {
-        e.preventDefault();
+    // 터치 이벤트 처리를 위한 useEffect 추가
+    useEffect(() => {
+      const preventScroll = (e: TouchEvent) => {
+        if (isDragging && e.cancelable) {
+          e.preventDefault();
+        }
+      };
+
+      // 터치무브 이벤트에 대한 기본 동작 방지
+      document.body.addEventListener('touchmove', preventScroll, { passive: false });
+
+      return () => {
+        document.body.removeEventListener('touchmove', preventScroll);
+      };
+    }, [isDragging]);
+
+    // 드래그 시작 시 body에 overflow hidden 적용
+    useEffect(() => {
+      if (isDragging) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
       }
+    }, [isDragging]);
+
+    const defaultTitleData = {
+      prefix: '',
+      suffix: t('recommendedCourses'),
+      isFiltered: false,
     };
 
-    // 터치무브 이벤트에 대한 기본 동작 방지
-    document.body.addEventListener('touchmove', preventScroll, { passive: false });
+    const finalTitleData = titleData || defaultTitleData;
 
-    return () => {
-      document.body.removeEventListener('touchmove', preventScroll);
+    // 뷰포트 높이 변경 감지
+    useEffect(() => {
+      const handleResize = () => {
+        setViewportHeight(window.innerHeight);
+      };
+
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // 스냅 포인트로 이동
+    const snapTo = (snapIndex: number) => {
+      if (snapIndex < 0 || snapIndex >= SNAP_HEIGHTS.length) return;
+
+      const targetHeight = viewportHeight * SNAP_HEIGHTS[snapIndex];
+      setCurrentSnap(snapIndex);
+
+      // 애니메이션 시작 전에 즉시 높이 변경 알림
+      onHeightChange?.(targetHeight);
+
+      controls.start({
+        height: targetHeight,
+        transition: {
+          type: 'spring',
+          damping: 25,
+          stiffness: 300,
+          mass: 0.5,
+        },
+      });
     };
-  }, [isDragging]);
 
-  // 드래그 시작 시 body에 overflow hidden 적용
-  useEffect(() => {
-    if (isDragging) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-  }, [isDragging]);
+    // 가장 가까운 스냅 포인트 찾기
+    const findClosestSnap = (currentHeight: number, velocity: number = 0) => {
+      const currentRatio = currentHeight / viewportHeight;
 
-  const defaultTitleData = {
-    prefix: '',
-    suffix: t('recommendedCourses'),
-    isFiltered: false,
-  };
+      // 드래그 민감도 향상
+      const VELOCITY_THRESHOLD = 50; // 속도 임계값
+      const DRAG_THRESHOLD = 0.1; // 드래그 거리 임계값 (뷰포트 높이의 10%)
 
-  const finalTitleData = titleData || defaultTitleData;
+      if (Math.abs(velocity) > VELOCITY_THRESHOLD) {
+        if (velocity > 0 && currentSnap < SNAP_HEIGHTS.length - 1) {
+          return currentSnap + 1;
+        } else if (velocity < 0 && currentSnap > 0) {
+          return currentSnap - 1;
+        }
+      }
 
-  // 뷰포트 높이 변경 감지
-  useEffect(() => {
-    const handleResize = () => {
-      setViewportHeight(window.innerHeight);
+      // 현재 스냅 포인트와의 거리 계산
+      const currentSnapHeight = SNAP_HEIGHTS[currentSnap];
+      const distanceFromCurrentSnap = Math.abs(currentRatio - currentSnapHeight);
+
+      if (distanceFromCurrentSnap > DRAG_THRESHOLD) {
+        if (currentRatio > currentSnapHeight && currentSnap < SNAP_HEIGHTS.length - 1) {
+          return currentSnap + 1;
+        }
+        if (currentRatio < currentSnapHeight && currentSnap > 0) {
+          return currentSnap - 1;
+        }
+      }
+
+      let closestSnap = 0;
+      let minDistance = Math.abs(SNAP_HEIGHTS[0] - currentRatio);
+
+      for (let i = 1; i < SNAP_HEIGHTS.length; i++) {
+        const distance = Math.abs(SNAP_HEIGHTS[i] - currentRatio);
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestSnap = i;
+        }
+      }
+
+      return closestSnap;
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    // 드래그 시작
+    const handleDragStart = () => {
+      setIsDragging(true);
+    };
 
-  // 스냅 포인트로 이동
-  const snapTo = (snapIndex: number) => {
-    if (snapIndex < 0 || snapIndex >= SNAP_HEIGHTS.length) return;
+    // 드래그 중
+    const handleDrag = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+      if (!sheetRef.current) return;
 
-    const targetHeight = viewportHeight * SNAP_HEIGHTS[snapIndex];
-    setCurrentSnap(snapIndex);
+      const sheetElement = sheetRef.current;
+      const currentHeight = sheetElement.offsetHeight;
+      const deltaY = info.delta.y * 1.5; // 드래그 반응성 향상
 
-    // 애니메이션 시작 전에 즉시 높이 변경 알림
-    onHeightChange?.(targetHeight);
+      // 새로운 높이 계산 (드래그 방향과 높이 변화 반대)
+      const newHeight = Math.max(
+        42, // 최소 높이 42px로 고정
+        Math.min(
+          viewportHeight * 0.9, // 최대 높이
+          currentHeight - deltaY // 위로 드래그하면 높이 증가, 아래로 드래그하면 높이 감소
+        )
+      );
 
-    controls.start({
-      height: targetHeight,
-      transition: {
-        type: 'spring',
-        damping: 25,
-        stiffness: 300,
-        mass: 0.5,
-      },
-    });
-  };
+      // 즉시 높이 적용
+      controls.set({ height: newHeight });
 
-  // 가장 가까운 스냅 포인트 찾기
-  const findClosestSnap = (currentHeight: number, velocity: number = 0) => {
-    const currentRatio = currentHeight / viewportHeight;
+      // 드래그 중 실시간 높이 변경 알림
+      onHeightChange?.(newHeight);
+    };
 
-    // 드래그 민감도 향상
-    const VELOCITY_THRESHOLD = 50; // 속도 임계값
-    const DRAG_THRESHOLD = 0.1; // 드래그 거리 임계값 (뷰포트 높이의 10%)
+    // 드래그 종료
+    const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+      setIsDragging(false);
 
-    if (Math.abs(velocity) > VELOCITY_THRESHOLD) {
-      if (velocity > 0 && currentSnap < SNAP_HEIGHTS.length - 1) {
-        return currentSnap + 1;
-      } else if (velocity < 0 && currentSnap > 0) {
-        return currentSnap - 1;
+      if (!sheetRef.current) return;
+
+      const currentHeight = sheetRef.current.offsetHeight;
+      const newSnap = findClosestSnap(currentHeight, info.velocity.y);
+      snapTo(newSnap);
+    };
+
+    useImperativeHandle(ref, () => ({
+      snapTo,
+    }));
+
+    // 초기 위치 설정
+    useEffect(() => {
+      if (viewportHeight > 0) {
+        snapTo(INITIAL_SNAP);
       }
-    }
+    }, [viewportHeight]);
 
-    // 현재 스냅 포인트와의 거리 계산
-    const currentSnapHeight = SNAP_HEIGHTS[currentSnap];
-    const distanceFromCurrentSnap = Math.abs(currentRatio - currentSnapHeight);
+    return (
+      <>
+        <SheetContainer
+          ref={sheetRef}
+          drag="y"
+          dragConstraints={{ top: 0, bottom: 0 }}
+          dragElastic={0}
+          dragMomentum={false}
+          onDragStart={handleDragStart}
+          onDrag={handleDrag}
+          onDragEnd={handleDragEnd}
+          animate={controls}
+          initial={{ height: viewportHeight * SNAP_HEIGHTS[INITIAL_SNAP] }}
+          isDragging={isDragging}
+        >
+          {floatButtons && <FloatButtonWrapper>{floatButtons}</FloatButtonWrapper>}
 
-    if (distanceFromCurrentSnap > DRAG_THRESHOLD) {
-      if (currentRatio > currentSnapHeight && currentSnap < SNAP_HEIGHTS.length - 1) {
-        return currentSnap + 1;
-      }
-      if (currentRatio < currentSnapHeight && currentSnap > 0) {
-        return currentSnap - 1;
-      }
-    }
+          <SheetContent>
+            <DragArea>
+              <DragHandle />
+            </DragArea>
+            <ContentArea>
+              <TitleWrapper>
+                <div style={{ width: '28px' }} />
+                <Title>
+                  {finalTitleData.prefix && <FilterText>{finalTitleData.prefix}&nbsp;</FilterText>}
+                  <BaseText>{finalTitleData.suffix}</BaseText>
+                </Title>
+                <PenButton showAnimation={showAnimation}>
+                  <img src={PenIconSrc} alt="코스 등록" width={20} height={20} />
+                </PenButton>
+              </TitleWrapper>
 
-    let closestSnap = 0;
-    let minDistance = Math.abs(SNAP_HEIGHTS[0] - currentRatio);
-
-    for (let i = 1; i < SNAP_HEIGHTS.length; i++) {
-      const distance = Math.abs(SNAP_HEIGHTS[i] - currentRatio);
-      if (distance < minDistance) {
-        minDistance = distance;
-        closestSnap = i;
-      }
-    }
-
-    return closestSnap;
-  };
-
-  // 드래그 시작
-  const handleDragStart = () => {
-    setIsDragging(true);
-  };
-
-  // 드래그 중
-  const handleDrag = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (!sheetRef.current) return;
-
-    const sheetElement = sheetRef.current;
-    const currentHeight = sheetElement.offsetHeight;
-    const deltaY = info.delta.y * 1.5; // 드래그 반응성 향상
-
-    // 새로운 높이 계산 (드래그 방향과 높이 변화 반대)
-    const newHeight = Math.max(
-      42, // 최소 높이 42px로 고정
-      Math.min(
-        viewportHeight * 0.9, // 최대 높이
-        currentHeight - deltaY // 위로 드래그하면 높이 증가, 아래로 드래그하면 높이 감소
-      )
+              <ScrollableContent>{children}</ScrollableContent>
+            </ContentArea>
+          </SheetContent>
+        </SheetContainer>
+      </>
     );
-
-    // 즉시 높이 적용
-    controls.set({ height: newHeight });
-
-    // 드래그 중 실시간 높이 변경 알림
-    onHeightChange?.(newHeight);
-  };
-
-  // 드래그 종료
-  const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    setIsDragging(false);
-
-    if (!sheetRef.current) return;
-
-    const currentHeight = sheetRef.current.offsetHeight;
-    const newSnap = findClosestSnap(currentHeight, info.velocity.y);
-    snapTo(newSnap);
-  };
-
-  useImperativeHandle(ref, () => ({
-    snapTo,
-  }));
-
-  // 초기 위치 설정
-  useEffect(() => {
-    if (viewportHeight > 0) {
-      snapTo(INITIAL_SNAP);
-    }
-  }, [viewportHeight]);
-
-  return (
-    <>
-      <SheetContainer
-        ref={sheetRef}
-        drag="y"
-        dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={0}
-        dragMomentum={false}
-        onDragStart={handleDragStart}
-        onDrag={handleDrag}
-        onDragEnd={handleDragEnd}
-        animate={controls}
-        initial={{ height: viewportHeight * SNAP_HEIGHTS[INITIAL_SNAP] }}
-        isDragging={isDragging}
-      >
-        {floatButtons && <FloatButtonWrapper>{floatButtons}</FloatButtonWrapper>}
-
-        <SheetContent>
-          <DragArea>
-            <DragHandle />
-          </DragArea>
-          <ContentArea>
-            <TitleWrapper>
-              <div style={{ width: '28px' }} />
-              <Title>
-                {finalTitleData.prefix && <FilterText>{finalTitleData.prefix}&nbsp;</FilterText>}
-                <BaseText>{finalTitleData.suffix}</BaseText>
-              </Title>
-              <PenButton>
-                <img src={PenIconSrc} alt="코스 등록" width={20} height={20} />
-              </PenButton>
-            </TitleWrapper>
-
-            <ScrollableContent>{children}</ScrollableContent>
-          </ContentArea>
-        </SheetContent>
-      </SheetContainer>
-    </>
-  );
-});
+  }
+);
 
 BottomSheet.displayName = 'BottomSheet';
 
@@ -314,7 +317,7 @@ const ContentArea = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
   min-height: 0;
   gap: var(--spacing-24);
 `;
@@ -342,17 +345,52 @@ const BaseText = styled.span`
   color: var(--text-text-title, #1c1c1c);
 `;
 
-const PenButton = styled.button`
+const PenButton = styled.button<{ showAnimation: boolean }>`
   background: none;
   border: none;
   cursor: pointer;
   padding: var(--spacing-4);
   border-radius: 4px;
   transition: background-color 0.2s ease;
+  position: relative;
 
   &:hover {
     background: var(--surface-surface-highlight);
   }
+
+  ${({ showAnimation }) =>
+    showAnimation &&
+    `
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 28px;
+      height: 28px;
+      background: rgba(69, 97, 255, 0.3);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      animation: Pulse 2s ease-out infinite;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @keyframes Pulse {
+      0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.6;
+      }
+      70% {
+        transform: translate(-50%, -50%) scale(1.3);
+        opacity: 0.2;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0;
+      }
+    }
+  `}
 `;
 
 const ScrollableContent = styled.div`

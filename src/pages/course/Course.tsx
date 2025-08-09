@@ -255,7 +255,12 @@ const Course = () => {
       </FloatButton>
 
       {!isModalOpen && (
-        <BottomSheet titleData={getBottomSheetTitle()} floatButtons={floatButtons} onHeightChange={handleBottomSheetHeightChange}>
+        <BottomSheet
+          titleData={getBottomSheetTitle()}
+          floatButtons={floatButtons}
+          onHeightChange={handleBottomSheetHeightChange}
+          showAnimation={courses.length === 0 && !loading && !error}
+        >
           <CourseList
             courses={courses}
             loading={loading}
