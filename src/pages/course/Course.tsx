@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import * as S from './Course.styled';
@@ -30,7 +30,6 @@ const Course = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [bottomSheetHeight, setBottomSheetHeight] = useState(0);
   const [isMapInitialized, setIsMapInitialized] = useState(false);
-  const [hasMovedToRestoredCourse, setHasMovedToRestoredCourse] = useState(false);
   const {
     courses,
     loading,
@@ -53,21 +52,33 @@ const Course = () => {
   });
 
   // A코스 시작점으로 지도 이동
-  const moveToFirstCourseStart = (fetchedCourses: CourseData[]) => {
-    if (fetchedCourses && fetchedCourses.length > 0 && fetchedCourses[0].trackPoints && fetchedCourses[0].trackPoints.length > 0 && mapRef.current) {
-      const firstTrackPoint = fetchedCourses[0].trackPoints[0];
-      mapRef.current.moveToLocation(firstTrackPoint.lat, firstTrackPoint.lon, 7);
-    }
-  };
+  const moveToFirstCourseStart = useCallback(
+    (fetchedCourses: CourseData[]) => {
+      if (
+        fetchedCourses &&
+        fetchedCourses.length > 0 &&
+        fetchedCourses[0].trackPoints &&
+        fetchedCourses[0].trackPoints.length > 0 &&
+        mapRef.current
+      ) {
+        const firstTrackPoint = fetchedCourses[0].trackPoints[0];
+        mapRef.current.moveToLocation(firstTrackPoint.lat, firstTrackPoint.lon, 7);
+      }
+    },
+    [mapRef]
+  );
 
   // 특정 코스의 시작점으로 지도 이동
-  const moveToCourseStart = (courseId: number) => {
-    const course = courses.find(c => c.courseId === courseId);
-    if (course && course.trackPoints && course.trackPoints.length > 0 && mapRef.current) {
-      const firstTrackPoint = course.trackPoints[0];
-      mapRef.current.moveToLocation(firstTrackPoint.lat, firstTrackPoint.lon, 7);
-    }
-  };
+  const moveToCourseStart = useCallback(
+    (courseId: number) => {
+      const course = courses.find(c => c.courseId === courseId);
+      if (course && course.trackPoints && course.trackPoints.length > 0 && mapRef.current) {
+        const firstTrackPoint = course.trackPoints[0];
+        mapRef.current.moveToLocation(firstTrackPoint.lat, firstTrackPoint.lon, 7);
+      }
+    },
+    [courses, mapRef]
+  );
 
   const moveToCurrentLocationHandler = async () => {
     try {
@@ -108,7 +119,6 @@ const Course = () => {
     if (mapRef.current) {
       mapRef.current.clearAllCourses();
     }
-    setHasMovedToRestoredCourse(false); // 새로운 필터 선택시 플래그 리셋
 
     const fetchedCourses = await fetchCoursesByArea(area);
     moveToFirstCourseStart(fetchedCourses || []);
@@ -118,7 +128,6 @@ const Course = () => {
     if (mapRef.current) {
       mapRef.current.clearAllCourses();
     }
-    setHasMovedToRestoredCourse(false); // 새로운 필터 선택시 플래그 리셋
 
     const fetchedCourses = await fetchCoursesByTheme(theme);
     moveToFirstCourseStart(fetchedCourses || []);
@@ -173,14 +182,12 @@ const Course = () => {
       if (courses.length > 0) {
         try {
           mapRef.current.displayCourses(courses, selectedCourseId);
-          // 복원된 코스의 선택된 코스 위치로 지도 이동 (최초 1회만)
-          if (!hasMovedToRestoredCourse) {
-            if (selectedCourseId) {
-              moveToCourseStart(selectedCourseId);
-            } else {
-              moveToFirstCourseStart(courses);
-            }
-            setHasMovedToRestoredCourse(true);
+
+          // 선택된 코스가 있으면 해당 위치로, 없으면 첫 번째 코스로 이동
+          if (selectedCourseId) {
+            moveToCourseStart(selectedCourseId);
+          } else {
+            moveToFirstCourseStart(courses);
           }
         } catch (error) {
           console.warn('Failed to display courses:', error);
@@ -200,7 +207,7 @@ const Course = () => {
         console.warn('Failed to clear courses:', error);
       }
     }
-  }, [courses, selectedFilter.type, selectedCourseId, isMapInitialized]);
+  }, [courses, selectedFilter.type, selectedCourseId, isMapInitialized, mapRef, moveToCourseStart, moveToFirstCourseStart]);
 
   const floatButtons = (
     <>
