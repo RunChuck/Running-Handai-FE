@@ -30,6 +30,7 @@ const Course = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [bottomSheetHeight, setBottomSheetHeight] = useState(0);
   const [isMapInitialized, setIsMapInitialized] = useState(false);
+  const [isMenuAnimating, setIsMenuAnimating] = useState(false);
   const {
     courses,
     loading,
@@ -117,8 +118,12 @@ const Course = () => {
   };
 
   const handleMenuClick = () => {
-    console.log('메뉴 버튼 클릭');
-    // TODO: 메뉴 기능 구현
+    setIsMenuAnimating(true);
+    
+    // drawer 열리는 애니메이션 후 마이페이지로 이동
+    setTimeout(() => {
+      navigate('/mypage');
+    }, 200);
   };
 
   const handleBookmarkClick = (course: CourseData) => {
@@ -296,6 +301,13 @@ const Course = () => {
         cancelText={t('cancel')}
         confirmText={t('main.simpleLogin')}
       />
+
+      {/* 메뉴 drawer 애니메이션 오버레이 */}
+      {isMenuAnimating && (
+        <S.MenuTransitionOverlay>
+          <S.DrawerSlide />
+        </S.MenuTransitionOverlay>
+      )}
     </S.Container>
   );
 };
