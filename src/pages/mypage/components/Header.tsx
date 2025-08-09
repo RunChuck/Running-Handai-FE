@@ -1,0 +1,60 @@
+import styled from '@emotion/styled';
+
+import BackIconSrc from '@/assets/icons/arrow-left-24px.svg';
+import LogoIconSrc from '@/assets/icons/logo.svg';
+
+interface HeaderProps {
+  onBack: () => void;
+}
+
+const Header = ({ onBack }: HeaderProps) => {
+  return (
+    <Container>
+      <IconButton onClick={onBack}>
+        <img src={BackIconSrc} alt="back" />
+      </IconButton>
+      <LogoWrapper>
+        <img src={LogoIconSrc} alt="logo" />
+      </LogoWrapper>
+    </Container>
+  );
+};
+
+export default Header;
+
+const Container = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+  padding: 0 10px;
+  background: var(--surface-surface-default);
+  border-bottom: 1px solid var(--line-line-001);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-shrink: 0;
+`;
+
+const LogoWrapper = styled.div`
+  flex: 1;
+  display: flex;
+  justify-content: center;
+`;
+
+const IconButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: var(--surface-surface-highlight);
+  }
+`;
