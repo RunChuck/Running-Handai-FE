@@ -10,7 +10,14 @@ import type { CourseData, CourseResponse, AreaCode, ThemeCode } from '@/types/co
 export const useCourses = () => {
   const queryClient = useQueryClient();
 
-  const { selectedFilter, selectedCourseId, setFilter, setSelectedCourse } = useCourseStore();
+  const { 
+    selectedFilter, 
+    selectedCourseId, 
+    lastMapViewport,
+    setFilter, 
+    setSelectedCourse,
+    setLastMapViewport 
+  } = useCourseStore();
 
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
 
@@ -219,10 +226,12 @@ export const useCourses = () => {
     error: query.error?.message || null,
     selectedFilter,
     selectedCourseId,
+    lastMapViewport,
     fetchNearbyCourses,
     fetchCoursesByArea,
     fetchCoursesByTheme,
     handleCourseMarkerClick,
     updateCourseBookmark,
+    setLastMapViewport,
   };
 };

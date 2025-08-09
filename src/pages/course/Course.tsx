@@ -36,11 +36,13 @@ const Course = () => {
     error,
     selectedFilter,
     selectedCourseId,
+    lastMapViewport,
     fetchNearbyCourses,
     fetchCoursesByArea,
     fetchCoursesByTheme,
     handleCourseMarkerClick,
     updateCourseBookmark,
+    setLastMapViewport,
   } = useCourses();
   const { handleBookmark } = useBookmark({
     onUpdateCourse: (courseId, updates) => {
@@ -62,10 +64,16 @@ const Course = () => {
         mapRef.current
       ) {
         const firstTrackPoint = fetchedCourses[0].trackPoints[0];
-        mapRef.current.moveToLocation(firstTrackPoint.lat, firstTrackPoint.lon, 7);
+        const center = { lat: firstTrackPoint.lat, lng: firstTrackPoint.lon };
+        const zoom = 7;
+
+        mapRef.current.moveToLocation(center.lat, center.lng, zoom);
+
+        // 뷰포트 저장
+        setLastMapViewport({ center, zoom });
       }
     },
-    [mapRef]
+    [mapRef, setLastMapViewport]
   );
 
   // 특정 코스의 시작점으로 지도 이동
@@ -74,10 +82,16 @@ const Course = () => {
       const course = courses.find(c => c.courseId === courseId);
       if (course && course.trackPoints && course.trackPoints.length > 0 && mapRef.current) {
         const firstTrackPoint = course.trackPoints[0];
-        mapRef.current.moveToLocation(firstTrackPoint.lat, firstTrackPoint.lon, 7);
+        const center = { lat: firstTrackPoint.lat, lng: firstTrackPoint.lon };
+        const zoom = 7;
+
+        mapRef.current.moveToLocation(center.lat, center.lng, zoom);
+
+        // 뷰포트 저장
+        setLastMapViewport({ center, zoom });
       }
     },
-    [courses, mapRef]
+    [courses, mapRef, setLastMapViewport]
   );
 
   const moveToCurrentLocationHandler = async () => {
@@ -231,6 +245,8 @@ const Course = () => {
           onMapLoad={handleMapLoad}
           onCourseMarkerClick={handleCourseMarkerClickWrapper}
           containerHeight={window.innerHeight - bottomSheetHeight}
+          initialCenter={lastMapViewport?.center}
+          initialZoom={lastMapViewport?.zoom}
         />
       </S.MapContainer>
 
