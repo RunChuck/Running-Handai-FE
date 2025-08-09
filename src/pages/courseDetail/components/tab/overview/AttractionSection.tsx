@@ -5,7 +5,7 @@ import type { CourseTabType } from '@/types/course';
 
 import AttractionItem from '@/components/AttractionItem';
 import Button from '@/components/Button';
-import ArrowIconSrc from '@/assets/icons/arrow-down-16px.svg';
+import ArrowIconSrc from '@/assets/icons/arrow-right-16px.svg';
 
 interface AttractionSectionProps {
   onTabChange: (tabKey: CourseTabType) => void;

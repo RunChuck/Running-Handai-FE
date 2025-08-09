@@ -64,7 +64,7 @@ const Container = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 44px;
+  height: 56px;
   padding: 0 10px;
   background: var(--surface-surface-default);
   border-bottom: 1px solid var(--line-line-001);
@@ -108,7 +108,14 @@ const Title = styled.h1`
   ${theme.typography.subtitle2}
   color: var(--text-text-title);
   text-align: center;
-  white-space: nowrap;
+  text-align-last: left;
+  white-space: normal;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const ShareButtonContainer = styled.div`

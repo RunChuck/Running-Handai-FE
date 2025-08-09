@@ -10,8 +10,10 @@ import { THEME_CARDS } from '@/constants/themes';
 import type { CourseData, ThemeCode } from '@/types/course';
 
 import CourseItem from './CourseItem';
+import { SVGColor } from '@/components/SvgColor';
 import LoadingMotion from '@/assets/animations/run-loading.json';
 import NoCourseImgSrc from '@/assets/images/sad-emoji.png';
+import ArrowIconSrc from '@/assets/icons/arrow-right-16px.svg';
 
 interface CourseListProps {
   courses: CourseData[];
@@ -21,9 +23,19 @@ interface CourseListProps {
   onBookmarkClick: (course: CourseData) => void;
   onThemeSelect: (theme: ThemeCode) => void;
   fetchNearbyCourses: () => void;
+  onCourseClick?: (courseId: number) => void;
 }
 
-const CourseList = ({ courses, loading, error, selectedCourseId, onBookmarkClick, onThemeSelect, fetchNearbyCourses }: CourseListProps) => {
+const CourseList = ({
+  courses,
+  loading,
+  error,
+  selectedCourseId,
+  onBookmarkClick,
+  onThemeSelect,
+  fetchNearbyCourses,
+  onCourseClick,
+}: CourseListProps) => {
   const [t] = useTranslation();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
@@ -86,8 +98,11 @@ const CourseList = ({ courses, loading, error, selectedCourseId, onBookmarkClick
         >
           {THEME_CARDS.map(card => (
             <ThemeCourseCard key={card.key} onClick={() => handleThemeCardClick(card.key)}>
-              <ThemeCourseCardTitle>{t(card.titleKey)}</ThemeCourseCardTitle>
-              <ThemeCourseCardText>{t(card.descriptionKey)}</ThemeCourseCardText>
+              <ThemeCourseCardTitle>
+                {t(card.titleKey)}
+                <SVGColor src={ArrowIconSrc} width={16} height={16} color="#4561FF" />
+              </ThemeCourseCardTitle>
+              {/* <ThemeCourseCardText>{t(card.descriptionKey)}</ThemeCourseCardText> */}
             </ThemeCourseCard>
           ))}
         </ThemeCourseCardContainer>
@@ -104,6 +119,7 @@ const CourseList = ({ courses, loading, error, selectedCourseId, onBookmarkClick
           index={index}
           isSelected={course.courseId === selectedCourseId}
           onBookmarkClick={() => onBookmarkClick(course)}
+          onCourseClick={() => onCourseClick?.(course.courseId)}
         />
       ))}
     </S.CourseGrid>
@@ -143,6 +159,7 @@ const ErrorContainer = styled.div`
 
 const ThemeCourseCardContainer = styled.div`
   display: flex;
+  justify-content: safe center;
   gap: var(--spacing-8);
   overflow-x: auto;
   overflow-y: hidden;
@@ -162,26 +179,32 @@ const ThemeCourseCardContainer = styled.div`
 `;
 
 const ThemeCourseCard = styled.div`
-  min-width: 164px;
   flex-shrink: 0;
-  height: 66px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  padding: var(--spacing-12) var(--spacing-24);
   border-radius: 8px;
   background: var(--surface-surface-highlight3, #f7f8fa);
   padding: var(--spacing-12) var(--spacing-24);
   margin-top: var(--spacing-12);
   cursor: pointer;
+
+  &:hover {
+    background: var(--surface-surface-highlight, #f4f4f4);
+  }
 `;
 
 const ThemeCourseCardTitle = styled.span`
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
   ${theme.typography.caption1}
-  color: var(--text-text-title, #1c1c1c);
+  color: var(--text-text-primary, #4561FF);
 `;
 
-const ThemeCourseCardText = styled.span`
-  ${theme.typography.body2}
-  color: var(--text-text-secondary, #555555);
-`;
+// const ThemeCourseCardText = styled.span`
+//   ${theme.typography.body2}
+//   color: var(--text-text-primary, #4561FF);
+// `;

@@ -17,8 +17,8 @@ const OverviewTab = ({ onTabChange, courseDetail }: OverviewTabProps) => {
       <SectionDivider />
       <AttractionSection onTabChange={onTabChange} />
       <SectionDivider />
-      <ReviewSection />
-    </Container>
+      <ReviewSection onTabChange={onTabChange} />
+      </Container>
   );
 };
 

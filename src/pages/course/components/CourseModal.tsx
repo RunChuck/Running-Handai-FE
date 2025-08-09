@@ -5,6 +5,8 @@ import { theme } from '@/styles/theme';
 import type { AreaCode, ThemeCode } from '@/types/course';
 
 import BackIconSrc from '@/assets/icons/arrow-left-24px.svg';
+import CheckIconSrc from '@/assets/icons/check-circle.svg';
+import PaperPlaneIconSrc from '@/assets/icons/paperplane-icon.svg';
 import locationOpt1 from '@/assets/images/location-opt1.png';
 import locationOpt2 from '@/assets/images/location-opt2.png';
 import locationOpt3 from '@/assets/images/location-opt3.png';
@@ -20,6 +22,7 @@ import themeCity from '@/assets/images/theme-city.png';
 interface CourseModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onNearbySelect?: () => void;
   onAreaSelect?: (area: AreaCode) => void;
   onThemeSelect?: (theme: ThemeCode) => void;
   selectedFilter?: {
@@ -45,7 +48,7 @@ const THEME_OPTIONS = [
   { key: 'DOWNTOWN', image: themeCity, zoom: 8 },
 ] as const;
 
-const CourseModal = ({ isOpen, onClose, onAreaSelect, onThemeSelect, selectedFilter }: CourseModalProps) => {
+const CourseModal = ({ isOpen, onClose, onNearbySelect, onAreaSelect, onThemeSelect, selectedFilter }: CourseModalProps) => {
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -56,6 +59,14 @@ const CourseModal = ({ isOpen, onClose, onAreaSelect, onThemeSelect, selectedFil
       img.src = src;
     });
   }, []);
+
+  const handleNearbySelect = () => {
+    if (onNearbySelect) {
+      onNearbySelect();
+    }
+
+    onClose();
+  };
 
   const handleLocationSelect = (locationKey: string) => {
     if (onAreaSelect) {
@@ -89,6 +100,11 @@ const CourseModal = ({ isOpen, onClose, onAreaSelect, onThemeSelect, selectedFil
           <Section>
             <Subtitle>{t('modal.courseModal.location')}</Subtitle>
             <OptionGrid>
+              <NearbyButton onClick={handleNearbySelect} isSelected={selectedFilter?.type === 'nearby'}>
+                <img src={PaperPlaneIconSrc} alt="nearby" />
+                {t('location.nearby')}
+                {selectedFilter?.type === 'nearby' && <CheckIcon src={CheckIconSrc} alt="check" />}
+              </NearbyButton>
               {LOCATION_OPTIONS.map(option => (
                 <OptionButton
                   key={option.key}
@@ -97,6 +113,7 @@ const CourseModal = ({ isOpen, onClose, onAreaSelect, onThemeSelect, selectedFil
                   isSelected={selectedFilter?.type === 'area' && selectedFilter?.value === option.key}
                 >
                   {t(`location.${option.key.toLowerCase()}`)}
+                  {selectedFilter?.type === 'area' && selectedFilter?.value === option.key && <CheckIcon src={CheckIconSrc} alt="check" />}
                 </OptionButton>
               ))}
             </OptionGrid>
@@ -113,6 +130,7 @@ const CourseModal = ({ isOpen, onClose, onAreaSelect, onThemeSelect, selectedFil
                   isSelected={selectedFilter?.type === 'theme' && selectedFilter?.value === option.key}
                 >
                   {t(`theme.${option.key.toLowerCase()}`)}
+                  {selectedFilter?.type === 'theme' && selectedFilter?.value === option.key && <CheckIcon src={CheckIconSrc} alt="check" />}
                 </OptionButton>
               ))}
             </OptionGrid>
@@ -221,14 +239,16 @@ const OptionButton = styled.button<{ backgroundImage: string; isSelected?: boole
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
   width: 64px;
   height: 64px;
   white-space: pre-line;
   border: ${props => (props.isSelected ? '2px solid #4561FF' : 'none')};
   border-radius: 50%;
-  background:
-    linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.4) 100%),
-    url(${props => props.backgroundImage}) lightgray 50% / cover no-repeat;
+  background: ${props =>
+    props.isSelected
+      ? `linear-gradient(0deg, rgba(0, 19, 124, 0.60) 0%, rgba(0, 19, 124, 0.60) 100%), url(${props.backgroundImage}) lightgray 50% / cover no-repeat`
+      : `linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.4) 100%), url(${props.backgroundImage}) lightgray 50% / cover no-repeat`};
   cursor: pointer;
   transition: all 0.2s ease;
 
@@ -243,4 +263,38 @@ const OptionButton = styled.button<{ backgroundImage: string; isSelected?: boole
   &:active {
     transform: scale(0.98);
   }
+`;
+
+const NearbyButton = styled.button<{ isSelected?: boolean }>`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 64px;
+  height: 64px;
+  gap: 4px;
+  border: ${props => (props.isSelected ? '2px solid #4561FF' : 'none')};
+  border-radius: 50%;
+  background: ${props => (props.isSelected ? '#3751E6' : '#4561FF')};
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  ${theme.typography.caption1}
+  color: var(--text-text-inverse, #ffffff);
+
+  &:hover {
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+`;
+
+const CheckIcon = styled.img`
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  z-index: 10;
 `;

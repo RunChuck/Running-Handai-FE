@@ -25,9 +25,11 @@ interface MapViewProps {
   onMapLoad?: (map: kakao.maps.Map) => void;
   onCourseMarkerClick?: (courseId: number) => void;
   containerHeight?: number;
+  initialCenter?: { lat: number; lng: number };
+  initialZoom?: number;
 }
 
-const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarkerClick, containerHeight }, ref) => {
+const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarkerClick, containerHeight, initialCenter, initialZoom }, ref) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<kakao.maps.Map | null>(null);
   const courseElements = useRef<CourseMapElements>({ polylines: [], markers: [] });
@@ -62,12 +64,18 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
 
   // 지도 초기 위치 설정
   const getInitialLocation = async () => {
+    // props로 전달받은 초기 위치가 있으면 우선 사용 (복원된 위치)
+    if (initialCenter) {
+      console.log('복원된 지도 위치 사용:', initialCenter);
+      return { location: initialCenter, isUserLocation: false, isRestored: true };
+    }
+
     try {
       const location = await getUserLocation();
-      return { location, isUserLocation: true };
+      return { location, isUserLocation: true, isRestored: false };
     } catch {
       console.log('부산 시청 좌표 사용:', BUSAN_CITY_HALL);
-      return { location: BUSAN_CITY_HALL, isUserLocation: false };
+      return { location: BUSAN_CITY_HALL, isUserLocation: false, isRestored: false };
     }
   };
 
@@ -91,8 +99,8 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
             position: relative;
           ">
             <div style="
-              width: 16px;
-              height: 16px;
+              width: 14px;
+              height: 14px;
               border-radius: 50%;
               background-color: #FF460D;
               border: 2px solid #FFF;
@@ -177,11 +185,11 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
       }
 
       // 개별 마커 클릭 이벤트 등록
-      courseElements.current.markers.forEach((marker, index) => {
-        const courseData = coursesData[index];
+      courseElements.current.markers.forEach(marker => {
+        const markerWithData = marker as unknown as { courseData: MultiCourseMapData };
         window.kakao.maps.event.addListener(marker, 'click', () => {
           setPopover({ visible: false, courses: [], position: { x: 0, y: 0 } });
-          onCourseMarkerClickCallback(courseData.courseId);
+          onCourseMarkerClickCallback(markerWithData.courseData.courseId);
         });
       });
     },
@@ -208,11 +216,12 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
       }
 
       // 마커 클릭 이벤트 재등록
-      courseElements.current.markers.forEach((marker, index) => {
-        const courseData = currentCoursesData.current[index];
+      courseElements.current.markers.forEach(marker => {
+        const markerWithData = marker as unknown as { courseData: MultiCourseMapData };
+        // 기존 이벤트는 clearMapElements에서 자동으로 제거됨
         window.kakao.maps.event.addListener(marker, 'click', () => {
           setPopover({ visible: false, courses: [], position: { x: 0, y: 0 } });
-          onCourseMarkerClickCallback(courseData.courseId);
+          onCourseMarkerClickCallback(markerWithData.courseData.courseId);
         });
       });
 
@@ -273,19 +282,21 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
           const container = mapContainer.current;
           if (!container || isMapInitialized.current) return;
 
-          const { location: initialLocation, isUserLocation: isCurrentUserLocation } = await getInitialLocation();
+          const { location: initialLocation, isUserLocation: isCurrentUserLocation, isRestored } = await getInitialLocation();
 
           const options = {
             center: new window.kakao.maps.LatLng(initialLocation.lat, initialLocation.lng),
-            level: DEFAULT_MAP_LEVEL,
+            level: initialZoom || DEFAULT_MAP_LEVEL, // 복원된 줌 레벨 사용
           };
 
           const map = new window.kakao.maps.Map(container, options);
           mapInstance.current = map;
           isMapInitialized.current = true; // 초기화 완료 표시
 
-          // 위치에 마커 표시
-          addLocationMarker(map, initialLocation, isCurrentUserLocation);
+          // 복원된 위치가 아닌 경우에만 현재 위치 마커 표시
+          if (!isRestored) {
+            addLocationMarker(map, initialLocation, isCurrentUserLocation);
+          }
 
           console.log('지도 초기화 완료. 중심 좌표:', initialLocation);
           console.log('사용자 위치 여부:', isCurrentUserLocation);

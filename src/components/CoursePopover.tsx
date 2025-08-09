@@ -20,16 +20,20 @@ const CoursePopover = ({ courses, position, onSelect, onClose }: CoursePopoverPr
   const [t] = useTranslation();
   const popoverRef = useRef<HTMLDivElement>(null);
 
-  // 외부 클릭시 닫기
+  // 외부 클릭 및 터치시 닫기
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
       if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
         onClose();
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
   }, [onClose]);
 
   const handleSelect = (courseId: number) => {

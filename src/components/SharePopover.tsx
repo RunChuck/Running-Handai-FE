@@ -1,4 +1,6 @@
 import styled from '@emotion/styled';
+import { useTranslation } from 'react-i18next';
+import { useToast } from '@/hooks/useToast';
 import { shareToKakao } from '@/utils/kakao';
 
 import KakaoIconSrc from '@/assets/icons/kakao-icon.svg';
@@ -14,6 +16,9 @@ interface SharePopoverProps {
 }
 
 const SharePopover = ({ isOpen, onClose, courseTitle, courseDescription, courseImageUrl, courseUrl }: SharePopoverProps) => {
+  const [t] = useTranslation();
+  const { showSuccessToast, showErrorToast } = useToast();
+
   const handleKakaoShare = () => {
     shareToKakao({
       title: courseTitle,
@@ -27,9 +32,12 @@ const SharePopover = ({ isOpen, onClose, courseTitle, courseDescription, courseI
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(courseUrl);
+      showSuccessToast(t('toast.copyLinkSuccess'), { position: 'top' });
       onClose();
     } catch (error) {
       console.error('링크 복사 실패:', error);
+      showErrorToast(t('toast.copyLinkFailed'), { position: 'top' });
+      onClose();
     }
   };
 

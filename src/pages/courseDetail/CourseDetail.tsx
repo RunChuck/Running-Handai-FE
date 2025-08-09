@@ -9,7 +9,7 @@ import * as S from '@/pages/course/Course.styled';
 import useScrollToTop from '@/hooks/useScrollToTop';
 import { useCourseDetail } from '@/hooks/useCourseDetail';
 import { useBookmark } from '@/hooks/useBookmark';
-import { formatCourseInfo } from '@/utils/format';
+import { mapCourseInfo } from '@/utils/format';
 import type { CourseData } from '@/types/course';
 
 import Header from './components/Header';
@@ -85,7 +85,7 @@ const CourseDetail = () => {
         }
       }
     }
-    
+
     return `${window.location.origin}/thumbnail-default.png`;
   };
 
@@ -116,13 +116,13 @@ const CourseDetail = () => {
     return null;
   }
 
-  const formattedCourseInfo = formatCourseInfo(courseDetail);
+  const mappedCourseInfo = mapCourseInfo(courseDetail);
 
   return (
     <Container ref={scrollRef}>
       <MetaTags
         title={courseDetail.courseName}
-        description={t('seo.courseDescription', formattedCourseInfo)}
+        description={t('seo.courseDescription', mappedCourseInfo)}
         image={getThumbnailUrl()}
         url={window.location.href}
       />
@@ -131,7 +131,7 @@ const CourseDetail = () => {
         isBookmarked={courseDetail.isBookmarked}
         onBack={handleBack}
         onBookmarkToggle={handleBookmarkToggle}
-        courseDescription={t('seo.courseDescription', formattedCourseInfo)}
+        courseDescription={t('seo.courseDescription', mappedCourseInfo)}
         courseImageUrl={getThumbnailUrl()}
       />
       <CourseRouteMap courseDetail={courseDetail} />
@@ -162,13 +162,8 @@ export default CourseDetail;
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  height: 100dvh;
-  overflow-y: auto;
-  padding-bottom: 40px;
-
-  ::-webkit-scrollbar {
-    display: none;
-  }
+  min-height: 100dvh;
+  padding-bottom: var(--spacing-32);
 `;
 
 const StatusContainer = styled.div`
@@ -177,7 +172,7 @@ const StatusContainer = styled.div`
   align-items: center;
   justify-content: center;
   gap: var(--spacing-12);
-  height: 100%;
+  height: 100dvh;
 `;
 
 const ScrollButtonContainer = styled.div`

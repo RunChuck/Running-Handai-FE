@@ -2,7 +2,7 @@
   "menu": "메뉴",
   "seo": {
     "title": "러닝한다이",
-    "description": "부산 러닝 코스 추천 서비스",
+    "description": "부산에서 '러닝한다이'",
     "courseDescription": "{{distance}}km · {{duration}}분 · 최고 {{maxElevation}}m · 최저 {{minElevation}}m · 난이도 {{level}}",
     "units": {
       "km": "km",
@@ -32,7 +32,23 @@
     "autoLogin": "자동 로그인",
     "error": "로그인 처리 중 오류가 발생했습니다.\n다시 시도해주세요."
   },
+  "toast": {
+    "loginSuccess": "환영합니다! 러닝 준비 완료! 🏃‍♂️",
+    "loginFailed": "앗, 로그인에 실패했어요. 다시 시도해주세요.",
+    "logoutSuccess": "안전하게 로그아웃되었어요. 다음에 또 만나요! 👋",
+    "logoutFailed": "로그아웃 중 문제가 발생했어요. 다시 시도해주세요.",
+    "copyLinkSuccess": "코스 링크 복사 완료! 친구들에게 공유해보세요 📤",
+    "copyLinkFailed": "링크 복사에 실패했어요. 다시 시도해주세요.",
+    "reviewSuccess": "리뷰 등록 완료! 러너들에게 도움이 될 거예요 👍",
+    "reviewFailed": "리뷰 등록 중 문제가 발생했어요. 다시 시도해주세요.",
+    "reviewUpdated": "리뷰 수정이 완료되었어요!",
+    "reviewUpdateFailed": "리뷰 수정 중 문제가 발생했어요. 다시 시도해주세요.",
+    "reviewDeleted": "리뷰가 삭제되었어요.",
+    "reviewDeleteFailed": "리뷰 삭제 중 문제가 발생했어요. 다시 시도해주세요.",
+    "error": "오류가 발생했어요. 다시 시도해주세요."
+  },
   "location": {
+    "nearby": "내 위치",
     "haeun_gwangan": "해운\n광안",
     "songjeong_gijang": "송정\n기장",
     "seomyeon_dongnae": "서면\n동래",
@@ -66,13 +82,14 @@
   },
   "modal": {
     "courseModal": {
-    "title": "추천 코스 탐색",
-    "location": "어디로 가시나요?",
+      "title": "추천 코스 탐색",
+      "location": "어디로 가시나요?",
       "theme": "어떤 테마로 원하세요?"
     },
     "reviewModal": {
       "title": "리뷰 작성",
       "confirm": "작성 완료",
+      "submitting": "등록 중...",
       "loginMessage": "로그인하고\n리뷰를 남겨보세요!",
       "placeholder": "다른 러너들을 위해 코스에 대한 후기를 남겨주세요!\n작성 내용은 해당 코스 상세 리뷰에 노출 됩니다!",
       "warning": "* 욕설, 비방이 포함된 리뷰는 경고 없이 삭제됩니다.",
@@ -85,10 +102,10 @@
   },
   "courseDetail": {
     "tabs": {
-    "overview": "전체",
-    "course": "코스",
-    "attractions": "즐길거리",
-    "reviews": "리뷰"
+      "overview": "전체",
+      "course": "코스",
+      "attractions": "즐길거리",
+      "reviews": "리뷰"
     },
     "loadingMap": "지도를 불러오고 있어요.",
     "loading": "코스 상세 정보를 불러오는 중입니다.",
@@ -96,11 +113,13 @@
     "retry": "다시 시도",
     "moreCourseInfo": "코스 정보 더보기",
     "moreAttractions": "즐길거리 더보기",
+    "moreReview": "리뷰 더보기",
     "firstReviewer": "코스의 첫번째 리뷰어가 되어주세요!",
     "reviewRating": "이 코스는 어떠셨나요?",
     "aiCourseAnalysis": "AI 코스 분석 (추정)",
+    "noAnalysisAvailable": "AI 코스 분석을 불러오지 못했어요.",
     "scrollToTop": "맨 위로",
-    "moreReviews": "...더보기",
+    "more": "...더보기",
     "collapse": "접기"
   }
 }

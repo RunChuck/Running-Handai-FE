@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
+import { useToast } from '@/hooks/useToast';
 import { reviewAPI } from '@/api/review';
 import { reviewKeys } from '@/constants/queryKeys';
 import { useAuth } from '@/hooks/useAuth';
@@ -60,8 +62,10 @@ interface UseReviewsReturn {
 }
 
 export const useReviews = ({ courseId, onLoginRequired }: UseReviewsProps): UseReviewsReturn => {
+  const [t] = useTranslation();
   const { isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
+  const { showSuccessToast, showErrorToast } = useToast();
 
   // 폼 상태
   const [rating, setRating] = useState(0);
@@ -89,9 +93,11 @@ export const useReviews = ({ courseId, onLoginRequired }: UseReviewsProps): UseR
       queryClient.invalidateQueries({
         queryKey: reviewKeys.list(variables.courseId),
       });
+      showSuccessToast(t('toast.reviewSuccess'));
     },
     onError: error => {
       console.error('Failed to create review:', error);
+      showErrorToast(t('toast.reviewFailed'));
     },
   });
 
@@ -104,9 +110,11 @@ export const useReviews = ({ courseId, onLoginRequired }: UseReviewsProps): UseR
       queryClient.invalidateQueries({
         queryKey: reviewKeys.list(courseId),
       });
+      showSuccessToast(t('toast.reviewUpdated'));
     },
     onError: error => {
       console.error('Failed to edit review:', error);
+      showErrorToast(t('toast.reviewUpdateFailed'));
     },
   });
 
@@ -119,9 +127,11 @@ export const useReviews = ({ courseId, onLoginRequired }: UseReviewsProps): UseR
       queryClient.invalidateQueries({
         queryKey: reviewKeys.list(courseId),
       });
+      showSuccessToast(t('toast.reviewDeleted'));
     },
     onError: error => {
       console.error('Failed to delete review:', error);
+      showErrorToast(t('toast.reviewDeleteFailed'));
     },
   });
 

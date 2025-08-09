@@ -9,7 +9,7 @@ import Button from '@/components/Button';
 import DistanceIconSrc from '@/assets/icons/course-distance.svg';
 import TimeIconSrc from '@/assets/icons/course-time.svg';
 import AltitudeIconSrc from '@/assets/icons/course-max-altitude.svg';
-import ArrowIconSrc from '@/assets/icons/arrow-down-16px.svg';
+import ArrowIconSrc from '@/assets/icons/arrow-right-16px.svg';
 
 interface CourseSectionProps {
   onTabChange: (tabKey: CourseTabType) => void;

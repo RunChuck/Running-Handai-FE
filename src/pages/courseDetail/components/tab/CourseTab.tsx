@@ -10,6 +10,7 @@ import TimeIconSrc from '@/assets/icons/course-time.svg';
 import MaxAltitudeIconSrc from '@/assets/icons/course-max-altitude.svg';
 import MinAltitudeIconSrc from '@/assets/icons/course-min-altitude.svg';
 import LevelIconSrc from '@/assets/icons/course-level.svg';
+import NoCourseImgSrc from '@/assets/images/sad-emoji.png';
 
 interface CourseTabProps {
   courseDetail: CourseDetailResponse['data'];
@@ -80,11 +81,18 @@ const CourseTab = ({ courseDetail }: CourseTabProps) => {
       <CourseAnalysisContainer>
         <CourseAnalysisTitle>{t('courseDetail.aiCourseAnalysis')}</CourseAnalysisTitle>
         <CourseAnalysisContent>
-          <ul>
-            {courseDetail.roadConditions.map((condition, index) => (
-              <li key={index}>{condition}</li>
-            ))}
-          </ul>
+          {courseDetail.roadConditions.length < 0 ? (
+            <ul>
+              {courseDetail.roadConditions.map((condition, index) => (
+                <li key={index}>{condition}</li>
+              ))}
+            </ul>
+          ) : (
+            <NoAnalysisResult>
+              <img src={NoCourseImgSrc} alt="no analysis" width={57} height={60} />
+              {t('courseDetail.noAnalysisAvailable')}
+            </NoAnalysisResult>
+          )}
         </CourseAnalysisContent>
       </CourseAnalysisContainer>
     </Container>
@@ -191,6 +199,17 @@ const CourseAnalysisContent = styled.div`
   width: 100%;
   gap: var(--spacing-4);
   padding-left: var(--spacing-16);
+  ${theme.typography.body2};
+  color: var(--text-text-secondary, #555555);
+`;
+
+const NoAnalysisResult = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0;
+  margin-left: -16px;
+  gap: var(--spacing-12);
   ${theme.typography.body2};
   color: var(--text-text-secondary, #555555);
 `;

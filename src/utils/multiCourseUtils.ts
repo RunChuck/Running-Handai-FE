@@ -42,7 +42,13 @@ export const drawMultipleCoursesOnMap = (map: kakao.maps.Map, coursesData: Multi
   const polylines: kakao.maps.Polyline[] = [];
   const markers: kakao.maps.Marker[] = [];
 
-  coursesData.forEach(courseData => {
+  // 선택된 코스는 마지막에 그리기
+  const sortedCoursesData = [...coursesData].sort((a, b) => {
+    if (a.isSelected === b.isSelected) return 0;
+    return a.isSelected ? 1 : -1;
+  });
+
+  sortedCoursesData.forEach(courseData => {
     if (courseData.points.length === 0) return;
 
     // 폴리라인 생성
@@ -54,6 +60,7 @@ export const drawMultipleCoursesOnMap = (map: kakao.maps.Map, coursesData: Multi
       strokeColor: courseData.color,
       strokeOpacity: courseData.isSelected ? 0.9 : 0.7,
       strokeStyle: 'solid',
+      zIndex: courseData.isSelected ? 100 : 1,
     });
 
     polyline.setMap(map);
@@ -73,6 +80,7 @@ export const drawMultipleCoursesOnMap = (map: kakao.maps.Map, coursesData: Multi
       position: markerPosition,
       image: markerImage,
       title: `${courseData.label}코스`,
+      zIndex: courseData.isSelected ? 100 : 1,
     });
 
     // 마커에 코스 데이터 저장 (클러스터 클릭시 사용)
