@@ -129,6 +129,11 @@ const Course = () => {
     setIsLoginModalOpen(false);
   };
 
+  const handleNearbySelect = async () => {
+    await fetchNearbyCourses();
+    await moveToCurrentLocationHandler();
+  };
+
   const handleAreaSelect = async (area: AreaCode) => {
     if (mapRef.current) {
       mapRef.current.clearAllCourses();
@@ -279,7 +284,7 @@ const Course = () => {
         onClose={() => setIsModalOpen(false)}
         onAreaSelect={handleAreaSelect}
         onThemeSelect={handleThemeSelect}
-        onNearbySelect={fetchNearbyCourses}
+        onNearbySelect={handleNearbySelect}
         selectedFilter={selectedFilter}
       />
 
