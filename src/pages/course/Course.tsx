@@ -29,17 +29,23 @@ const Course = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [bottomSheetHeight, setBottomSheetHeight] = useState(0);
-  const [selectedFilter, setSelectedFilter] = useState<{
-    type: 'nearby' | 'area' | 'theme';
-    value?: AreaCode | ThemeCode;
-  }>({ type: 'nearby' });
-  const [selectedCourseId, setSelectedCourseId] = useState<number | undefined>();
-  const [localCourses, setLocalCourses] = useState<CourseData[]>([]);
-
-  const { courses, loading, error, fetchNearbyCourses, fetchCoursesByArea, fetchCoursesByTheme } = useCourses();
+  const [isMapInitialized, setIsMapInitialized] = useState(false);
+  const [hasMovedToRestoredCourse, setHasMovedToRestoredCourse] = useState(false);
+  const {
+    courses,
+    loading,
+    error,
+    selectedFilter,
+    selectedCourseId,
+    fetchNearbyCourses,
+    fetchCoursesByArea,
+    fetchCoursesByTheme,
+    handleCourseMarkerClick,
+    updateCourseBookmark,
+  } = useCourses();
   const { handleBookmark } = useBookmark({
     onUpdateCourse: (courseId, updates) => {
-      setLocalCourses(prevCourses => prevCourses.map(course => (course.courseId === courseId ? { ...course, ...updates } : course)));
+      updateCourseBookmark(courseId, updates);
     },
     onUnauthenticated: () => {
       setIsLoginModalOpen(true);
@@ -50,6 +56,15 @@ const Course = () => {
   const moveToFirstCourseStart = (fetchedCourses: CourseData[]) => {
     if (fetchedCourses && fetchedCourses.length > 0 && fetchedCourses[0].trackPoints && fetchedCourses[0].trackPoints.length > 0 && mapRef.current) {
       const firstTrackPoint = fetchedCourses[0].trackPoints[0];
+      mapRef.current.moveToLocation(firstTrackPoint.lat, firstTrackPoint.lon, 7);
+    }
+  };
+
+  // 특정 코스의 시작점으로 지도 이동
+  const moveToCourseStart = (courseId: number) => {
+    const course = courses.find(c => c.courseId === courseId);
+    if (course && course.trackPoints && course.trackPoints.length > 0 && mapRef.current) {
+      const firstTrackPoint = course.trackPoints[0];
       mapRef.current.moveToLocation(firstTrackPoint.lat, firstTrackPoint.lon, 7);
     }
   };
@@ -90,32 +105,32 @@ const Course = () => {
   };
 
   const handleAreaSelect = async (area: AreaCode) => {
-    setSelectedFilter({ type: 'area', value: area });
-    setSelectedCourseId(undefined);
     if (mapRef.current) {
       mapRef.current.clearAllCourses();
     }
+    setHasMovedToRestoredCourse(false); // 새로운 필터 선택시 플래그 리셋
 
     const fetchedCourses = await fetchCoursesByArea(area);
     moveToFirstCourseStart(fetchedCourses || []);
   };
 
   const handleThemeSelect = async (theme: ThemeCode) => {
-    setSelectedFilter({ type: 'theme', value: theme });
-    setSelectedCourseId(undefined);
     if (mapRef.current) {
       mapRef.current.clearAllCourses();
     }
+    setHasMovedToRestoredCourse(false); // 새로운 필터 선택시 플래그 리셋
 
     const fetchedCourses = await fetchCoursesByTheme(theme);
     moveToFirstCourseStart(fetchedCourses || []);
   };
 
-  const handleCourseMarkerClick = (courseId: number) => {
-    setSelectedCourseId(courseId);
+  const handleCourseMarkerClickWrapper = (courseId: number) => {
+    handleCourseMarkerClick(courseId);
     if (mapRef.current) {
       mapRef.current.updateSelectedCourse(courseId);
     }
+    // 클릭한 코스의 시작점으로 지도 이동
+    moveToCourseStart(courseId);
   };
 
   const handleBottomSheetHeightChange = (height: number) => {
@@ -146,29 +161,46 @@ const Course = () => {
     };
   };
 
-  // 필터링된 경우에만 코스 표시
+  const handleMapLoad = () => {
+    setIsMapInitialized(true);
+  };
+
+  // 코스 데이터가 변경되면 지도에 표시
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapRef.current || !isMapInitialized) return;
 
     if (selectedFilter.type === 'area' || selectedFilter.type === 'theme') {
       if (courses.length > 0) {
-        const firstCourseId = courses[0].courseId;
-        setSelectedCourseId(prevId => prevId === firstCourseId ? prevId : firstCourseId);
-        mapRef.current.displayCourses(courses, firstCourseId);
+        try {
+          mapRef.current.displayCourses(courses, selectedCourseId);
+          // 복원된 코스의 선택된 코스 위치로 지도 이동 (최초 1회만)
+          if (!hasMovedToRestoredCourse) {
+            if (selectedCourseId) {
+              moveToCourseStart(selectedCourseId);
+            } else {
+              moveToFirstCourseStart(courses);
+            }
+            setHasMovedToRestoredCourse(true);
+          }
+        } catch (error) {
+          console.warn('Failed to display courses:', error);
+        }
       } else {
-        setSelectedCourseId(prevId => prevId === undefined ? prevId : undefined);
-        mapRef.current.clearAllCourses();
+        try {
+          mapRef.current.clearAllCourses();
+        } catch (error) {
+          console.warn('Failed to clear courses:', error);
+        }
       }
     } else {
       // nearby인 경우 코스 제거
-      setSelectedCourseId(prevId => prevId === undefined ? prevId : undefined);
-      mapRef.current.clearAllCourses();
+      try {
+        mapRef.current.clearAllCourses();
+      } catch (error) {
+        console.warn('Failed to clear courses:', error);
+      }
     }
-  }, [courses, selectedFilter.type]);
-
-  useEffect(() => {
-    setLocalCourses(courses);
-  }, [courses]);
+  }, [courses, selectedFilter.type, selectedCourseId, isMapInitialized]);
 
   const floatButtons = (
     <>
@@ -187,7 +219,12 @@ const Course = () => {
     <S.Container>
       <MetaTags />
       <S.MapContainer bottomSheetHeight={bottomSheetHeight}>
-        <MapView ref={mapRef} onCourseMarkerClick={handleCourseMarkerClick} containerHeight={window.innerHeight - bottomSheetHeight} />
+        <MapView
+          ref={mapRef}
+          onMapLoad={handleMapLoad}
+          onCourseMarkerClick={handleCourseMarkerClickWrapper}
+          containerHeight={window.innerHeight - bottomSheetHeight}
+        />
       </S.MapContainer>
 
       <FloatButton onClick={handleMenuClick} position={{ top: 16, left: 16 }} size="large" variant="rounded">
@@ -197,13 +234,14 @@ const Course = () => {
       {!isModalOpen && (
         <BottomSheet titleData={getBottomSheetTitle()} floatButtons={floatButtons} onHeightChange={handleBottomSheetHeightChange}>
           <CourseList
-            courses={localCourses}
+            courses={courses}
             loading={loading}
             error={error}
             selectedCourseId={selectedCourseId}
             onBookmarkClick={handleBookmarkClick}
             onThemeSelect={handleThemeSelect}
             fetchNearbyCourses={fetchNearbyCourses}
+            onCourseClick={handleCourseMarkerClick}
           />
         </BottomSheet>
       )}

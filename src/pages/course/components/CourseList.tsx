@@ -21,9 +21,19 @@ interface CourseListProps {
   onBookmarkClick: (course: CourseData) => void;
   onThemeSelect: (theme: ThemeCode) => void;
   fetchNearbyCourses: () => void;
+  onCourseClick?: (courseId: number) => void;
 }
 
-const CourseList = ({ courses, loading, error, selectedCourseId, onBookmarkClick, onThemeSelect, fetchNearbyCourses }: CourseListProps) => {
+const CourseList = ({
+  courses,
+  loading,
+  error,
+  selectedCourseId,
+  onBookmarkClick,
+  onThemeSelect,
+  fetchNearbyCourses,
+  onCourseClick,
+}: CourseListProps) => {
   const [t] = useTranslation();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
@@ -104,6 +114,7 @@ const CourseList = ({ courses, loading, error, selectedCourseId, onBookmarkClick
           index={index}
           isSelected={course.courseId === selectedCourseId}
           onBookmarkClick={() => onBookmarkClick(course)}
+          onCourseClick={() => onCourseClick?.(course.courseId)}
         />
       ))}
     </S.CourseGrid>

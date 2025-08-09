@@ -13,9 +13,10 @@ interface CourseItemProps {
   index: number;
   isSelected?: boolean;
   onBookmarkClick: () => void;
+  onCourseClick?: () => void;
 }
 
-const CourseItem = ({ course, index, isSelected, onBookmarkClick }: CourseItemProps) => {
+const CourseItem = ({ course, index, isSelected, onBookmarkClick, onCourseClick }: CourseItemProps) => {
   const [t] = useTranslation();
   const navigate = useNavigate();
 
@@ -25,6 +26,7 @@ const CourseItem = ({ course, index, isSelected, onBookmarkClick }: CourseItemPr
   };
 
   const handleClick = () => {
+    onCourseClick?.();
     navigate(`/course-detail/${course.courseId}`, {
       state: { course },
     });

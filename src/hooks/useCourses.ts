@@ -6,6 +6,8 @@ import { getUserLocation } from '@/utils/geolocation';
 import { BUSAN_CITY_HALL } from '@/constants/locations';
 import type { CourseData, CourseResponse, AreaCode, ThemeCode } from '@/types/course';
 
+const STORAGE_KEY = 'courseFilterState';
+
 export const useCourses = () => {
   const queryClient = useQueryClient();
   const [currentFilter, setCurrentFilter] = useState<{
@@ -13,6 +15,7 @@ export const useCourses = () => {
     value?: AreaCode | ThemeCode;
     location?: { lat: number; lng: number };
   }>({ type: 'nearby' });
+  const [selectedCourseId, setSelectedCourseId] = useState<number | undefined>();
 
   const getCurrentLocation = useCallback(async () => {
     try {
@@ -80,15 +83,49 @@ export const useCourses = () => {
     gcTime: 10 * 60 * 1000,
   });
 
-  // 위치가 설정되면 현재 필터 업데이트
+  // 위치가 설정되면 현재 필터 업데이트 및 세션스토리지 복원
   useEffect(() => {
     if (userLocation) {
       setCurrentFilter(prev => ({
         ...prev,
         location: { lat: userLocation.lat, lng: userLocation.lng },
       }));
+
+      // 세션스토리지에서 필터와 코스 데이터 복원
+      try {
+        const savedState = sessionStorage.getItem(STORAGE_KEY);
+        if (savedState) {
+          const { filter, selectedCourseId: savedSelectedId, courses: savedCourses } = JSON.parse(savedState);
+          console.log('Restoring filter from useCourses:', filter);
+
+          if (filter && filter.type !== 'nearby' && savedCourses && savedCourses.length > 0) {
+            setSelectedCourseId(savedSelectedId);
+
+            // 필터 설정과 동시에 캐시에 데이터 저장
+            if (filter.type === 'area' && filter.value) {
+              const queryKey = courseKeys.area(filter.value, userLocation.lat, userLocation.lng);
+              queryClient.setQueryData(queryKey, { data: savedCourses });
+              setCurrentFilter({
+                type: 'area',
+                value: filter.value,
+                location: { lat: userLocation.lat, lng: userLocation.lng },
+              });
+            } else if (filter.type === 'theme' && filter.value) {
+              const queryKey = courseKeys.theme(filter.value, userLocation.lat, userLocation.lng);
+              queryClient.setQueryData(queryKey, { data: savedCourses });
+              setCurrentFilter({
+                type: 'theme',
+                value: filter.value,
+                location: { lat: userLocation.lat, lng: userLocation.lng },
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to restore filter state:', error);
+      }
     }
-  }, [userLocation]);
+  }, [userLocation, queryClient]);
 
   const fetchNearbyCourses = useCallback(async () => {
     if (!userLocation) return;
@@ -100,12 +137,32 @@ export const useCourses = () => {
       if (!userLocation) return;
 
       const locationCoords = { lat: userLocation.lat, lng: userLocation.lng };
-      setCurrentFilter({ type: 'area', value: area, location: locationCoords });
+      const filter = { type: 'area' as const, value: area };
+
+      setCurrentFilter({ ...filter, location: locationCoords });
 
       // 캐시된 데이터가 있으면 즉시 반환
       const cachedData = queryClient.getQueryData(courseKeys.area(area, userLocation.lat, userLocation.lng));
       if (cachedData) {
-        return (cachedData as CourseResponse).data;
+        const courses = (cachedData as CourseResponse).data;
+        const firstCourseId = courses[0]?.courseId;
+        setSelectedCourseId(firstCourseId);
+
+        // 세션스토리지에 저장
+        try {
+          sessionStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify({
+              filter,
+              selectedCourseId: firstCourseId,
+              courses,
+            })
+          );
+        } catch (error) {
+          console.warn('Failed to save filter state:', error);
+        }
+
+        return courses;
       }
 
       try {
@@ -115,7 +172,26 @@ export const useCourses = () => {
           lon: userLocation.lng,
           area,
         });
-        return response.data;
+
+        const courses = response.data;
+        const firstCourseId = courses[0]?.courseId;
+        setSelectedCourseId(firstCourseId);
+
+        // 세션스토리지에 저장
+        try {
+          sessionStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify({
+              filter,
+              selectedCourseId: firstCourseId,
+              courses,
+            })
+          );
+        } catch (error) {
+          console.warn('Failed to save filter state:', error);
+        }
+
+        return courses;
       } catch (error) {
         console.error('지역별 코스 조회 실패:', error);
         return undefined;
@@ -129,12 +205,32 @@ export const useCourses = () => {
       if (!userLocation) return;
 
       const locationCoords = { lat: userLocation.lat, lng: userLocation.lng };
-      setCurrentFilter({ type: 'theme', value: theme, location: locationCoords });
+      const filter = { type: 'theme' as const, value: theme };
+
+      setCurrentFilter({ ...filter, location: locationCoords });
 
       // 캐시된 데이터가 있으면 즉시 반환
       const cachedData = queryClient.getQueryData(courseKeys.theme(theme, userLocation.lat, userLocation.lng));
       if (cachedData) {
-        return (cachedData as CourseResponse).data;
+        const courses = (cachedData as CourseResponse).data;
+        const firstCourseId = courses[0]?.courseId;
+        setSelectedCourseId(firstCourseId);
+
+        // 세션스토리지에 저장
+        try {
+          sessionStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify({
+              filter,
+              selectedCourseId: firstCourseId,
+              courses,
+            })
+          );
+        } catch (error) {
+          console.warn('Failed to save filter state:', error);
+        }
+
+        return courses;
       }
 
       try {
@@ -144,7 +240,26 @@ export const useCourses = () => {
           lon: userLocation.lng,
           theme,
         });
-        return response.data;
+
+        const courses = response.data;
+        const firstCourseId = courses[0]?.courseId;
+        setSelectedCourseId(firstCourseId);
+
+        // 세션스토리지에 저장
+        try {
+          sessionStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify({
+              filter,
+              selectedCourseId: firstCourseId,
+              courses,
+            })
+          );
+        } catch (error) {
+          console.warn('Failed to save filter state:', error);
+        }
+
+        return courses;
       } catch (error) {
         console.error('테마별 코스 조회 실패:', error);
         return undefined;
@@ -157,12 +272,75 @@ export const useCourses = () => {
     return (query.data as CourseResponse)?.data || [];
   }, [query.data]);
 
+  const handleCourseMarkerClick = useCallback((courseId: number) => {
+    setSelectedCourseId(courseId);
+
+    // 세션스토리지 업데이트 (선택된 코스 아이디만)
+    try {
+      const savedState = sessionStorage.getItem(STORAGE_KEY);
+      if (savedState) {
+        const parsedState = JSON.parse(savedState);
+        sessionStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify({
+            ...parsedState,
+            selectedCourseId: courseId,
+          })
+        );
+      }
+    } catch (error) {
+      console.warn('Failed to update selected course:', error);
+    }
+  }, []);
+
+  const updateCourseBookmark = useCallback(
+    (courseId: number, updates: { isBookmarked: boolean; bookmarks: number }) => {
+      // React Query 캐시의 모든 코스 데이터 업데이트
+      queryClient.setQueriesData({ queryKey: courseKeys.all }, (oldData: unknown) => {
+        const data = oldData as CourseResponse | undefined;
+        if (!data?.data) return data;
+
+        return {
+          ...data,
+          data: data.data.map((course: CourseData) => (course.courseId === courseId ? { ...course, ...updates } : course)),
+        };
+      });
+
+      // 세션스토리지 업데이트
+      try {
+        const savedState = sessionStorage.getItem(STORAGE_KEY);
+        if (savedState) {
+          const parsedState = JSON.parse(savedState);
+          if (parsedState.courses) {
+            const updatedCourses = parsedState.courses.map((course: CourseData) =>
+              course.courseId === courseId ? { ...course, ...updates } : course
+            );
+            sessionStorage.setItem(
+              STORAGE_KEY,
+              JSON.stringify({
+                ...parsedState,
+                courses: updatedCourses,
+              })
+            );
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to update bookmark in session storage:', error);
+      }
+    },
+    [queryClient]
+  );
+
   return {
     courses,
     loading: query.isLoading,
     error: query.error?.message || null,
+    selectedFilter: currentFilter,
+    selectedCourseId,
     fetchNearbyCourses,
     fetchCoursesByArea,
     fetchCoursesByTheme,
+    handleCourseMarkerClick,
+    updateCourseBookmark,
   };
 };
