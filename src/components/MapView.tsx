@@ -99,8 +99,8 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
             position: relative;
           ">
             <div style="
-              width: 16px;
-              height: 16px;
+              width: 14px;
+              height: 14px;
               border-radius: 50%;
               background-color: #FF460D;
               border: 2px solid #FFF;
@@ -185,11 +185,11 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
       }
 
       // 개별 마커 클릭 이벤트 등록
-      courseElements.current.markers.forEach((marker, index) => {
-        const courseData = coursesData[index];
+      courseElements.current.markers.forEach(marker => {
+        const markerWithData = marker as unknown as { courseData: MultiCourseMapData };
         window.kakao.maps.event.addListener(marker, 'click', () => {
           setPopover({ visible: false, courses: [], position: { x: 0, y: 0 } });
-          onCourseMarkerClickCallback(courseData.courseId);
+          onCourseMarkerClickCallback(markerWithData.courseData.courseId);
         });
       });
     },
@@ -216,11 +216,12 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
       }
 
       // 마커 클릭 이벤트 재등록
-      courseElements.current.markers.forEach((marker, index) => {
-        const courseData = currentCoursesData.current[index];
+      courseElements.current.markers.forEach(marker => {
+        const markerWithData = marker as unknown as { courseData: MultiCourseMapData };
+        // 기존 이벤트는 clearMapElements에서 자동으로 제거됨
         window.kakao.maps.event.addListener(marker, 'click', () => {
           setPopover({ visible: false, courses: [], position: { x: 0, y: 0 } });
-          onCourseMarkerClickCallback(courseData.courseId);
+          onCourseMarkerClickCallback(markerWithData.courseData.courseId);
         });
       });
 
