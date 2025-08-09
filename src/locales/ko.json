@@ -2,7 +2,7 @@
   "menu": "메뉴",
   "seo": {
     "title": "러닝한다이",
-    "description": "부산 러닝 코스 추천 서비스",
+    "description": "부산에서 '러닝한다이'",
     "courseDescription": "{{distance}}km · {{duration}}분 · 최고 {{maxElevation}}m · 최저 {{minElevation}}m · 난이도 {{level}}",
     "units": {
       "km": "km",
@@ -82,8 +82,8 @@
   },
   "modal": {
     "courseModal": {
-    "title": "추천 코스 탐색",
-    "location": "어디로 가시나요?",
+      "title": "추천 코스 탐색",
+      "location": "어디로 가시나요?",
       "theme": "어떤 테마로 원하세요?"
     },
     "reviewModal": {
@@ -102,10 +102,10 @@
   },
   "courseDetail": {
     "tabs": {
-    "overview": "전체",
-    "course": "코스",
-    "attractions": "즐길거리",
-    "reviews": "리뷰"
+      "overview": "전체",
+      "course": "코스",
+      "attractions": "즐길거리",
+      "reviews": "리뷰"
     },
     "loadingMap": "지도를 불러오고 있어요.",
     "loading": "코스 상세 정보를 불러오는 중입니다.",

@@ -16,7 +16,7 @@ const MetaTags = ({ title, description, image, url }: MetaTagsProps) => {
   const defaultImage = '/runninghandai-thumbnail.png';
   const defaultUrl = `${window.location.origin}${window.location.pathname}`;
 
-  const seoTitle = title ? `${defaultTitle} | ${title}` : defaultTitle;
+  const seoTitle = title ? `${title}` : defaultTitle;
   const seoDescription = description || defaultDescription;
   const seoImage = image || defaultImage;
   const seoUrl = url || defaultUrl;
