@@ -274,6 +274,7 @@ const Course = () => {
         onClose={() => setIsModalOpen(false)}
         onAreaSelect={handleAreaSelect}
         onThemeSelect={handleThemeSelect}
+        onNearbySelect={fetchNearbyCourses}
         selectedFilter={selectedFilter}
       />
 

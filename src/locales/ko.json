@@ -48,6 +48,7 @@
     "error": "오류가 발생했어요. 다시 시도해주세요."
   },
   "location": {
+    "nearby": "내 위치",
     "haeun_gwangan": "해운\n광안",
     "songjeong_gijang": "송정\n기장",
     "seomyeon_dongnae": "서면\n동래",
