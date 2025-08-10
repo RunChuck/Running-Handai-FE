@@ -1,10 +1,10 @@
-import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import Lottie from 'lottie-react';
 import styled from '@emotion/styled';
 import * as S from '../Course.styled';
 import { theme } from '@/styles/theme';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 
 import { THEME_CARDS } from '@/constants/themes';
 import type { CourseData, ThemeCode } from '@/types/course';
@@ -37,29 +37,8 @@ const CourseList = ({
   onCourseClick,
 }: CourseListProps) => {
   const [t] = useTranslation();
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
-  const handleMouseDown = (e: React.MouseEvent) => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    const startX = e.pageX - container.offsetLeft;
-    const scrollLeft = container.scrollLeft;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const x = e.pageX - container.offsetLeft;
-      const walk = (x - startX) * 2;
-      container.scrollLeft = scrollLeft - walk;
-    };
-
-    const handleMouseUp = () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  };
+  const { scrollContainerRef, handleMouseDown, handleWheel } = useHorizontalScroll();
 
   const handleThemeCardClick = (themeKey: ThemeCode) => {
     onThemeSelect(themeKey);
@@ -89,13 +68,7 @@ const CourseList = ({
       <StatusContainer>
         <img src={NoCourseImgSrc} alt={t('main.noCourses')} width={57} height={60} />
         <S.StatusText>{isMobile ? t('main.noCourses.mobile') : t('main.noCourses')}</S.StatusText>
-        <ThemeCourseCardContainer
-          ref={scrollContainerRef}
-          onWheel={e => {
-            e.currentTarget.scrollLeft += e.deltaY;
-          }}
-          onMouseDown={handleMouseDown}
-        >
+        <ThemeCourseCardContainer ref={scrollContainerRef} onWheel={handleWheel} onMouseDown={handleMouseDown}>
           {THEME_CARDS.map(card => (
             <ThemeCourseCard key={card.key} onClick={() => handleThemeCardClick(card.key)}>
               <ThemeCourseCardTitle>
@@ -167,6 +140,16 @@ const ThemeCourseCardContainer = styled.div`
   scrollbar-width: none;
   margin: 0 calc(-1 * var(--spacing-16));
   padding: 0 var(--spacing-16);
+
+  /* 터치 동작 개선 */
+  touch-action: pan-x;
+
+  /* 드래그 시 선택 방지 */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+
   cursor: grab;
 
   &:active {
