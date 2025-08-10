@@ -7,6 +7,7 @@ import UserInfoSection from './components/UserInfoSection';
 import FavoriteSection from './components/FavoriteSection';
 import MyCourseSection from './components/MyCourseSection';
 import ServiceInfoSection from './components/ServiceInfoSection';
+import AccountSection from './components/AccountSection';
 
 const MyPage = () => {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ const MyPage = () => {
       <FavoriteSection isAuthenticated={isAuthenticated} />
       <MyCourseSection isAuthenticated={isAuthenticated} />
       <ServiceInfoSection />
+      {isAuthenticated && <AccountSection />}
     </S.Container>
   );
 };

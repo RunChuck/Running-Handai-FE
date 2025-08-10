@@ -134,6 +134,7 @@
     "myCourse": "내 코스",
     "myCourse.desc": "코스를 그려서 사람들에게 공유해보세요!",
     "login": "로그인 하기",
+    "more": "더보기",
     "service": {
       "title": "서비스",
       "serviceIntroduction": "서비스 소개",
@@ -141,6 +142,12 @@
       "locationTerms": "위치기반 서비스 이용약관",
       "privacyPolicy": "개인정보 처리방침",
       "version": "현재 버전"
+    },
+    "account": {
+      "title": "계정",
+      "logout": "로그아웃",
+      "withdrawal": "회원 탈퇴",
+      "logoutConfirm": "정말 로그아웃 하시겠어요?"
     }
   }
 }

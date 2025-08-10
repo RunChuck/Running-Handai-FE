@@ -53,7 +53,7 @@ const ServiceInfoSection = () => {
 
   return (
     <>
-      <SectionDivider />
+      <S.SectionDivider />
       <S.SectionContainer2>
         <SectionTitle>{t('mypage.service.title')}</SectionTitle>
         {serviceItemData.map(item => (
@@ -69,12 +69,6 @@ const ServiceInfoSection = () => {
 };
 
 export default ServiceInfoSection;
-
-const SectionDivider = styled.div`
-  width: 100%;
-  height: 10px;
-  background-color: var(--surface-surface-highlight, #f4f4f4);
-`;
 
 const SectionTitle = styled.div`
   ${theme.typography.body2};
