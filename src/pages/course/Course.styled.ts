@@ -56,3 +56,36 @@ export const RetryButton = styled.button`
     transform: translateY(0);
   }
 `;
+
+export const MenuTransitionOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2000;
+  pointer-events: none;
+  overflow: hidden;
+`;
+
+export const DrawerSlide = styled.div`
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  background: var(--surface-surface-default, #ffffff);
+  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.15);
+  animation: slideInFromLeft 0.25s ease-out forwards;
+
+  @keyframes slideInFromLeft {
+    from {
+      left: -100%;
+    }
+    to {
+      left: 0%;
+    }
+  }
+`;

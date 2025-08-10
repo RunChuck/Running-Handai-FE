@@ -17,6 +17,7 @@ const hexToFilter = (hex: string): string => {
     '#000000': 'brightness(0) saturate(100%) invert(0%)',
     '#FFFFFF': 'brightness(0) saturate(100%) invert(100%)',
     '#333333': 'brightness(0) saturate(100%) invert(20%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(20%) contrast(100%)',
+    '#BBBBBB': 'brightness(0) saturate(100%) invert(75%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(105%) contrast(100%)',
   };
 
   if (colorFilters[hex.toUpperCase()]) {

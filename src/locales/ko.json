@@ -121,5 +121,40 @@
     "scrollToTop": "맨 위로",
     "more": "...더보기",
     "collapse": "접기"
+  },
+  "mypage": {
+    "defaultNickname": "러너",
+    "greeting": "님,\n오늘은 어디로 달려볼까요?",
+    "socialLogin": "간편 로그인",
+    "runningTerms": "러닝 용어 사전",
+    "myInfo": "내 정보",
+    "myReview": "내 리뷰",
+    "favoriteCourse": "즐겨찾는 코스",
+    "favoriteCourse.desc": "마음에 드는 코스, 즐겨찾기 하세요!",
+    "myCourse": "내 코스",
+    "myCourse.desc": "코스를 그려서 사람들에게 공유해보세요!",
+    "login": "로그인 하기",
+    "more": "더보기",
+    "service": {
+      "title": "서비스",
+      "serviceIntroduction": "서비스 소개",
+      "terms": "서비스 이용약관",
+      "locationTerms": "위치기반 서비스 이용약관",
+      "privacyPolicy": "개인정보 처리방침",
+      "version": "현재 버전"
+    },
+    "account": {
+      "title": "계정",
+      "logout": "로그아웃",
+      "withdrawal": "회원 탈퇴",
+      "logoutConfirm": "정말 로그아웃 하시겠어요?"
+    },
+    "Info": {
+      "title": "내 정보",
+      "email": "이메일",
+      "nickname": "닉네임",
+      "nicknamePlaceholder": "닉네임을 입력해주세요.",
+      "confirm": "완료"
+    }
   }
 }

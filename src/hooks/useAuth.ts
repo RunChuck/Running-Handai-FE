@@ -79,6 +79,8 @@ export const useAuth = () => {
 
   const logout = () => {
     removeToken();
+    sessionStorage.clear();
+    showSuccessToast(t('toast.logoutSuccess'), { position: 'top' });
     navigate('/', { replace: true });
   };
 
