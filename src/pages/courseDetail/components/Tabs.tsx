@@ -31,7 +31,7 @@ const Tabs = ({ courseDetail }: CourseTabProps) => {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'overview':
-        return <OverviewTab onTabChange={handleTabChange} courseDetail={courseDetail} />;
+        return <OverviewTab onTabChange={handleTabChange} courseDetail={courseDetail} courseId={courseDetail.courseId} />;
       case 'course':
         return <CourseTab courseDetail={courseDetail} />;
       case 'attractions':
@@ -39,7 +39,7 @@ const Tabs = ({ courseDetail }: CourseTabProps) => {
       case 'reviews':
         return <ReviewTab courseId={courseDetail.courseId} />;
       default:
-        return <OverviewTab onTabChange={handleTabChange} courseDetail={courseDetail} />;
+        return <OverviewTab onTabChange={handleTabChange} courseDetail={courseDetail} courseId={courseDetail.courseId} />;
     }
   };
 
