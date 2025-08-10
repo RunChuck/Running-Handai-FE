@@ -28,7 +28,7 @@ const UserInfoSection = ({ isAuthenticated }: UserInfoSectionProps) => {
           <>
             <ButtonSection>
               <ButtonWrapper>
-                <RoundButton onClick={() => navigate('/my-info')}>
+                <RoundButton onClick={() => navigate('/mypage/info')}>
                   <SVGColor src={ProfileIconSrc} width={18} height={18} color="#FFFFFF" />
                 </RoundButton>
                 <ButtonText>{t('mypage.myInfo')}</ButtonText>

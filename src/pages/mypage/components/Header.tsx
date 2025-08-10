@@ -1,21 +1,26 @@
 import styled from '@emotion/styled';
-
+import { theme } from '@/styles/theme';
 import BackIconSrc from '@/assets/icons/arrow-left-24px.svg';
 import LogoIconSrc from '@/assets/icons/logo.svg';
 
 interface HeaderProps {
   onBack: () => void;
+  title?: string;
 }
 
-const Header = ({ onBack }: HeaderProps) => {
+const Header = ({ onBack, title }: HeaderProps) => {
   return (
     <Container>
       <IconButton onClick={onBack}>
         <img src={BackIconSrc} alt="back" />
       </IconButton>
-      <LogoWrapper>
-        <img src={LogoIconSrc} alt="logo" />
-      </LogoWrapper>
+      {title ? (
+        <Title>{title}</Title>
+      ) : (
+        <LogoWrapper>
+          <img src={LogoIconSrc} alt="logo" />
+        </LogoWrapper>
+      )}
     </Container>
   );
 };
@@ -26,7 +31,7 @@ const Container = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 44px;
+  height: 56px;
   padding: 0 10px;
   background: var(--surface-surface-default);
   border-bottom: 1px solid var(--line-line-001);
@@ -37,6 +42,14 @@ const Container = styled.div`
 `;
 
 const LogoWrapper = styled.div`
+  flex: 1;
+  display: flex;
+  justify-content: center;
+`;
+
+const Title = styled.div`
+  ${theme.typography.subtitle2};
+  color: var(--text-text-title, #1c1c1c);
   flex: 1;
   display: flex;
   justify-content: center;

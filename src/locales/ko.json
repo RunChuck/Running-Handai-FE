@@ -148,6 +148,13 @@
       "logout": "로그아웃",
       "withdrawal": "회원 탈퇴",
       "logoutConfirm": "정말 로그아웃 하시겠어요?"
+    },
+    "Info": {
+      "title": "내 정보",
+      "email": "이메일",
+      "nickname": "닉네임",
+      "nicknamePlaceholder": "닉네임을 입력해주세요.",
+      "confirm": "완료"
     }
   }
 }
