@@ -155,6 +155,13 @@
       "nickname": "닉네임",
       "nicknamePlaceholder": "닉네임을 입력해주세요.",
       "confirm": "완료"
+    },
+    "review": {
+      "title": "내 리뷰",
+      "placeholder": "리뷰를 작성해주세요.",
+      "confirm": "작성 완료",
+      "empty": "작성한 리뷰가 없어요",
+      "goToReview": "해당 리뷰로 이동"
     }
   }
 }
