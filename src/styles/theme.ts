@@ -14,6 +14,7 @@ export const theme = {
     subtitle1: createTypography('1.25rem', 600, 1.5), // 20px, SemiBold, 150%
     subtitle2: createTypography('1.125rem', 600, 1.5), // 18px, SemiBold, 150%
     subtitle3: createTypography('1rem', 600, 1.5), // 16px, SemiBold, 150%
+    subtitle4: createTypography('1.125rem', 400, 1.5), // 18px, Regular, 150%
 
     // Body text
     body1: createTypography('1rem', 400, 1.5), // 16px, Regular, 150%
