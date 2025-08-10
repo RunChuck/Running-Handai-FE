@@ -71,3 +71,30 @@ export const SectionDivider = styled.div`
   height: 10px;
   background-color: var(--surface-surface-highlight, #f4f4f4);
 `;
+
+export const CardList = styled.div`
+  display: flex;
+  gap: var(--spacing-12);
+  overflow-x: auto;
+
+  /* 터치 스크롤  */
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  touch-action: pan-x;
+
+  /* 드래그 시 선택 방지 */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+`;
