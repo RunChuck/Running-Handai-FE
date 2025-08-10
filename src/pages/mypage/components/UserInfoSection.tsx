@@ -37,7 +37,7 @@ const UserInfoSection = ({ isAuthenticated }: UserInfoSectionProps) => {
             <Divider />
             <ButtonSection>
               <ButtonWrapper>
-                <RoundButton onClick={() => navigate('/my-review')}>
+                <RoundButton onClick={() => navigate('/mypage/review')}>
                   <img src={SpeechBubbleIconSrc} alt="profile" />
                 </RoundButton>
                 <ButtonText>{t('mypage.myReview')}</ButtonText>
