@@ -8,7 +8,7 @@ import Header from '../components/Header';
 import CommonInput from '@/components/CommonInput';
 import Button from '@/components/Button';
 
-const MyInfo = () => {
+const InfoPage = () => {
   const [t] = useTranslation();
   const navigate = useNavigate();
 
@@ -35,7 +35,7 @@ const MyInfo = () => {
   );
 };
 
-export default MyInfo;
+export default InfoPage;
 
 const Container = styled.div`
   width: 100%;
