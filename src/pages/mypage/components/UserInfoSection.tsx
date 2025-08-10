@@ -3,16 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import * as S from '../MyPage.styled';
 import { theme } from '@/styles/theme';
-import { useAuth } from '@/hooks/useAuth';
 
 import SVGColor from '@/components/SvgColor';
 import ProfileIconSrc from '@/assets/icons/profile-default.svg';
 import BookIconSrc from '@/assets/icons/book-icon.svg';
 import SpeechBubbleIconSrc from '@/assets/icons/speech-bubble.svg';
 
-const UserInfoSection = () => {
+interface UserInfoSectionProps {
+  isAuthenticated: boolean;
+}
+
+const UserInfoSection = ({ isAuthenticated }: UserInfoSectionProps) => {
   const [t] = useTranslation();
-  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   return (

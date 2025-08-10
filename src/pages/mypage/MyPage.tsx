@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import * as S from './MyPage.styled';
+import { useAuth } from '@/hooks/useAuth';
 
 import Header from './components/Header';
 import UserInfoSection from './components/UserInfoSection';
@@ -9,6 +10,7 @@ import ServiceInfoSection from './components/ServiceInfoSection';
 
 const MyPage = () => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   const handleBack = () => {
     navigate(-1);
@@ -17,9 +19,9 @@ const MyPage = () => {
   return (
     <S.Container>
       <Header onBack={handleBack} />
-      <UserInfoSection />
-      <FavoriteSection />
-      <MyCourseSection />
+      <UserInfoSection isAuthenticated={isAuthenticated} />
+      <FavoriteSection isAuthenticated={isAuthenticated} />
+      <MyCourseSection isAuthenticated={isAuthenticated} />
       <ServiceInfoSection />
     </S.Container>
   );
