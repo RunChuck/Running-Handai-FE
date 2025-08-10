@@ -36,6 +36,7 @@ const CardContainer = styled.div`
   flex-direction: column;
   max-width: 126px;
   gap: var(--spacing-8);
+  cursor: pointer;
 `;
 
 const ThumbnailWrapper = styled.div`

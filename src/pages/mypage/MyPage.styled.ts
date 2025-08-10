@@ -4,6 +4,7 @@ import { theme } from '@/styles/theme';
 export const Container = styled.div`
   width: 100%;
   height: 100%;
+  padding-bottom: 32px;
 `;
 
 export const SectionContainer = styled.div`
@@ -76,6 +77,7 @@ export const CardList = styled.div`
   display: flex;
   gap: var(--spacing-12);
   overflow-x: auto;
+  padding: 2px;
 
   /* 터치 스크롤  */
   -webkit-overflow-scrolling: touch;
