@@ -56,7 +56,8 @@
     "wondosim": "원도심\n영도",
     "southern_coast": "남부해안",
     "western_nakdongriver": "서부\n낙동강",
-    "northern_busan": "북부산"
+    "northern_busan": "북부산",
+    "all": "전체"
   },
   "theme": {
     "sea": "바다",
