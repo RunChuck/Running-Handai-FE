@@ -32,9 +32,17 @@ const CourseItem = ({ course, index, isSelected, onBookmarkClick, onCourseClick 
     });
   };
 
-  // 인덱스를 알파벳으로 변환
+  // 인덱스를 알파벳으로 변환 (A, B, ..., Z, AA, AB, ...)
   const getCourseName = (index: number) => {
-    return `${String.fromCharCode(65 + index)}${t('course')} `;
+    let result = '';
+    let num = index;
+
+    do {
+      result = String.fromCharCode(65 + (num % 26)) + result;
+      num = Math.floor(num / 26) - 1;
+    } while (num >= 0);
+
+    return `${result}${t('course')} `;
   };
 
   return (
