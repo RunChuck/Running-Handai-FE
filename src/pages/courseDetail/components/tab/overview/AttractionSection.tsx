@@ -65,17 +65,19 @@ const AttractionSection = ({ onTabChange, spots, loading, error }: AttractionSec
         </AttractionList>
       </S.ContentContainer>
 
-      <Button
-        backgroundColor="var(--bg-background-primary, #fff)"
-        border="1px solid var(--line-line-002, #e0e0e0)"
-        borderRadius="24px"
-        fullWidth
-        customTypography={true}
-        onClick={handleAttractionDetail}
-      >
-        <S.ButtonText>{t('courseDetail.moreAttractions')}</S.ButtonText>
-        <img src={ArrowIconSrc} alt="arrow" />
-      </Button>
+      {spots.length > 2 && (
+        <Button
+          backgroundColor="var(--bg-background-primary, #fff)"
+          border="1px solid var(--line-line-002, #e0e0e0)"
+          borderRadius="24px"
+          fullWidth
+          customTypography={true}
+          onClick={handleAttractionDetail}
+        >
+          <S.ButtonText>{t('courseDetail.moreAttractions')}</S.ButtonText>
+          <img src={ArrowIconSrc} alt="arrow" />
+        </Button>
+      )}
     </S.SectionContainer>
   );
 };

@@ -58,17 +58,19 @@ const ReviewSection = ({ onTabChange, reviewData, courseId }: ReviewSectionProps
         <ReviewList courseId={courseId} reviewData={reviewData} skipQuery={true} />
       </S.ContentContainer>
 
-      <Button
-        backgroundColor="var(--bg-background-primary, #fff)"
-        border="1px solid var(--line-line-002, #e0e0e0)"
-        borderRadius="24px"
-        fullWidth
-        customTypography={true}
-        onClick={handleReviewDetail}
-      >
-        <S.ButtonText>{t('courseDetail.moreReview')}</S.ButtonText>
-        <img src={ArrowIconSrc} alt="arrow" />
-      </Button>
+      {reviewData && reviewData.reviewInfoDtos.length > 2 && (
+        <Button
+          backgroundColor="var(--bg-background-primary, #fff)"
+          border="1px solid var(--line-line-002, #e0e0e0)"
+          borderRadius="24px"
+          fullWidth
+          customTypography={true}
+          onClick={handleReviewDetail}
+        >
+          <S.ButtonText>{t('courseDetail.moreReview')}</S.ButtonText>
+          <img src={ArrowIconSrc} alt="arrow" />
+        </Button>
+      )}
 
       <CommonModal
         isOpen={isLoginModalOpen}
