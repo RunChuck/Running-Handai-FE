@@ -8,6 +8,7 @@ import MyPage from '@/pages/mypage/MyPage';
 import InfoPage from '@/pages/mypage/Info/InfoPage';
 import ReviewPage from '@/pages/mypage/review/ReviewPage';
 import FavoritePage from '@/pages/mypage/favorites/FavoritePage';
+import NotFound from '@/pages/NotFound';
 import Test from '@/pages/temp/Test';
 
 const AppRoutes = () => {
@@ -22,6 +23,7 @@ const AppRoutes = () => {
       <Route path="/mypage/review" element={<ReviewPage />} />
       <Route path="/mypage/favorites" element={<FavoritePage />} />
       <Route path="/test" element={<Test />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };
