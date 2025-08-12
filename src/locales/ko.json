@@ -45,7 +45,8 @@
     "reviewUpdateFailed": "리뷰 수정 중 문제가 발생했어요. 다시 시도해주세요.",
     "reviewDeleted": "리뷰가 삭제되었어요.",
     "reviewDeleteFailed": "리뷰 삭제 중 문제가 발생했어요. 다시 시도해주세요.",
-    "error": "오류가 발생했어요. 다시 시도해주세요."
+    "error": "오류가 발생했어요. 다시 시도해주세요.",
+    "preparing": "준비 중인 기능입니다. 조금만 기다려주세요!"
   },
   "location": {
     "nearby": "내 위치",
@@ -155,6 +156,13 @@
       "nickname": "닉네임",
       "nicknamePlaceholder": "닉네임을 입력해주세요.",
       "confirm": "완료"
+    },
+    "review": {
+      "title": "내 리뷰",
+      "placeholder": "리뷰를 작성해주세요.",
+      "confirm": "작성 완료",
+      "empty": "작성한 리뷰가 없어요",
+      "goToReview": "해당 리뷰로 이동"
     }
   }
 }

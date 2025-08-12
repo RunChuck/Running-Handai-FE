@@ -8,6 +8,7 @@ interface DropdownProps {
   children: ReactNode;
   isOpen?: boolean;
   onToggle?: (isOpen: boolean) => void;
+  width?: number;
 }
 
 interface DropdownItemProps {
@@ -16,7 +17,7 @@ interface DropdownItemProps {
   variant?: 'default' | 'danger';
 }
 
-const Dropdown = ({ trigger, children, isOpen: controlledIsOpen, onToggle }: DropdownProps) => {
+const Dropdown = ({ trigger, children, isOpen: controlledIsOpen, onToggle, width = 80 }: DropdownProps) => {
   const [internalIsOpen, setInternalIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -46,7 +47,7 @@ const Dropdown = ({ trigger, children, isOpen: controlledIsOpen, onToggle }: Dro
   return (
     <DropdownContainer ref={dropdownRef}>
       <TriggerButton onClick={handleTriggerClick}>{trigger}</TriggerButton>
-      {isOpen && <DropdownMenu>{children}</DropdownMenu>}
+      {isOpen && <DropdownMenu width={width}>{children}</DropdownMenu>}
     </DropdownContainer>
   );
 };
@@ -78,7 +79,7 @@ const TriggerButton = styled.button`
   }
 `;
 
-const DropdownMenu = styled.div`
+const DropdownMenu = styled.div<{ width: number }>`
   position: absolute;
   top: 0;
   right: 100%;
@@ -87,12 +88,12 @@ const DropdownMenu = styled.div`
   border-radius: 4px;
   box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.1);
   z-index: 1000;
-  min-width: 80px;
+  width: ${props => props.width}px;
   overflow: hidden;
 `;
 
 const StyledDropdownItem = styled.button<{ $variant: 'default' | 'danger' }>`
-  width: 80px;
+  width: 100%;
   padding: 8px 16px;
   background: none;
   border: none;
@@ -101,6 +102,7 @@ const StyledDropdownItem = styled.button<{ $variant: 'default' | 'danger' }>`
   color: ${props => (props.$variant === 'danger' ? 'var(--text-text-error, #ff0010)' : 'var(--text-text-secondary, #555555)')};
   text-align: center;
   transition: background-color 0.2s ease;
+  white-space: nowrap;
 
   &:hover {
     background: var(--surface-surface-highlight, #f4f4f4);
