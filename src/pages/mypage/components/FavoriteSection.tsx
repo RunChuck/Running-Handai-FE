@@ -25,7 +25,7 @@ const FavoriteSection = ({ isAuthenticated }: FavoriteSectionProps) => {
           {t('mypage.favoriteCourse')}
         </S.SectionTitle>
         {isAuthenticated && (
-          <S.MoreButton>
+          <S.MoreButton onClick={() => navigate('/mypage/favorites')}>
             {t('mypage.more')}
             <SVGColor src={ArrowIconSrc} width={16} height={16} color="#BBBBBB" />
           </S.MoreButton>

@@ -164,6 +164,10 @@
       "confirm": "작성 완료",
       "empty": "작성한 리뷰가 없어요",
       "goToReview": "해당 리뷰로 이동"
+    },
+    "favorites": {
+      "title": "즐겨찾는 코스",
+      "filter": "지역 선택"
     }
   }
 }

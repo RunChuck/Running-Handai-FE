@@ -7,6 +7,7 @@ import CourseDetail from '@/pages/courseDetail/CourseDetail';
 import MyPage from '@/pages/mypage/MyPage';
 import InfoPage from '@/pages/mypage/Info/InfoPage';
 import ReviewPage from '@/pages/mypage/review/ReviewPage';
+import FavoritePage from '@/pages/mypage/favorites/FavoritePage';
 import Test from '@/pages/temp/Test';
 
 const AppRoutes = () => {
@@ -19,6 +20,7 @@ const AppRoutes = () => {
       <Route path="/mypage" element={<MyPage />} />
       <Route path="/mypage/info" element={<InfoPage />} />
       <Route path="/mypage/review" element={<ReviewPage />} />
+      <Route path="/mypage/favorites" element={<FavoritePage />} />
       <Route path="/test" element={<Test />} />
     </Routes>
   );

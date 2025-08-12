@@ -20,7 +20,7 @@ const CourseFilter = () => {
   return (
     <FilterContainer>
       <FilterButton onClick={() => setIsOpen(!isOpen)}>
-        <FilterText>지역 선택</FilterText>
+        <FilterText>{t('mypage.favorites.filter')}</FilterText>
         <SVGColor
           src={ArrowIconSrc}
           alt="arrow"
