@@ -13,7 +13,7 @@ const getServiceItemData = (t: (key: string) => string) => [
     id: 1,
     title: t('mypage.service.serviceIntroduction'),
     icon: ArrowIconSrc,
-    link: '/service',
+    link: '/https://runninghandai.notion.site/2490df91dcd7805ab556ccfa7bf48205',
   },
   {
     id: 2,
