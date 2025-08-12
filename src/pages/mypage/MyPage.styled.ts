@@ -42,6 +42,10 @@ export const MoreButton = styled.button`
   ${theme.typography.caption1};
   color: var(--text-text-secondary, #555555);
   cursor: pointer;
+
+  &:hover {
+    color: var(--GrayScale-gray600, #777777);
+  }
 `;
 
 export const SectionContent = styled.div`

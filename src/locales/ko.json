@@ -56,7 +56,8 @@
     "wondosim": "원도심\n영도",
     "southern_coast": "남부해안",
     "western_nakdongriver": "서부\n낙동강",
-    "northern_busan": "북부산"
+    "northern_busan": "북부산",
+    "all": "전체"
   },
   "theme": {
     "sea": "바다",
@@ -163,6 +164,15 @@
       "confirm": "작성 완료",
       "empty": "작성한 리뷰가 없어요",
       "goToReview": "해당 리뷰로 이동"
+    },
+    "favorites": {
+      "title": "즐겨찾는 코스",
+      "filter": "지역 선택"
     }
+  },
+  "notFound": {
+    "text": "404 not found",
+    "desc": "앗, 잘못된 코스로 들어왔어요.\n다시 출발점으로 가볼까요?",
+    "button": "홈 화면으로 돌아가기"
   }
 }
