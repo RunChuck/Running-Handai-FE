@@ -136,6 +136,8 @@
     "myCourse": "내 코스",
     "myCourse.desc": "코스를 그려서 사람들에게 공유해보세요!",
     "login": "로그인 하기",
+    "goToCourse": "코스 둘러보기",
+    "goToCreateCourse": "코스 생성하기",
     "more": "더보기",
     "service": {
       "title": "서비스",

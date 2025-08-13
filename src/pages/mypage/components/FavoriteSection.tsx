@@ -17,6 +17,9 @@ const FavoriteSection = ({ isAuthenticated }: FavoriteSectionProps) => {
   const navigate = useNavigate();
   const { scrollContainerRef, handleMouseDown, handleWheel } = useHorizontalScroll();
 
+  // 테스트용
+  const favoriteCourseCount = 0;
+
   return (
     <S.SectionContainer>
       <S.SectionTitleWrapper>
@@ -24,7 +27,7 @@ const FavoriteSection = ({ isAuthenticated }: FavoriteSectionProps) => {
           <SVGColor src={HeartIconSrc} width={16} height={16} color="#4561FF" />
           {t('mypage.favoriteCourse')}
         </S.SectionTitle>
-        {isAuthenticated && (
+        {isAuthenticated && favoriteCourseCount > 0 && (
           <S.MoreButton onClick={() => navigate('/mypage/favorites')}>
             {t('mypage.more')}
             <SVGColor src={ArrowIconSrc} width={16} height={16} color="#BBBBBB" />
@@ -32,17 +35,24 @@ const FavoriteSection = ({ isAuthenticated }: FavoriteSectionProps) => {
         )}
       </S.SectionTitleWrapper>
       {isAuthenticated ? (
-        <S.CardList ref={scrollContainerRef} onMouseDown={handleMouseDown} onWheel={handleWheel}>
-          <FavoriteCourseCard />
-          <FavoriteCourseCard />
-          <FavoriteCourseCard />
-          <FavoriteCourseCard />
-          <FavoriteCourseCard />
-        </S.CardList>
+        favoriteCourseCount > 0 ? (
+          <S.CardList ref={scrollContainerRef} onMouseDown={handleMouseDown} onWheel={handleWheel}>
+            <FavoriteCourseCard />
+            <FavoriteCourseCard />
+            <FavoriteCourseCard />
+            <FavoriteCourseCard />
+            <FavoriteCourseCard />
+          </S.CardList>
+        ) : (
+          <S.SectionContent>
+            <S.ContentDescription>{t('mypage.favoriteCourse.desc')}</S.ContentDescription>
+            <S.CtaButton onClick={() => navigate('/course')}>{t('mypage.goToCourse')}</S.CtaButton>
+          </S.SectionContent>
+        )
       ) : (
         <S.SectionContent>
           <S.ContentDescription>{t('mypage.favoriteCourse.desc')}</S.ContentDescription>
-          <S.LoginButton onClick={() => navigate('/')}>{t('mypage.login')}</S.LoginButton>
+          <S.CtaButton onClick={() => navigate('/')}>{t('mypage.login')}</S.CtaButton>
         </S.SectionContent>
       )}
     </S.SectionContainer>
