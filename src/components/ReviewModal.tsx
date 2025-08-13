@@ -20,19 +20,10 @@ interface ReviewModalProps {
   initialReviewText?: string;
 }
 
-const ReviewModal = ({ 
-  isOpen, 
-  onClose, 
-  onConfirm, 
-  confirmText, 
-  mode = 'create',
-  initialRating = 0,
-  initialReviewText = ''
-}: ReviewModalProps) => {
+const ReviewModal = ({ isOpen, onClose, onConfirm, confirmText, mode = 'create', initialRating = 0, initialReviewText = '' }: ReviewModalProps) => {
   const [t] = useTranslation();
   const [reviewText, setReviewText] = useState(initialReviewText);
   const [rating, setRating] = useState(initialRating);
-
 
   const handleConfirm = () => {
     onConfirm(reviewText, mode === 'edit' ? rating : undefined);
@@ -51,14 +42,7 @@ const ReviewModal = ({
         </CloseButton>
         <Title>{t('modal.reviewModal.title')}</Title>
 
-        {mode === 'edit' && (
-          <StarRating
-            rating={rating}
-            onRatingChange={setRating}
-            label={t('modal.reviewModal.editRating')}
-            padding={16}
-          />
-        )}
+        {mode === 'edit' && <StarRating rating={rating} onRatingChange={setRating} label={t('modal.reviewModal.editRating')} padding={16} />}
 
         <TextareaWrapper $isOverLimit={isTextOverLimit}>
           <Textarea
@@ -74,7 +58,7 @@ const ReviewModal = ({
         </TextareaWrapper>
 
         <Warning>{t('modal.reviewModal.warning')}</Warning>
-        <Button fullWidth disabled={isButtonDisabled} onClick={handleConfirm}>
+        <Button variant="primary" fullWidth disabled={isButtonDisabled} onClick={handleConfirm}>
           {confirmText}
         </Button>
       </ModalContainer>
@@ -147,14 +131,12 @@ const TextareaWrapper = styled.div<{ $isOverLimit: boolean }>`
   height: 100%;
   padding: 0 0 37px 0;
   border-radius: 8px;
-  border: 1px solid ${({ $isOverLimit }) => 
-    $isOverLimit ? 'var(--system-error, #ff0010)' : 'var(--line-line-001, #eee)'};
+  border: 1px solid ${({ $isOverLimit }) => ($isOverLimit ? 'var(--system-error, #ff0010)' : 'var(--line-line-001, #eee)')};
   background: var(--surface-surface-highlight3, #f7f8fa);
   box-sizing: border-box;
 
   &:focus-within {
-    border-color: ${({ $isOverLimit }) => 
-      $isOverLimit ? 'var(--system-error, #ff0010)' : 'var(--primary-primary, #4261ff)'};
+    border-color: ${({ $isOverLimit }) => ($isOverLimit ? 'var(--system-error, #ff0010)' : 'var(--primary-primary, #4261ff)')};
   }
 `;
 
@@ -188,8 +170,7 @@ const CharacterCount = styled.div<{ $isOverLimit: boolean }>`
   bottom: 16px;
   right: 16px;
   ${theme.typography.body2}
-  color: ${({ $isOverLimit }) => 
-    $isOverLimit ? 'var(--system-error, #ff0010)' : 'var(--text-text-secondary, #757575)'};
+  color: ${({ $isOverLimit }) => ($isOverLimit ? 'var(--system-error, #ff0010)' : 'var(--text-text-secondary, #757575)')};
 `;
 
 const Warning = styled.div`

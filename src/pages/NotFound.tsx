@@ -17,7 +17,7 @@ const NotFound = () => {
         <NotFoundText>{t('notFound.text')}</NotFoundText>
         <NotFoundDesc>{t('notFound.desc')}</NotFoundDesc>
       </Content>
-      <Button fullWidth onClick={() => navigate('/')}>
+      <Button variant="primary" fullWidth onClick={() => navigate('/')}>
         {t('notFound.button')}
       </Button>
     </Container>
