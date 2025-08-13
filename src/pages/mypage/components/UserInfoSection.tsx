@@ -1,10 +1,8 @@
-import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import * as S from '../MyPage.styled';
 import { theme } from '@/styles/theme';
-import { useToast } from '@/hooks/useToast';
 
 import SVGColor from '@/components/SvgColor';
 import ProfileIconSrc from '@/assets/icons/profile-default.svg';
@@ -18,18 +16,6 @@ interface UserInfoSectionProps {
 const UserInfoSection = ({ isAuthenticated }: UserInfoSectionProps) => {
   const [t] = useTranslation();
   const navigate = useNavigate();
-  const { showInfoToast } = useToast();
-  const lastClickTime = useRef(0);
-
-  const handleClickRunningTerms = () => {
-    const now = Date.now();
-    if (now - lastClickTime.current < 3000) return;
-
-    lastClickTime.current = now;
-    showInfoToast(t('toast.preparing'), {
-      position: 'top',
-    });
-  };
 
   return (
     <S.SectionContainer>
@@ -71,7 +57,7 @@ const UserInfoSection = ({ isAuthenticated }: UserInfoSectionProps) => {
         <Divider />
         <ButtonSection>
           <ButtonWrapper>
-            <RoundButton onClick={handleClickRunningTerms}>
+            <RoundButton onClick={() => navigate('/mypage/terms')}>
               <img src={BookIconSrc} alt="profile" />
             </RoundButton>
             <ButtonText>{t('mypage.runningTerms')}</ButtonText>

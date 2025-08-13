@@ -168,6 +168,9 @@
     "favorites": {
       "title": "즐겨찾는 코스",
       "filter": "지역 선택"
+    },
+    "terms": {
+      "title": "러닝 용어 사전"
     }
   },
   "notFound": {
