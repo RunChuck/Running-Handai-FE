@@ -9,39 +9,53 @@ const urlsToCache = [
 ];
 
 // 설치 이벤트
-self.addEventListener('install', (event) => {
-  console.log('Service Worker installing...');
+self.addEventListener('install', event => {
+  if (self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1') {
+    console.log('Service Worker installing...');
+  }
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Caching files');
+    caches
+      .open(CACHE_NAME)
+      .then(cache => {
+        if (self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1') {
+          console.log('Caching files');
+        }
         return cache.addAll(urlsToCache);
       })
-      .catch((error) => {
-        console.error('Caching failed:', error);
+      .catch(error => {
+        if (self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1') {
+          console.error('Caching failed:', error);
+        }
       })
   );
   // 새 서비스 워커 즉시 활성화
   self.skipWaiting();
 });
 
-// 활성화 이벤트  
-self.addEventListener('activate', (event) => {
-  console.log('Service Worker activating...');
+// 활성화 이벤트
+self.addEventListener('activate', event => {
+  if (self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1') {
+    console.log('Service Worker activating...');
+  }
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => {
-      // 모든 탭에서 새 SW 제어권 가져오기
-      return self.clients.claim();
-    })
+    caches
+      .keys()
+      .then(cacheNames => {
+        return Promise.all(
+          cacheNames.map(cacheName => {
+            if (cacheName !== CACHE_NAME) {
+              if (self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1') {
+                console.log('Deleting old cache:', cacheName);
+              }
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      })
+      .then(() => {
+        // 모든 탭에서 새 SW 제어권 가져오기
+        return self.clients.claim();
+      })
   );
 });
 
