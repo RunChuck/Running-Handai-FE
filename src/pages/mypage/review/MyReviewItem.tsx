@@ -1,7 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
+import type { Review } from '@/types/auth';
+import { formatDate } from '@/utils/dateFormat';
+import { getAreaDisplayName } from '@/utils/areaCodeMap';
 
 import { Dropdown, DropdownItem } from '@/components/Dropdown';
 import ReviewModal from '@/components/ReviewModal';
@@ -10,8 +14,13 @@ import TempThumbnailSrc from '@/assets/images/temp-courseCard.png';
 import StarIconSrc from '@/assets/icons/star-filled.svg';
 import MoreIconSrc from '@/assets/icons/more-24px.svg';
 
-const MyReviewItem = () => {
+interface MyReviewItemProps {
+  review: Review;
+}
+
+const MyReviewItem = ({ review }: MyReviewItemProps) => {
   const [t] = useTranslation();
+  const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
   const [needsTruncation, setNeedsTruncation] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -23,18 +32,13 @@ const MyReviewItem = () => {
     }
   };
 
-  // 더미 데이터 (실제로는 props로 받아올 데이터)
-  const reviewData = {
-    reviewId: 1,
-    rating: 5,
-    review:
-      '바다 옆을 뛸 수 있어서 좋아요! 그런데 뱅뱅사거리 쯤 도로공사로 길이 좀 안좋네요 ㅠㅠ 그리고 근처 카페 coffee051 에서 커피 한 잔해도 바다 옆을 뛸 수 있어서 좋아요! 그런데 뱅뱅사거리 쯤 도로공사로 길이 좀 안좋네요 ㅠㅠ 그리고 근처 카페 coffee051 에서 커피 한 잔해도',
-    courseId: 1,
+  const handleGoToCourseDetail = () => {
+    navigate(`/course-detail/${review.courseId}`);
   };
 
   const handleGoToReview = () => {
     // TODO: 해당 리뷰로 이동
-    console.log('Go to review:', reviewData.reviewId);
+    navigate(`/course-detail/${review.courseId}`);
   };
 
   const handleEditClick = () => {
@@ -58,7 +62,7 @@ const MyReviewItem = () => {
   const handleDeleteConfirm = async () => {
     try {
       // TODO: API 호출
-      console.log('Delete review:', reviewData.reviewId);
+      console.log('Delete review:', review.reviewId);
       setIsDeleteModalOpen(false);
     } catch (error) {
       console.error('Failed to delete review:', error);
@@ -67,23 +71,25 @@ const MyReviewItem = () => {
 
   return (
     <Container>
-      <ThumbnailWrapper>
-        <Thumbnail src={TempThumbnailSrc} />
-        <CourseStats>4km · 50분 · 100m</CourseStats>
+      <ThumbnailWrapper onClick={handleGoToCourseDetail}>
+        <Thumbnail src={review.thumbnailUrl || TempThumbnailSrc} />
+        <CourseStats>
+          {review.distance}km · {review.duration}분 · {review.maxElevation}m
+        </CourseStats>
       </ThumbnailWrapper>
       <ReviewInfo>
         <TitleWrapper>
-          <Category>해운광안</Category>
-          <Title>다대포-을숙도</Title>
+          <Category>{getAreaDisplayName(review.area)}</Category>
+          <Title>{review.courseName}</Title>
         </TitleWrapper>
         <ContentWrapper>
           <RowWrapper>
             <StarWrapper>
               <Stars>
-                <img src={StarIconSrc} width={12} height={12} /> {reviewData.rating}
+                <img src={StarIconSrc} width={12} height={12} /> {review.stars}
               </Stars>
               <Divider />
-              <ReviewDate>2025.01.01</ReviewDate>
+              <ReviewDate>{formatDate(review.createdAt)}</ReviewDate>
             </StarWrapper>
             <Dropdown trigger={<img src={MoreIconSrc} alt="more" width={24} height={24} />} width={124}>
               <DropdownItem onClick={handleGoToReview}>{t('mypage.review.goToReview')}</DropdownItem>
@@ -96,18 +102,12 @@ const MyReviewItem = () => {
           <ReviewWrapper>
             {isExpanded ? (
               <>
-                <ReviewContents>
-                  바다 옆을 뛸 수 있어서 좋아요! 그런데 뱅뱅사거리 쯤 도로공사로 길이 좀 안좋네요 ㅠㅠ 그리고 근처 카페 coffee051 에서 커피 한 잔해도
-                  바다 옆을 뛸 수 있어서 좋아요! 그런데 뱅뱅사거리 쯤 도로공사로 길이 좀 안좋네요 ㅠㅠ 그리고 근처 카페 coffee051 에서 커피 한 잔해도
-                </ReviewContents>
+                <ReviewContents>{review.contents}</ReviewContents>
                 <ToggleButton onClick={() => setIsExpanded(false)}>{t('courseDetail.collapse')}</ToggleButton>
               </>
             ) : (
               <ReviewTruncated>
-                <ReviewContents ref={checkTextOverflow}>
-                  바다 옆을 뛸 수 있어서 좋아요! 그런데 뱅뱅사거리 쯤 도로공사로 길이 좀 안좋네요 ㅠㅠ 그리고 근처 카페 coffee051 에서 커피 한 잔해도
-                  바다 옆을 뛸 수 있어서 좋아요! 그런데 뱅뱅사거리 쯤 도로공사로 길이 좀 안좋네요 ㅠㅠ 그리고 근처 카페 coffee051 에서 커피 한 잔해도
-                </ReviewContents>
+                <ReviewContents ref={checkTextOverflow}>{review.contents}</ReviewContents>
                 {needsTruncation && <ToggleButtonInline onClick={() => setIsExpanded(true)}>{t('courseDetail.more')}</ToggleButtonInline>}
               </ReviewTruncated>
             )}
@@ -121,8 +121,8 @@ const MyReviewItem = () => {
         onConfirm={handleEditConfirm}
         confirmText={t('modal.reviewModal.edit')}
         mode="edit"
-        initialRating={reviewData.rating}
-        initialReviewText={reviewData.review}
+        initialRating={review.stars}
+        initialReviewText={review.contents}
       />
       <CommonModal
         isOpen={isDeleteModalOpen}
@@ -137,6 +137,7 @@ const MyReviewItem = () => {
 };
 
 export default MyReviewItem;
+
 const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -150,6 +151,7 @@ const ThumbnailWrapper = styled.div`
   height: 260px;
   border-radius: 4px;
   position: relative;
+  cursor: pointer;
 `;
 
 const Thumbnail = styled.img`
