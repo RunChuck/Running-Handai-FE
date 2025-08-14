@@ -11,6 +11,7 @@ import ReviewPage from '@/pages/mypage/review/ReviewPage';
 import FavoritePage from '@/pages/mypage/favorites/FavoritePage';
 import NotFound from '@/pages/NotFound';
 import Test from '@/pages/temp/Test';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 const AppRoutes = () => {
   return (
@@ -21,9 +22,11 @@ const AppRoutes = () => {
       <Route path="/course-detail/:id" element={<CourseDetail />} />
       <Route path="/mypage" element={<MyPage />} />
       <Route path="/mypage/terms" element={<TermsPage />} />
-      <Route path="/mypage/info" element={<InfoPage />} />
-      <Route path="/mypage/review" element={<ReviewPage />} />
-      <Route path="/mypage/favorites" element={<FavoritePage />} />
+      <Route path="/mypage" element={<ProtectedRoute />}>
+        <Route path="info" element={<InfoPage />} />
+        <Route path="review" element={<ReviewPage />} />
+        <Route path="favorites" element={<FavoritePage />} />
+      </Route>
       <Route path="/test" element={<Test />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
