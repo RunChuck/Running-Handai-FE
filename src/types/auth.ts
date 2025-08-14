@@ -1,3 +1,5 @@
+import type { AreaCode } from './course';
+
 export interface RefreshTokenRequest {
   refreshToken: string;
 }
@@ -54,4 +56,26 @@ export interface BookmarkedCoursesResponse {
   message: string;
   totalCount: number;
   data: BookmarkedCourse[];
+}
+
+export interface Review {
+  reviewId: number;
+  courseId: number;
+  courseName: string;
+  thumbnailUrl: string;
+  area: AreaCode;
+  distance: number;
+  duration: number;
+  maxElevation: number;
+  stars: number;
+  contents: string;
+  createdAt: string;
+}
+
+export interface MyReviewsResponse {
+  statusCode: number;
+  responseCode: string;
+  message: string;
+  totalCount: number;
+  data: Review[];
 }
