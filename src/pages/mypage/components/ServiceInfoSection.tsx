@@ -8,12 +8,11 @@ import SVGColor from '@/components/SvgColor';
 import ArrowIconSrc from '@/assets/icons/arrow-right-16px.svg';
 
 const getServiceItemData = (t: (key: string) => string) => [
-  // TODO: 각 페이지로 링크
   {
     id: 1,
     title: t('mypage.service.serviceIntroduction'),
     icon: ArrowIconSrc,
-    link: '/https://runninghandai.notion.site/2490df91dcd7805ab556ccfa7bf48205',
+    link: 'https://runninghandai.notion.site/2490df91dcd7805ab556ccfa7bf48205',
   },
   {
     id: 2,
