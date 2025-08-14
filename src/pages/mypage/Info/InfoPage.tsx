@@ -29,7 +29,9 @@ const InfoPage = () => {
             <CommonInput value={nickname} onChange={setNickname} placeholder={t('mypage.Info.nicknamePlaceholder')} />
           </InfoWrapper>
         </InfoContent>
-        <Button disabled={nickname.length === 0}>{t('mypage.Info.confirm')}</Button>
+        <Button variant="primary" disabled={nickname.length === 0}>
+          {t('mypage.Info.confirm')}
+        </Button>
       </Content>
     </Container>
   );

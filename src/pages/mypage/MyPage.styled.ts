@@ -64,7 +64,7 @@ export const ContentDescription = styled.span`
   color: var(--text-text-secondary, #555555);
 `;
 
-export const LoginButton = styled.button`
+export const CtaButton = styled.button`
   ${theme.typography.caption1};
   color: var(--text-text-title, #1c1c1c);
   text-decoration-line: underline;

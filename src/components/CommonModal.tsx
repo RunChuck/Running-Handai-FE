@@ -19,14 +19,12 @@ const CommonModal = ({ isOpen, onClose, onConfirm, content, cancelText, confirmT
       <ModalContainer onClick={e => e.stopPropagation()}>
         <Content>{content}</Content>
         <ButtonContainer>
-          <Button
-            onClick={onClose}
-            backgroundColor="var(--surface-surface-highlight, #F4F4F4);"
-            style={{ color: 'var(--GrayScale-gray700, #555)' }}
-          >
+          <Button variant="secondary" onClick={onClose}>
             {cancelText}
           </Button>
-          <Button onClick={onConfirm}>{confirmText}</Button>
+          <Button variant="primary" onClick={onConfirm}>
+            {confirmText}
+          </Button>
         </ButtonContainer>
       </ModalContainer>
     </Overlay>

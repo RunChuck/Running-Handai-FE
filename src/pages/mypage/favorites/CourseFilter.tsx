@@ -18,7 +18,7 @@ const CourseFilter = () => {
   const locationOptions = ['all', ...Object.keys(COURSE_LOCATIONS)];
 
   return (
-    <FilterContainer>
+    <FilterContainer isOpen={isOpen}>
       <FilterButton onClick={() => setIsOpen(!isOpen)}>
         <FilterText>{t('mypage.favorites.filter')}</FilterText>
         <SVGColor
@@ -30,28 +30,27 @@ const CourseFilter = () => {
           style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
         />
       </FilterButton>
-      {isOpen && (
-        <FilterList ref={scrollContainerRef} onMouseDown={handleMouseDown} onWheel={handleWheel}>
-          {locationOptions.map(location => (
-            <FilterOption key={location} isSelected={selectedLocation === location} onClick={() => setSelectedLocation(location)}>
-              {t(`location.${location.toLowerCase()}`).replace('\n', '/')}
-            </FilterOption>
-          ))}
-        </FilterList>
-      )}
+      <FilterList isOpen={isOpen} ref={scrollContainerRef} onMouseDown={handleMouseDown} onWheel={handleWheel}>
+        {locationOptions.map(location => (
+          <FilterOption key={location} isSelected={selectedLocation === location} onClick={() => setSelectedLocation(location)}>
+            {t(`location.${location.toLowerCase()}`).replace('\n', '/')}
+          </FilterOption>
+        ))}
+      </FilterList>
     </FilterContainer>
   );
 };
 
 export default CourseFilter;
 
-const FilterContainer = styled.div`
+const FilterContainer = styled.div<{ isOpen: boolean }>`
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   padding: 24px 0;
-  gap: var(--spacing-12);
+  gap: ${props => (props.isOpen ? 'var(--spacing-12)' : '0')};
+  transition: gap 0.3s ease;
 `;
 
 const FilterButton = styled.button`
@@ -70,13 +69,18 @@ const FilterText = styled.span`
   }
 `;
 
-const FilterList = styled.div`
+const FilterList = styled.div<{ isOpen: boolean }>`
   display: flex;
   width: 100%;
   padding: 0 var(--spacing-16);
   gap: var(--spacing-8);
   align-self: flex-start;
   overflow: hidden;
+  opacity: ${props => (props.isOpen ? 1 : 0)};
+  max-height: ${props => (props.isOpen ? '50px' : '0')};
+  transition:
+    opacity 0.3s ease,
+    max-height 0.3s ease;
 `;
 
 const FilterOption = styled.button<{ isSelected: boolean }>`

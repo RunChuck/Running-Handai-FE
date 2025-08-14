@@ -30,6 +30,10 @@ export const GlobalStyles = () => (
         /* Brand Color */
         --primary-primary: #4561ff;
         --primary-primary002: #2845e9;
+        --primary-primary003: #1b37d3;
+        --secondary-default: #f4f4f4;
+        --secondary-hover: #eeeeee;
+        --secondary-active: #e4e4e4;
 
         /* GrayScale */
         --GrayScale-gray900: #1c1c1c;

@@ -136,6 +136,8 @@
     "myCourse": "내 코스",
     "myCourse.desc": "코스를 그려서 사람들에게 공유해보세요!",
     "login": "로그인 하기",
+    "goToCourse": "코스 둘러보기",
+    "goToCreateCourse": "코스 생성하기",
     "more": "더보기",
     "service": {
       "title": "서비스",
@@ -168,6 +170,252 @@
     "favorites": {
       "title": "즐겨찾는 코스",
       "filter": "지역 선택"
+    },
+    "terms": {
+      "title": "러닝 용어 사전",
+      "tip": "초보 러너를 위한 팁",
+      "tip.content1": "처음엔 '이지런'과 'LSD' 위주로 심폐와 근육을 길들이세요.",
+      "tip.content2": "주간 총 주행거리에 10%법칙(한 주 증가량이 10 % 이내)을 적용하면 부상 예방에 효과적입니다.",
+      "tip.content3": "테이퍼링 기간엔 거리를 줄이되, 페이스(속도) 자체는 그대로 유지해 주어야 레이스 감각이 살아납니다.",
+      "tip.content4": "욕심내기보다 회복주를 주기적으로 잡아야 장기적으로 더 빨라집니다.",
+      "tabs": {
+        "pace": "페이스",
+        "distance": "거리·경기",
+        "body": "신체",
+        "training": "훈련",
+        "injury": "부상",
+        "equipment": "장비",
+        "technique": "자세·기술"
+      },
+      "pace": {
+        "content1": {
+          "term": "페이스",
+          "label": "Pace",
+          "description": "1km(또는 1마일)을 달리는 데 걸린 시간"
+        },
+        "content2": {
+          "term": "러닝 이코노미",
+          "label": "Running Economy",
+          "description": "동일 속도로 달릴 때 소비되는 에너지 효율"
+        },
+        "content3": {
+          "term": "레이스 페이스",
+          "label": "Race Pace (RP)",
+          "description": "목표 레이스에서 유지하려는 평균 속도"
+        },
+        "content4": {
+          "term": "LSD",
+          "label": "Long Slow Distance",
+          "description": "지구력 기초를 다지는 느린 장거리 주행"
+        },
+        "content5": {
+          "term": "템포런",
+          "label": "Tempo Run",
+          "description": "젖산역치(LT) 부근 속도로 20~40분 달리기"
+        },
+        "content6": {
+          "term": "인터벌",
+          "label": "Intervals",
+          "description": "고강도 구간과 회복 구간을 교차 반복"
+        },
+        "content7": {
+          "term": "레페티션",
+          "label": "Repetition(Reps)",
+          "description": "인터벌보다 더 짧고 빠른 고강도 질주"
+        },
+        "content8": {
+          "term": "빌드업",
+          "label": "Progression / Build-up",
+          "description": "달리면서 점진적으로 속도를 높이는 훈련"
+        },
+        "content9": {
+          "term": "크루즈 인터벌",
+          "label": "Cruise Intervals",
+          "description": "1 ㎞(또는 1 마일)를 달리는 데 걸린 시간"
+        },
+        "content10": {
+          "term": "이지런",
+          "label": "Easy Run",
+          "description": "대화가 가능한 완만한 페이스(정맥 60~70 %)"
+        }
+      },
+      "distance": {
+        "content1": {
+          "term": "5 km",
+          "label": "5 K",
+          "description": "초보가 첫 대회로 많이 선택하는 거리"
+        },
+        "content2": {
+          "term": "10 km",
+          "label": "10 K",
+          "description": "5 K를 완주한 뒤 도전하는 대표 입문 레이스"
+        },
+        "content3": {
+          "term": "하프마라톤",
+          "label": "Half Marathon (HM)",
+          "description": "21.0975 ㎞풀코스 마라톤Marathon (FM)42.195 ㎞"
+        },
+        "content4": {
+          "term": "울트라마라톤",
+          "label": "Ultra Marathon",
+          "description": "42.195 ㎞를 초과하는 경기(50K, 100K 등)"
+        },
+        "content5": {
+          "term": "트레일런",
+          "label": "Trail Running",
+          "description": "비포장 산길·숲길을 달리는 경기"
+        },
+        "content6": {
+          "term": "릴레이런",
+          "label": "Relay",
+          "description": "여러 명이 바통이나 타이밍 칩을 이어 달리는 형식"
+        }
+      },
+      "body": {
+        "content1": {
+          "term": "최대심박",
+          "label": "Maximum Heart Rate (HRmax)",
+          "description": "젖산이 급격히 근육에 축적되기 직전의 강도"
+        },
+        "content2": {
+          "term": "젖산역치",
+          "label": "Lactate Threshold (LT)",
+          "description": "젖산이 급격히 근육에 축적되기 직전의 강도"
+        },
+        "content3": {
+          "term": "VO₂ max",
+          "label": "최대산소섭취량",
+          "description": "분당 흡수·사용 가능한 산소 최고치"
+        },
+        "content4": {
+          "term": "RPE",
+          "label": "Rate of Perceived Exertion",
+          "description": "자각적 운동 강도(1~10 단계)"
+        },
+        "content5": {
+          "term": "케이던스",
+          "label": "Cadence",
+          "description": "1분당 걸음(스텝) 수"
+        },
+        "content6": {
+          "term": "보폭",
+          "label": "Stride Length",
+          "description": "한 발 디뎠을 때 이동 거리"
+        }
+      },
+      "training": {
+        "content1": {
+          "term": "주간 총 주행거리",
+          "label": "Weekly Mileage",
+          "description": "한 주 동안 달린 총 거리"
+        },
+        "content2": {
+          "term": "주기화",
+          "label": "Periodization",
+          "description": "거리를 늘리고 강도를 조절해 가는 장기 계획"
+        },
+        "content3": {
+          "term": "테이퍼링",
+          "label": "Tapering",
+          "description": "대회 전 1~3주간 운동량을 줄여 컨디션을 끌어올림"
+        },
+        "content4": {
+          "term": "회복주",
+          "label": "Recovery Week/Down Week",
+          "description": "피로 누적을 방지하기 위해 거리를 20~40 % 줄이는 주간"
+        },
+        "content5": {
+          "term": "크로스 트레이닝",
+          "label": "Cross-Training",
+          "description": "이클·수영·근력 등 달리기 외 운동으로 부상 예방"
+        }
+      },
+      "injury": {
+        "content1": {
+          "term": "러너스 니",
+          "label": "Runner’s Knee",
+          "description": "무릎 뼈 주위 인대조직에 통증이 생기는 질환이다.\n흙 길보다는 딱딱한 콘크리트 바닥을 달릴 때 나타나기 쉬움"
+        },
+        "content2": {
+          "term": "장경인대증후군",
+          "label": "IT Band Syndrome",
+          "description": "정강이뼈와 슬개골을 잇는 부위의 마찰 통증"
+        },
+        "content3": {
+          "term": "족저근막염",
+          "label": "Plantar Fasciitis",
+          "description": "발바닥 근막 염증으로 과도한 발 사용, 발 아치 무너짐, 부적절한 신발 착용 등의 원인으로 발생"
+        },
+        "content4": {
+          "term": "신 스플린트",
+          "label": "Shin Splints",
+          "description": "정강이 부분에 통증이 생기거나 부풀게 된 피로성 통증\n운동량을 갑작스럽게 늘리거나 반복적인 자극과 충격으로 발생"
+        },
+        "content5": {
+          "term": "RICE",
+          "label": "Rest-Ice-Compression-Elevation",
+          "description": "급성 부상 대응 4단계"
+        }
+      },
+      "equipment": {
+        "content1": {
+          "term": "데일리 트레이너",
+          "label": "Daily Trainer",
+          "description": "쿠션·내구성 중심의 일상 연습화"
+        },
+        "content2": {
+          "term": "레이싱 플랫",
+          "label": "Racing Flats",
+          "description": "가볍고 낮은 쿠션, 단거리·레이스용"
+        },
+        "content3": {
+          "term": "카본 슈즈",
+          "label": "Carbon-Plated Shoes",
+          "description": "중간 탄소 플레이트로 반발력 강화(“슈퍼 슈즈”)"
+        },
+        "content4": {
+          "term": "풋팟",
+          "label": "Foot Pod",
+          "description": "신발에 부착해 정확한 거리·케이던스 측정"
+        },
+        "content5": {
+          "term": "하이드레이션 벨트",
+          "label": "Hydration Belt",
+          "description": "물통·젤을 차고 달리는 허리 벨트"
+        },
+        "content6": {
+          "term": "압박(컴프레션) 슬리브",
+          "label": "Compression Sleeve",
+          "description": "근육 흔들림·피로 완화 목적의 종아리/팔 토시"
+        },
+        "content7": {
+          "term": "러닝 퍼포먼스 워치",
+          "label": "GPS Watch",
+          "description": "거리·심박·경로 기록용 시계 "
+        }
+      },
+      "technique": {
+        "content1": {
+          "term": "미드풋 착지",
+          "label": "Mid-foot Strike",
+          "description": "발 중앙으로 착지해 충격 분산"
+        },
+        "content2": {
+          "term": "포워드 린",
+          "label": "Forward Lean",
+          "description": "발목에서 살짝 앞으로 기울인 러닝 자세"
+        },
+        "content3": {
+          "term": "힙 드라이브",
+          "label": "Hip Drive",
+          "description": "엉덩이 근육으로 추진력을 얻는 동작"
+        },
+        "content4": {
+          "term": "암스윙",
+          "label": "Arm Swing",
+          "description": "균형과 리듬을 돕는 팔 흔들기"
+        }
+      }
     }
   },
   "notFound": {

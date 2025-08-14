@@ -4,12 +4,14 @@ import styled from '@emotion/styled';
 import { css } from '@emotion/react';
 
 export type ButtonSize = 'md' | 'lg';
+export type ButtonVariant = 'primary' | 'secondary';
 export type IconPosition = 'center' | 'left';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   maxWidth?: string;
   fullWidth?: boolean;
   size?: ButtonSize;
+  variant?: ButtonVariant;
   backgroundColor?: string;
   startIcon?: React.ReactNode;
   iconPosition?: IconPosition;
@@ -26,7 +28,6 @@ const ButtonBase = styled.button<ButtonProps>`
   border: ${({ border }) => border || 'none'};
   transition: all 0.2s ease-in-out;
   cursor: pointer;
-  color: ${({ textColor }) => textColor || '#fff'};
   position: relative;
 
   ${({ iconPosition = 'center' }) => {
@@ -65,7 +66,52 @@ const ButtonBase = styled.button<ButtonProps>`
     `;
   }}
 
-  background-color: ${({ backgroundColor }) => backgroundColor || 'var(--primary-primary)'};
+  ${({ variant = 'primary', backgroundColor, textColor }) => {
+    if (backgroundColor) {
+      return css`
+        background-color: ${backgroundColor};
+        color: ${textColor || '#fff'};
+      `;
+    }
+
+    if (variant === 'secondary') {
+      return css`
+        background-color: var(--secondary-default, #f4f4f4);
+        color: var(--text-text-secondary, #555555);
+
+        &:hover:not(:disabled) {
+          background-color: var(--secondary-hover, #eeeeee);
+        }
+
+        &:active:not(:disabled) {
+          background-color: var(--secondary-active, #e4e4e4);
+        }
+
+        &:disabled {
+          background-color: var(--secondary-default, #f4f4f4);
+          color: var(--text-text-disabled, #bbbbbb);
+        }
+      `;
+    }
+
+    return css`
+      background-color: var(--primary-primary, #4561ff);
+      color: var(--text-text-inverse, #ffffff);
+
+      &:hover:not(:disabled) {
+        background-color: var(--primary-primary002, #2845e9);
+      }
+
+      &:active:not(:disabled) {
+        background-color: var(--primary-primary003, #1b37d3);
+      }
+
+      &:disabled {
+        background-color: var(--GrayScale-gray400, #bbbbbb);
+        color: #fff;
+      }
+    `;
+  }}
 
   max-width: ${({ maxWidth }) => maxWidth || 'none'};
 
@@ -75,20 +121,22 @@ const ButtonBase = styled.button<ButtonProps>`
       width: 100%;
     `}
 
-  &:hover:not(:disabled) {
-    opacity: 0.9;
-    transform: translateY(-1px);
-  }
+  ${({ variant }) =>
+    !variant &&
+    css`
+      &:hover:not(:disabled) {
+        transform: translateY(-1px);
+      }
 
-  &:active:not(:disabled) {
-    transform: translateY(0);
-    opacity: 0.8;
-  }
+      &:active:not(:disabled) {
+        transform: translateY(0);
+      }
 
-  &:disabled {
-    background-color: var(--text-text-disabled, #bbbbbb);
-    transform: none;
-  }
+      &:disabled {
+        transform: none;
+        cursor: not-allowed;
+      }
+    `}
 `;
 
 const IconWrapper = styled.div<{ iconPosition?: IconPosition }>`
@@ -108,16 +156,14 @@ const IconWrapper = styled.div<{ iconPosition?: IconPosition }>`
   }}
 `;
 
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ children, startIcon, iconPosition = 'center', ...props }, ref) => {
-    return (
-      <ButtonBase ref={ref} iconPosition={iconPosition} {...props}>
-        {startIcon && <IconWrapper iconPosition={iconPosition}>{startIcon}</IconWrapper>}
-        {children}
-      </ButtonBase>
-    );
-  }
-);
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(({ children, startIcon, iconPosition = 'center', ...props }, ref) => {
+  return (
+    <ButtonBase ref={ref} iconPosition={iconPosition} {...props}>
+      {startIcon && <IconWrapper iconPosition={iconPosition}>{startIcon}</IconWrapper>}
+      {children}
+    </ButtonBase>
+  );
+});
 
 Button.displayName = 'Button';
 
