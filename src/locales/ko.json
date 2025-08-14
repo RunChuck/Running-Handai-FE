@@ -169,7 +169,8 @@
     },
     "favorites": {
       "title": "즐겨찾는 코스",
-      "filter": "지역 선택"
+      "filter": "지역 선택",
+      "empty": "이 지역에 즐겨찾는 코스가 없어요"
     },
     "terms": {
       "title": "러닝 용어 사전",
