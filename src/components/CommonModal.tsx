@@ -9,22 +9,27 @@ interface CommonModalProps {
   content: React.ReactNode;
   cancelText: string;
   confirmText: string;
+  title?: string;
+  isDangerous?: boolean;
 }
 
-const CommonModal = ({ isOpen, onClose, onConfirm, content, cancelText, confirmText }: CommonModalProps) => {
+const CommonModal = ({ isOpen, onClose, onConfirm, content, cancelText, confirmText, title, isDangerous }: CommonModalProps) => {
   if (!isOpen) return null;
 
   return (
     <Overlay onClick={onClose}>
       <ModalContainer onClick={e => e.stopPropagation()}>
-        <Content>{content}</Content>
+        <Content>
+          {title && <Title>{title}</Title>}
+          {content}
+        </Content>
         <ButtonContainer>
           <Button variant="secondary" onClick={onClose}>
             {cancelText}
           </Button>
-          <Button variant="primary" onClick={onConfirm}>
+          <StyledButton variant="primary" onClick={onConfirm} isDangerous={isDangerous}>
             {confirmText}
-          </Button>
+          </StyledButton>
         </ButtonContainer>
       </ModalContainer>
     </Overlay>
@@ -77,6 +82,7 @@ const Content = styled.div`
   line-height: 1.5;
   flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   white-space: pre-wrap;
@@ -89,4 +95,22 @@ const ButtonContainer = styled.div`
   button {
     flex: 1;
   }
+`;
+
+const Title = styled.h3`
+  ${theme.typography.subtitle1};
+  color: var(--text-text-title, #1c1c1c);
+  text-align: center;
+`;
+
+const StyledButton = styled(Button)<{ isDangerous?: boolean }>`
+  ${({ isDangerous }) =>
+    isDangerous &&
+    `
+    background: var(--system-danger, #ff4830) !important;
+    
+    &:hover:not(:disabled) {
+      background: #f0452f !important;
+    }
+  `}
 `;

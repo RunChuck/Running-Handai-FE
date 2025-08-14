@@ -77,6 +77,7 @@ export const GlobalStyles = () => (
 
         /* System Colors */
         --system-error: #ff0010;
+        --system-danger: #ff4830;
         --system-error-light: #ffe6e8;
         --system-warning: #ffcb00;
         --system-warning-light: #fff8e1;

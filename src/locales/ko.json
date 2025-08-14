@@ -150,7 +150,9 @@
     "account": {
       "title": "계정",
       "logout": "로그아웃",
-      "withdrawal": "회원 탈퇴",
+      "withdrawal": "계정삭제",
+      "withdrawalDescription": "계정 삭제를 원하실 경우\n메일로 문의해주세요",
+      "withdrawalConfirm": "메일 보내기",
       "logoutConfirm": "정말 로그아웃 하시겠어요?"
     },
     "Info": {
