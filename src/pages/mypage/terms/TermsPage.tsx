@@ -4,6 +4,7 @@ import styled from '@emotion/styled';
 
 import Header from '../components/Header';
 import ToolTip from './ToopTip';
+import KeyTab from './KeyTab';
 
 const TermsPage = () => {
   const [t] = useTranslation();
@@ -13,6 +14,7 @@ const TermsPage = () => {
     <Container>
       <Header title={t('mypage.terms.title')} onBack={() => navigate(-1)} />
       <ToolTip />
+      <KeyTab />
     </Container>
   );
 };
@@ -20,7 +22,8 @@ const TermsPage = () => {
 export default TermsPage;
 
 const Container = styled.div`
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  height: 100%;
-  padding-bottom: var(--spacing-32);
+  height: 100vh;
 `;
