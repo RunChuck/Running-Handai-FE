@@ -36,6 +36,10 @@ const Container = styled.div`
   background-color: var(--surface-surface-highlight2, #eeeeee);
   padding: 0 var(--spacing-16);
   gap: var(--spacing-24);
+
+  @media (max-width: 600px) {
+    background-color: var(--surface-surface-default, #ffffff);
+  }
 `;
 
 const NotFoundImg = styled.img`
