@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import * as S from '../MyPage.styled';
 import { theme } from '@/styles/theme';
+import type { UserInfo } from '@/types/auth';
 
 import SVGColor from '@/components/SvgColor';
 import ProfileIconSrc from '@/assets/icons/profile-default.svg';
@@ -11,16 +12,17 @@ import SpeechBubbleIconSrc from '@/assets/icons/speech-bubble.svg';
 
 interface UserInfoSectionProps {
   isAuthenticated: boolean;
+  userInfo: UserInfo | null;
 }
 
-const UserInfoSection = ({ isAuthenticated }: UserInfoSectionProps) => {
+const UserInfoSection = ({ isAuthenticated, userInfo }: UserInfoSectionProps) => {
   const [t] = useTranslation();
   const navigate = useNavigate();
 
   return (
     <S.SectionContainer>
       <Greeting>
-        <UserNickname>{t('mypage.defaultNickname')}</UserNickname>
+        <UserNickname>{userInfo?.nickname || t('mypage.defaultNickname')}</UserNickname>
         {t('mypage.greeting')}
       </Greeting>
       <ButtonContainer>
