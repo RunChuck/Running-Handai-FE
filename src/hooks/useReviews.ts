@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/useToast';
 import { reviewAPI } from '@/api/review';
-import { reviewKeys } from '@/constants/queryKeys';
+import { reviewKeys, courseKeys } from '@/constants/queryKeys';
 import { useAuth } from '@/hooks/useAuth';
 import type {
   ReviewData,
@@ -18,6 +18,7 @@ import type {
 interface UseReviewsProps {
   courseId: number;
   onLoginRequired?: () => void;
+  skipQuery?: boolean;
 }
 
 interface UseReviewsReturn {
@@ -61,7 +62,7 @@ interface UseReviewsReturn {
   checkAuthAndExecute: (callback: () => void) => boolean;
 }
 
-export const useReviews = ({ courseId, onLoginRequired }: UseReviewsProps): UseReviewsReturn => {
+export const useReviews = ({ courseId, onLoginRequired, skipQuery = false }: UseReviewsProps): UseReviewsReturn => {
   const [t] = useTranslation();
   const { isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
@@ -72,14 +73,20 @@ export const useReviews = ({ courseId, onLoginRequired }: UseReviewsProps): UseR
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
+  // 디버깅용 로그
+  // if (process.env.NODE_ENV === 'development') {
+  //   console.log('useReviews:', { courseId, skipQuery, enabled: !!courseId && courseId > 0 && !skipQuery });
+  // }
+
   // 리뷰 목록 조회
   const reviewQuery = useQuery({
     queryKey: reviewKeys.list(courseId),
     queryFn: async (): Promise<ReviewData> => {
+      console.log('reviewAPI.getReviews called for courseId:', courseId);
       const response = await reviewAPI.getReviews({ courseId });
       return response.data;
     },
-    enabled: !!courseId && courseId > 0,
+    enabled: !!courseId && courseId > 0 && !skipQuery,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   });
@@ -92,6 +99,9 @@ export const useReviews = ({ courseId, onLoginRequired }: UseReviewsProps): UseR
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: reviewKeys.list(variables.courseId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: courseKeys.summary(variables.courseId),
       });
       showSuccessToast(t('toast.reviewSuccess'));
     },
@@ -110,6 +120,9 @@ export const useReviews = ({ courseId, onLoginRequired }: UseReviewsProps): UseR
       queryClient.invalidateQueries({
         queryKey: reviewKeys.list(courseId),
       });
+      queryClient.invalidateQueries({
+        queryKey: courseKeys.summary(courseId),
+      });
       showSuccessToast(t('toast.reviewUpdated'));
     },
     onError: error => {
@@ -126,6 +139,9 @@ export const useReviews = ({ courseId, onLoginRequired }: UseReviewsProps): UseR
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: reviewKeys.list(courseId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: courseKeys.summary(courseId),
       });
       showSuccessToast(t('toast.reviewDeleted'));
     },

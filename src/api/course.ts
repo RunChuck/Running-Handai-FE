@@ -1,5 +1,12 @@
 import { http } from '@/constants/http';
-import type { CourseRequest, CourseResponse, CourseDetailResponse, BookmarkResponse, AttractionResponse } from '@/types/course';
+import type {
+  CourseRequest,
+  CourseResponse,
+  CourseDetailResponse,
+  CourseSummaryResponse,
+  BookmarkResponse,
+  AttractionResponse,
+} from '@/types/course';
 
 const PREFIX = '/api/courses';
 
@@ -11,6 +18,11 @@ export const courseAPI = {
 
   getCourseDetail: async (courseId: number) => {
     const response = await http.get<CourseDetailResponse>(`${PREFIX}/${courseId}`);
+    return response.data;
+  },
+
+  getCourseSummary: async (courseId: number) => {
+    const response = await http.get<CourseSummaryResponse>(`${PREFIX}/${courseId}/summary`);
     return response.data;
   },
 

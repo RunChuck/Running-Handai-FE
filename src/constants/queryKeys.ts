@@ -6,6 +6,8 @@ export const courseKeys = {
   theme: (theme: string, lat: number, lon: number) => [...courseKeys.all, 'list', { filter: 'THEME', theme, lat, lon }] as const,
   // 코스 상세 조회
   detail: (id: number) => [...courseKeys.all, 'detail', id] as const,
+  // 코스 요약 조회
+  summary: (courseId: number) => [...courseKeys.all, 'summary', courseId] as const,
   // 코스 즐길거리 조회
   attractions: (courseId: number) => [...courseKeys.all, 'attractions', courseId] as const,
 };

@@ -3,6 +3,7 @@ import { theme } from '@/styles/theme';
 import { useReviews } from '@/hooks/useReviews';
 import { getStarData } from '@/utils/starRating';
 import { formatDate } from '@/utils/dateFormat';
+import type { ReviewData } from '@/types/review';
 
 import ReviewItem from './ReviewItem';
 import StarFilledIconSrc from '@/assets/icons/star-filled.svg';
@@ -11,10 +12,22 @@ import StarIconSrc from '@/assets/icons/star-default.svg';
 
 interface ReviewListProps {
   courseId: number;
+  reviewData?: ReviewData | null;
+  skipQuery?: boolean;
 }
 
-const ReviewList = ({ courseId }: ReviewListProps) => {
-  const { reviewData, editReviewAsync, deleteReviewAsync } = useReviews({ courseId });
+const ReviewList = ({ courseId, reviewData: propReviewData, skipQuery = false }: ReviewListProps) => {
+  const {
+    reviewData: hookReviewData,
+    editReviewAsync,
+    deleteReviewAsync,
+  } = useReviews({
+    courseId,
+    skipQuery: skipQuery || !!propReviewData,
+  });
+
+  // props로 받은 데이터가 있으면 우선 사용, 없으면 hook 데이터 사용
+  const reviewData = propReviewData || hookReviewData;
 
   const handleEditReview = async (reviewId: number, stars?: number, contents?: string) => {
     await editReviewAsync({ reviewId, stars, contents });

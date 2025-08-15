@@ -75,6 +75,33 @@ export interface CourseDetailResponse {
   data: CourseDetailData;
 }
 
+export interface ReviewData {
+  reviewId: number;
+  stars: number;
+  contents: string;
+  writerNickname: string;
+  isMyReview: boolean;
+  createdAt: string;
+}
+
+export interface CourseSummaryData {
+  distance: number;
+  duration: number;
+  maxElevation: number;
+  reviewCount: number;
+  starAverage: number;
+  reviews: ReviewData[];
+  spots: SpotData[];
+}
+
+export interface CourseSummaryResponse {
+  statusCode: number;
+  responseCode: string;
+  message: string;
+  totalCount: number;
+  data: CourseSummaryData;
+}
+
 export interface BookmarkResponse {
   statusCode: number;
   responseCode: string;

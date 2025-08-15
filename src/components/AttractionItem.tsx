@@ -8,9 +8,10 @@ import AttractionTumbnailSrc from '@/assets/images/temp-attraction.png';
 interface AttractionItemProps {
   spot: SpotData;
   onMoreClick?: (spot: SpotData, buttonElement: HTMLButtonElement) => void;
+  hideMoreButton?: boolean;
 }
 
-const AttractionItem = ({ spot, onMoreClick }: AttractionItemProps) => {
+const AttractionItem = ({ spot, onMoreClick, hideMoreButton = false }: AttractionItemProps) => {
   const [needsTruncation, setNeedsTruncation] = useState(false);
 
   if (!spot) {
@@ -42,7 +43,7 @@ const AttractionItem = ({ spot, onMoreClick }: AttractionItemProps) => {
       <DescriptionContainer>
         <DescriptionTruncated>
           <Description ref={checkTextOverflow}>{spot.description}</Description>
-          {needsTruncation && <MoreButton onClick={handleMoreButtonClick}>...더보기</MoreButton>}
+          {!hideMoreButton && needsTruncation && <MoreButton onClick={handleMoreButtonClick}>...더보기</MoreButton>}
         </DescriptionTruncated>
       </DescriptionContainer>
     </Container>
