@@ -100,6 +100,13 @@
       "deleteWarning": "리뷰를 삭제하면 되돌릴 수 없어요.\n정말 삭제할까요?",
       "deleteConfirm": "네, 삭제할게요",
       "deleteCancel": "취소"
+    },
+    "pwaInstall": {
+      "title": "앱으로 설치하기",
+      "description": "홈 화면에 추가하고\n언제든 빠르게 러닝하세요! 🏃‍♂️",
+      "confirm": "좋아요!",
+      "cancel": "나중에",
+      "installing": "설치 중..."
     }
   },
   "courseDetail": {

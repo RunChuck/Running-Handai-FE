@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 import Button from '@/components/Button';
 import MetaTags from '@/components/MetaTags';
+import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import GoogleIconSrc from '@/assets/icons/google-icon.svg';
@@ -82,6 +83,7 @@ const Login = () => {
   return (
     <S.Container>
       <MetaTags />
+      <PWAInstallPrompt />
       <S.LoginContainer>
         <S.LogoWrapper>
           <img src={isMobile ? WhiteLogoSrc : PrimaryLogoSrc} alt="러닝한다이" />
