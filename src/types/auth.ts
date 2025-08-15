@@ -12,3 +12,19 @@ export interface RefreshTokenResponse {
     refreshToken: string;
   };
 }
+
+export interface UserInfo {
+  nickname: string;
+  email: string;
+}
+
+export interface UserInfoResponse {
+  statusCode: number;
+  responseCode: string;
+  message: string;
+  totalCount: number;
+  data: {
+    nickname: string;
+    email: string;
+  };
+}
