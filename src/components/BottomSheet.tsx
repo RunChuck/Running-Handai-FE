@@ -25,7 +25,10 @@ export interface BottomSheetRef {
   snapTo: (index: number) => void;
 }
 
-const SNAP_HEIGHTS = [0.9, 0.6, 42 / window.innerHeight]; // 90%, 60%, 42px
+const isPWA = window.matchMedia('(display-mode: standalone)').matches;
+const SAFE_AREA_OFFSET = isPWA ? 34 : 0; // PWA에서만 추가 높이
+const MIN_HEIGHT = 42 + SAFE_AREA_OFFSET;
+const SNAP_HEIGHTS = [0.9, 0.6, MIN_HEIGHT / window.innerHeight]; // 90%, 60%, 최소높이
 const INITIAL_SNAP = 1; // 60%
 
 const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
@@ -159,7 +162,7 @@ const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
 
       // 새로운 높이 계산 (드래그 방향과 높이 변화 반대)
       const newHeight = Math.max(
-        42, // 최소 높이 42px로 고정
+        MIN_HEIGHT, // 최소 높이를 PWA 환경에 맞게 조정
         Math.min(
           viewportHeight * 0.9, // 최대 높이
           currentHeight - deltaY // 위로 드래그하면 높이 증가, 아래로 드래그하면 높이 감소
