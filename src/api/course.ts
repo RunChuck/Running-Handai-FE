@@ -1,5 +1,5 @@
 import { http } from '@/constants/http';
-import type { CourseRequest, CourseResponse, CourseDetailResponse, BookmarkRequest, BookmarkResponse } from '@/types/course';
+import type { CourseRequest, CourseResponse, CourseDetailResponse, BookmarkResponse, AttractionResponse } from '@/types/course';
 
 const PREFIX = '/api/courses';
 
@@ -14,13 +14,18 @@ export const courseAPI = {
     return response.data;
   },
 
-  bookmarkCourse: async (request: BookmarkRequest) => {
-    const response = await http.post<BookmarkResponse>(`${PREFIX}/${request.courseId}/bookmarks`, request);
+  bookmarkCourse: async (courseId: number) => {
+    const response = await http.post<BookmarkResponse>(`${PREFIX}/${courseId}/bookmarks`);
     return response.data;
   },
 
-  deleteBookmarkCourse: async (request: BookmarkRequest) => {
-    const response = await http.delete<BookmarkResponse>(`${PREFIX}/${request.courseId}/bookmarks`, { data: request });
+  deleteBookmarkCourse: async (courseId: number) => {
+    const response = await http.delete<BookmarkResponse>(`${PREFIX}/${courseId}/bookmarks`);
+    return response.data;
+  },
+
+  getAttractions: async (courseId: number) => {
+    const response = await http.get<AttractionResponse>(`${PREFIX}/${courseId}/spots`);
     return response.data;
   },
 };

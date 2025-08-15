@@ -75,12 +75,29 @@ export interface CourseDetailResponse {
   data: CourseDetailData;
 }
 
-export interface BookmarkRequest {
-  courseId: number;
-}
-
 export interface BookmarkResponse {
   statusCode: number;
   responseCode: string;
   message: string;
+}
+
+export interface AttractionData {
+  courseId: number;
+  spotCount: number;
+  spots: SpotData[];
+}
+
+export interface SpotData {
+  spotId: number;
+  name: string;
+  description: string;
+  imageUrl: string;
+}
+
+export interface AttractionResponse {
+  statusCode: number;
+  responseCode: string;
+  message: string;
+  totalCount: number;
+  data: AttractionData;
 }
