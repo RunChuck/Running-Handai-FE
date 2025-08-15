@@ -1,20 +1,31 @@
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
+import type { SpotData } from '@/types/course';
 
 import AttractionTumbnailSrc from '@/assets/images/temp-attraction.png';
 
-const AttractionItem = () => {
+interface AttractionItemProps {
+  spot: SpotData;
+}
+
+const AttractionItem = ({ spot }: AttractionItemProps) => {
+  if (!spot) {
+    return null;
+  }
+
   return (
     <Container>
       <ThumbnailWrapper>
-        <Thumbnail src={AttractionTumbnailSrc} alt="attraction" />
+        <Thumbnail
+          src={spot.imageUrl || AttractionTumbnailSrc}
+          alt={spot.name}
+          onError={e => {
+            e.currentTarget.src = AttractionTumbnailSrc;
+          }}
+        />
       </ThumbnailWrapper>
-      <Title>다대포 해수욕장</Title>
-      <Description>
-        제방길에 조성된 가우라 유채꽃 등 다양한 꽃밭제방길에 조성된 가우라 유채꽃 등 다양한 꽃밭 제방길에 조성된 가우라
-        유채꽃 등 다양한 꽃밭 제방길에 조성된 가우라 유채꽃 등 다양한 꽃밭 제방길에 조성된 가우라 유채꽃 등 다양한 꽃밭
-        제방길에 조성된 가우라 유채꽃 등 다양한 꽃밭 제방길에 조성된 가우라 유채꽃 등 다양한 꽃밭
-      </Description>
+      <Title>{spot.name}</Title>
+      <Description>{spot.description}</Description>
     </Container>
   );
 };
