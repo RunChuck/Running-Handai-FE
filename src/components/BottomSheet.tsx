@@ -272,6 +272,15 @@ const SheetContainer = styled(motion.div)<{ isDragging: boolean }>`
   touch-action: none;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+
+  /* PWA - 홈 인디케이터 영역 고려 */
+  @media (display-mode: standalone) {
+    padding-bottom: env(safe-area-inset-bottom);
+
+    @supports (padding: max(0px)) {
+      padding-bottom: max(env(safe-area-inset-bottom), 0px);
+    }
+  }
 `;
 
 const SheetContent = styled.div`
@@ -295,6 +304,9 @@ const DragArea = styled.div`
   -webkit-user-select: none;
   user-select: none;
   flex-shrink: 0;
+
+  /* 드래그 영역 확대 */
+  min-height: 48px;
 
   &:active {
     cursor: grabbing;
