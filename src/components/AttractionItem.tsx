@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { useState } from 'react';
 import { theme } from '@/styles/theme';
 import type { SpotData } from '@/types/course';
 
@@ -6,12 +7,25 @@ import AttractionTumbnailSrc from '@/assets/images/temp-attraction.png';
 
 interface AttractionItemProps {
   spot: SpotData;
+  onMoreClick?: (spot: SpotData, buttonElement: HTMLButtonElement) => void;
 }
 
-const AttractionItem = ({ spot }: AttractionItemProps) => {
+const AttractionItem = ({ spot, onMoreClick }: AttractionItemProps) => {
+  const [needsTruncation, setNeedsTruncation] = useState(false);
+
   if (!spot) {
     return null;
   }
+
+  const checkTextOverflow = (element: HTMLParagraphElement | null) => {
+    if (element) {
+      setNeedsTruncation(element.scrollHeight > element.clientHeight);
+    }
+  };
+
+  const handleMoreButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    onMoreClick?.(spot, event.currentTarget);
+  };
 
   return (
     <Container>
@@ -25,7 +39,12 @@ const AttractionItem = ({ spot }: AttractionItemProps) => {
         />
       </ThumbnailWrapper>
       <Title>{spot.name}</Title>
-      <Description>{spot.description}</Description>
+      <DescriptionContainer>
+        <DescriptionTruncated>
+          <Description ref={checkTextOverflow}>{spot.description}</Description>
+          {needsTruncation && <MoreButton onClick={handleMoreButtonClick}>...더보기</MoreButton>}
+        </DescriptionTruncated>
+      </DescriptionContainer>
     </Container>
   );
 };
@@ -35,8 +54,8 @@ export default AttractionItem;
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-8);
-  cursor: pointer;
+  gap: var(--spacing-4);
+  position: relative;
 `;
 
 const ThumbnailWrapper = styled.div`
@@ -44,6 +63,7 @@ const ThumbnailWrapper = styled.div`
   aspect-ratio: 1;
   border-radius: 4px;
   overflow: hidden;
+  margin-bottom: var(--spacing-4);
 `;
 
 const Thumbnail = styled.img`
@@ -58,15 +78,38 @@ const Title = styled.span`
   color: var(--text-text-title, #1c1c1c);
 `;
 
+const DescriptionContainer = styled.div`
+  position: relative;
+`;
+
+const DescriptionTruncated = styled.div`
+  position: relative;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+`;
+
 const Description = styled.p`
   ${theme.typography.caption3};
   color: var(--text-text-secondary, #555555);
-
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  overflow: hidden;
-  text-overflow: ellipsis;
   line-height: 1.4;
   word-break: break-word;
+  margin: 0;
+`;
+
+const MoreButton = styled.button`
+  ${theme.typography.caption2};
+  color: var(--text-text-secondary, #555555);
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: white;
+  border: none;
+  padding-left: 2px;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
 `;
