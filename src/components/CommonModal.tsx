@@ -11,14 +11,15 @@ interface CommonModalProps {
   confirmText: string;
   title?: string;
   isDangerous?: boolean;
+  height?: string;
 }
 
-const CommonModal = ({ isOpen, onClose, onConfirm, content, cancelText, confirmText, title, isDangerous }: CommonModalProps) => {
+const CommonModal = ({ isOpen, onClose, onConfirm, content, cancelText, confirmText, title, isDangerous, height }: CommonModalProps) => {
   if (!isOpen) return null;
 
   return (
     <Overlay onClick={onClose}>
-      <ModalContainer onClick={e => e.stopPropagation()}>
+      <ModalContainer onClick={e => e.stopPropagation()} customHeight={height}>
         <Content>
           {title && <Title>{title}</Title>}
           {content}
@@ -52,9 +53,9 @@ const Overlay = styled.div`
   z-index: 99999;
 `;
 
-const ModalContainer = styled.div`
+const ModalContainer = styled.div<{ customHeight?: string }>`
   width: 343px;
-  height: 196px;
+  height: ${props => props.customHeight || '196px'};
   background: var(--surface-surface-default, #ffffff);
   border-radius: 16px;
   padding: var(--spacing-16);
