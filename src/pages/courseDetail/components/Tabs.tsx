@@ -35,7 +35,7 @@ const Tabs = ({ courseDetail }: CourseTabProps) => {
       case 'course':
         return <CourseTab courseDetail={courseDetail} />;
       case 'attractions':
-        return <AttractionsTab />;
+        return <AttractionsTab courseId={courseDetail.courseId} />;
       case 'reviews':
         return <ReviewTab courseId={courseDetail.courseId} />;
       default:
@@ -47,7 +47,13 @@ const Tabs = ({ courseDetail }: CourseTabProps) => {
     <Container>
       <TabWrapper>
         {TAB_ITEMS.map(tab => (
-          <TabButton key={tab.key} isActive={activeTab === tab.key} onClick={() => handleTabChange(tab.key)}>
+          <TabButton
+            key={tab.key}
+            isActive={activeTab === tab.key}
+            onClick={() => {
+              handleTabChange(tab.key);
+            }}
+          >
             {t(tab.label)}
           </TabButton>
         ))}

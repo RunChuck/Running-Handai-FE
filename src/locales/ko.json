@@ -127,6 +127,9 @@
     "reviewRating": "이 코스는 어떠셨나요?",
     "aiCourseAnalysis": "AI 코스 분석 (추정)",
     "noAnalysisAvailable": "AI 코스 분석을 불러오지 못했어요.",
+    "attractions.loading": "즐길거리를 불러오고 있어요.",
+    "attractions.error": "즐길거리를 불러오는데 실패했어요.\n잠시 후 다시 시도해주세요.",
+    "attractions.empty": "등록된 즐길거리가 없어요.",
     "scrollToTop": "맨 위로",
     "more": "...더보기",
     "collapse": "접기"
