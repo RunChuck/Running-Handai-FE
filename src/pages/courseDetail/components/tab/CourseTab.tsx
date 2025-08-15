@@ -81,7 +81,7 @@ const CourseTab = ({ courseDetail }: CourseTabProps) => {
       <CourseAnalysisContainer>
         <CourseAnalysisTitle>{t('courseDetail.aiCourseAnalysis')}</CourseAnalysisTitle>
         <CourseAnalysisContent>
-          {courseDetail.roadConditions.length < 0 ? (
+          {courseDetail.roadConditions.length > 0 ? (
             <ul>
               {courseDetail.roadConditions.map((condition, index) => (
                 <li key={index}>{condition}</li>
