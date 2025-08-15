@@ -1,56 +1,63 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '@/hooks/useAuth';
+import { useReviews } from '@/hooks/useReviews';
 import * as S from './Section.styled';
 import type { CourseTabType } from '@/types/course';
+import type { ReviewData } from '@/types/review';
 
 import StarRating from '@/components/StarRating';
 import CommonModal from '@/components/CommonModal';
 import ReviewModal from '@/components/ReviewModal';
+import ReviewList from '@/components/ReviewList';
 import Button from '@/components/Button';
 import ArrowIconSrc from '@/assets/icons/arrow-right-16px.svg';
 
 interface ReviewSectionProps {
   onTabChange: (tabKey: CourseTabType) => void;
+  reviewData: ReviewData | null;
+  courseId: number;
 }
-const ReviewSection = ({ onTabChange }: ReviewSectionProps) => {
+const ReviewSection = ({ onTabChange, reviewData, courseId }: ReviewSectionProps) => {
   const [t] = useTranslation();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
-  const [rating, setRating] = useState(0);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const checkAuthAndExecute = (callback: () => void): boolean => {
-    if (!isAuthenticated) {
-      setIsLoginModalOpen(true);
-      return false;
-    }
-    callback();
-    return true;
-  };
+
+  const {
+    rating,
+    isReviewModalOpen,
+    isLoginModalOpen,
+    isCreating,
+    handleRatingChange,
+    handleReviewSubmit,
+    handleLoginModalClose,
+    handleReviewModalClose,
+  } = useReviews({ courseId, skipQuery: true });
 
   const handleReviewDetail = () => {
     onTabChange('reviews');
   };
 
-  const handleLoginModalClose = () => {
-    setIsLoginModalOpen(false);
+  const getStarRatingLabel = () => {
+    if (!reviewData || reviewData.reviewCount === 0) {
+      return t('courseDetail.firstReviewer');
+    }
+    const hasMyReview = reviewData.reviewInfoDtos.some(review => review.isMyReview);
+    if (hasMyReview) {
+      return null;
+    }
+    return t('courseDetail.reviewRating');
   };
 
-  const handleRatingChange = (newRating: number) => {
-    checkAuthAndExecute(() => {
-      setRating(newRating);
-      setIsReviewModalOpen(true);
-    });
-  };
+  const starRatingLabel = getStarRatingLabel();
 
   return (
     <S.SectionContainer>
       <S.ContentContainer>
         <S.SectionTitle>{t('review')}</S.SectionTitle>
-        <StarRating rating={rating} onRatingChange={handleRatingChange} label={t('courseDetail.firstReviewer')} />
+        {starRatingLabel && <StarRating rating={rating} onRatingChange={handleRatingChange} label={starRatingLabel} />}
+
+        <ReviewList courseId={courseId} reviewData={reviewData} skipQuery={true} />
       </S.ContentContainer>
+
       <Button
         backgroundColor="var(--bg-background-primary, #fff)"
         border="1px solid var(--line-line-002, #e0e0e0)"
@@ -74,12 +81,9 @@ const ReviewSection = ({ onTabChange }: ReviewSectionProps) => {
 
       <ReviewModal
         isOpen={isReviewModalOpen}
-        onClose={() => setIsReviewModalOpen(false)}
-        onConfirm={(reviewText, reviewRating) => {
-          console.log('Review submitted:', { reviewText, rating: reviewRating || rating });
-          setIsReviewModalOpen(false);
-        }}
-        confirmText={t('modal.reviewModal.confirm')}
+        onClose={handleReviewModalClose}
+        onConfirm={handleReviewSubmit}
+        confirmText={isCreating ? t('modal.reviewModal.submitting') : t('modal.reviewModal.confirm')}
         mode="create"
         initialRating={rating}
       />
