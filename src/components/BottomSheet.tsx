@@ -18,6 +18,7 @@ interface BottomSheetProps {
   floatButtons?: ReactNode;
   onHeightChange?: (height: number) => void;
   showAnimation?: boolean;
+  hasScrollableContent?: boolean;
 }
 
 export interface BottomSheetRef {
@@ -28,7 +29,7 @@ const SNAP_HEIGHTS = [0.9, 0.6, 42 / window.innerHeight]; // 90%, 60%, 42px
 const INITIAL_SNAP = 1; // 60%
 
 const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
-  ({ children, titleData, floatButtons, onHeightChange, showAnimation = false }, ref) => {
+  ({ children, titleData, floatButtons, onHeightChange, showAnimation = false, hasScrollableContent = false }, ref) => {
     const [t] = useTranslation();
     const [currentSnap, setCurrentSnap] = useState(INITIAL_SNAP);
     const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
@@ -198,21 +199,31 @@ const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
       <>
         <SheetContainer
           ref={sheetRef}
-          drag="y"
+          drag={!hasScrollableContent ? 'y' : false}
           dragConstraints={{ top: 0, bottom: 0 }}
           dragElastic={0}
           dragMomentum={false}
-          onDragStart={handleDragStart}
-          onDrag={handleDrag}
-          onDragEnd={handleDragEnd}
+          onDragStart={!hasScrollableContent ? handleDragStart : undefined}
+          onDrag={!hasScrollableContent ? handleDrag : undefined}
+          onDragEnd={!hasScrollableContent ? handleDragEnd : undefined}
           animate={controls}
           initial={{ height: viewportHeight * SNAP_HEIGHTS[INITIAL_SNAP] }}
           isDragging={isDragging}
+          hasScrollableContent={hasScrollableContent}
         >
           {floatButtons && <FloatButtonWrapper>{floatButtons}</FloatButtonWrapper>}
 
           <SheetContent>
-            <DragArea>
+            <DragArea
+              drag={hasScrollableContent ? 'y' : false}
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={0}
+              dragMomentum={false}
+              onDragStart={hasScrollableContent ? handleDragStart : undefined}
+              onDrag={hasScrollableContent ? handleDrag : undefined}
+              onDragEnd={hasScrollableContent ? handleDragEnd : undefined}
+              hasScrollableContent={hasScrollableContent}
+            >
               <DragHandle />
             </DragArea>
             <ContentArea>
@@ -253,7 +264,7 @@ const FloatButtonWrapper = styled.div`
   }
 `;
 
-const SheetContainer = styled(motion.div)<{ isDragging: boolean }>`
+const SheetContainer = styled(motion.div)<{ isDragging: boolean; hasScrollableContent: boolean }>`
   position: fixed;
   left: 0;
   right: 0;
@@ -293,7 +304,7 @@ const SheetContent = styled.div`
   overflow: hidden;
 `;
 
-const DragArea = styled.div`
+const DragArea = styled(motion.div)<{ hasScrollableContent: boolean }>`
   padding: var(--spacing-12) var(--spacing-24) var(--spacing-24);
   display: flex;
   justify-content: center;

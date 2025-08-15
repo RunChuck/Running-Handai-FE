@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Lottie from 'lottie-react';
 import styled from '@emotion/styled';
@@ -24,6 +25,7 @@ interface CourseListProps {
   onThemeSelect: (theme: ThemeCode) => void;
   fetchNearbyCourses: () => void;
   onCourseClick?: (courseId: number) => void;
+  onScrollableChange?: (hasScrollableContent: boolean) => void;
 }
 
 const CourseList = ({
@@ -35,6 +37,7 @@ const CourseList = ({
   onThemeSelect,
   fetchNearbyCourses,
   onCourseClick,
+  onScrollableChange,
 }: CourseListProps) => {
   const [t] = useTranslation();
   const isMobile = useIsMobile();
@@ -43,6 +46,19 @@ const CourseList = ({
   const handleThemeCardClick = (themeKey: ThemeCode) => {
     onThemeSelect(themeKey);
   };
+
+  // 스크롤 가능 여부 콜백
+  useEffect(() => {
+    if (onScrollableChange) {
+      if (courses.length > 0) {
+        // 코스 있음: 세로 스크롤 가능 - 핸들에서만 드래그
+        onScrollableChange(true);
+      } else {
+        // 로딩, 에러, 빈 상태: 전체 영역 드래그 가능
+        onScrollableChange(false);
+      }
+    }
+  }, [loading, error, courses.length, onScrollableChange]);
 
   if (loading) {
     return (

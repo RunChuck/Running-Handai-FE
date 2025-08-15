@@ -31,6 +31,7 @@ const Course = () => {
   const [bottomSheetHeight, setBottomSheetHeight] = useState(0);
   const [isMapInitialized, setIsMapInitialized] = useState(false);
   const [isMenuAnimating, setIsMenuAnimating] = useState(false);
+  const [hasScrollableContent, setHasScrollableContent] = useState(false);
   const {
     courses,
     loading,
@@ -119,7 +120,7 @@ const Course = () => {
 
   const handleMenuClick = () => {
     setIsMenuAnimating(true);
-    
+
     // drawer 열리는 애니메이션 후 마이페이지로 이동
     setTimeout(() => {
       navigate('/mypage');
@@ -168,6 +169,10 @@ const Course = () => {
 
   const handleBottomSheetHeightChange = (height: number) => {
     setBottomSheetHeight(height);
+  };
+
+  const handleScrollableChange = (scrollable: boolean) => {
+    setHasScrollableContent(scrollable);
   };
 
   const getBottomSheetTitle = () => {
@@ -270,6 +275,7 @@ const Course = () => {
           floatButtons={floatButtons}
           onHeightChange={handleBottomSheetHeightChange}
           showAnimation={courses.length === 0 && !loading && !error}
+          hasScrollableContent={hasScrollableContent}
         >
           <CourseList
             courses={courses}
@@ -280,6 +286,7 @@ const Course = () => {
             onThemeSelect={handleThemeSelect}
             fetchNearbyCourses={fetchNearbyCourses}
             onCourseClick={handleCourseMarkerClick}
+            onScrollableChange={handleScrollableChange}
           />
         </BottomSheet>
       )}
