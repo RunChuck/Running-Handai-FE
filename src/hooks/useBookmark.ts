@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { courseAPI } from '@/api/course';
-import { courseKeys } from '@/constants/queryKeys';
+import { courseKeys, authKeys } from '@/constants/queryKeys';
 import { useAuth } from './useAuth';
 import type { CourseData, CourseDetailData } from '@/types/course';
 
@@ -30,6 +30,8 @@ export const useBookmark = ({ onUpdateCourse, onError, onUnauthenticated }: UseB
     onSuccess: () => {
       // 코스 관련 쿼리 무효화
       queryClient.invalidateQueries({ queryKey: courseKeys.all });
+      // 즐겨찾기 코스 목록 쿼리 무효화
+      queryClient.invalidateQueries({ queryKey: authKeys.all });
     },
     onError: (error, { courseId, shouldBookmark }) => {
       // 실패시 UI 롤백
@@ -57,8 +59,19 @@ export const useBookmark = ({ onUpdateCourse, onError, onUnauthenticated }: UseB
     bookmarkMutation.mutate({ courseId: course.courseId, shouldBookmark });
   };
 
+  const handleBookmarkById = async (courseId: number, isCurrentlyBookmarked: boolean) => {
+    if (!isAuthenticated) {
+      onUnauthenticated?.();
+      return;
+    }
+
+    const shouldBookmark = !isCurrentlyBookmarked;
+    bookmarkMutation.mutate({ courseId, shouldBookmark });
+  };
+
   return {
     handleBookmark,
+    handleBookmarkById,
     isLoading: bookmarkMutation.isPending,
   };
 };

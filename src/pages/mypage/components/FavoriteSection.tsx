@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import * as S from '../MyPage.styled';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
+import { useFavorites } from '@/hooks/useFavorites';
 
 import FavoriteCourseCard from './FavoriteCourseCard';
 import SVGColor from '@/components/SvgColor';
@@ -17,8 +18,10 @@ const FavoriteSection = ({ isAuthenticated }: FavoriteSectionProps) => {
   const navigate = useNavigate();
   const { scrollContainerRef, handleMouseDown, handleWheel } = useHorizontalScroll();
 
-  // 테스트용
-  const favoriteCourseCount = 0;
+  const { data: favoriteCourseData, isLoading } = useFavorites({ area: null });
+  const favoriteCourses = favoriteCourseData?.data || [];
+  const displayedCourses = favoriteCourses.slice(0, 5);
+  const favoriteCourseCount = favoriteCourses.length;
 
   return (
     <S.SectionContainer>
@@ -35,13 +38,15 @@ const FavoriteSection = ({ isAuthenticated }: FavoriteSectionProps) => {
         )}
       </S.SectionTitleWrapper>
       {isAuthenticated ? (
-        favoriteCourseCount > 0 ? (
+        isLoading ? (
+          <S.SectionContent>
+            <S.ContentDescription>로딩 중...</S.ContentDescription>
+          </S.SectionContent>
+        ) : favoriteCourseCount > 0 ? (
           <S.CardList ref={scrollContainerRef} onMouseDown={handleMouseDown} onWheel={handleWheel}>
-            <FavoriteCourseCard />
-            <FavoriteCourseCard />
-            <FavoriteCourseCard />
-            <FavoriteCourseCard />
-            <FavoriteCourseCard />
+            {displayedCourses.map(course => (
+              <FavoriteCourseCard key={course.courseId} course={course} />
+            ))}
           </S.CardList>
         ) : (
           <S.SectionContent>
