@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { theme } from '@/styles/theme';
 import type { SpotData } from '@/types/course';
 
-import AttractionTumbnailSrc from '@/assets/images/temp-attraction.png';
+import AttractionTumbnailSrc from '@/assets/images/thumbnail-default.png';
 
 interface AttractionItemProps {
   spot: SpotData;

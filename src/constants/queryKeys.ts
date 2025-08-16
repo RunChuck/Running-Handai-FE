@@ -17,3 +17,9 @@ export const reviewKeys = {
   // 리뷰 목록 조회
   list: (courseId: number) => [...reviewKeys.all, 'list', courseId] as const,
 };
+
+export const authKeys = {
+  all: ['auth'] as const,
+  // 북마크된 코스 조회
+  bookmarkedCourses: (area?: string) => [...authKeys.all, 'bookmarked-courses', area] as const,
+};

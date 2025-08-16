@@ -41,7 +41,7 @@ const CourseList = ({
 }: CourseListProps) => {
   const [t] = useTranslation();
   const isMobile = useIsMobile();
-  const { scrollContainerRef, handleMouseDown, handleWheel } = useHorizontalScroll();
+  const { scrollContainerRef, handleMouseDown } = useHorizontalScroll();
 
   const handleThemeCardClick = (themeKey: ThemeCode) => {
     onThemeSelect(themeKey);
@@ -84,7 +84,7 @@ const CourseList = ({
       <StatusContainer>
         <img src={NoCourseImgSrc} alt={t('main.noCourses')} width={57} height={60} />
         <S.StatusText>{isMobile ? t('main.noCourses.mobile') : t('main.noCourses')}</S.StatusText>
-        <ThemeCourseCardContainer ref={scrollContainerRef} onWheel={handleWheel} onMouseDown={handleMouseDown}>
+        <ThemeCourseCardContainer ref={scrollContainerRef} onMouseDown={handleMouseDown}>
           {THEME_CARDS.map(card => (
             <ThemeCourseCard key={card.key} onClick={() => handleThemeCardClick(card.key)}>
               <ThemeCourseCardTitle>

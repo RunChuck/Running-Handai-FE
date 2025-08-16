@@ -1,19 +1,30 @@
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
+import { useBookmark } from '@/hooks/useBookmark';
+import type { BookmarkedCourse } from '@/types/auth';
 
 import HeartIconFilledSrc from '@/assets/icons/heart-filled.svg';
-import TempThumbnailImgSrc from '@/assets/images/temp-courseCard.png';
+import DefaultThumbnailSrc from '@/assets/images/thumbnail-default.png';
 
-const FavoriteCourseCard = () => {
-  // TODO: 코스 상세 페이지로 이동
+interface FavoriteCourseCardProps {
+  course: BookmarkedCourse;
+  onUpdateCourse?: (courseId: number, updates: { isBookmarked: boolean; bookmarks: number }) => void;
+}
+
+const FavoriteCourseCard = ({ course, onUpdateCourse }: FavoriteCourseCardProps) => {
+  const [t] = useTranslation();
+  const navigate = useNavigate();
+  const { handleBookmarkById } = useBookmark({ onUpdateCourse });
+
   const handleCardClick = () => {
-    console.log('card clicked');
+    navigate(`/course-detail/${course.courseId}`);
   };
 
-  // TODO: 북마크 클릭 이벤트 처리
   const handleBookmarkClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log('bookmark clicked');
+    handleBookmarkById(course.courseId, course.isBookmarked);
   };
 
   return (
@@ -22,9 +33,12 @@ const FavoriteCourseCard = () => {
         <BookmarkButton onClick={handleBookmarkClick}>
           <img src={HeartIconFilledSrc} width={20} height={20} />
         </BookmarkButton>
-        <img src={TempThumbnailImgSrc} />
+        <img src={course.thumbnailUrl || DefaultThumbnailSrc} alt="북마크된 코스" />
       </ThumbnailWrapper>
-      <BookmarkCount>4444명이 저장한 코스</BookmarkCount>
+      <BookmarkCount>
+        {course.bookmarkCount}
+        {t('main.bookmark')}
+      </BookmarkCount>
     </CardContainer>
   );
 };
@@ -40,17 +54,21 @@ const CardContainer = styled.div`
 `;
 
 const ThumbnailWrapper = styled.div`
-  width: 100%;
-  height: 100%;
+  width: 126px;
+  height: 126px;
   border-radius: 4px;
   overflow: hidden;
   position: relative;
+
+  @media (max-width: 600px) {
+    width: 100px;
+    height: 100px;
+  }
 
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    aspect-ratio: 1/1;
   }
 `;
 

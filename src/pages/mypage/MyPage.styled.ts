@@ -104,3 +104,8 @@ export const CardList = styled.div`
     display: none;
   }
 `;
+
+export const CountText = styled.span`
+  ${theme.typography.subtitle3};
+  color: var(--text-text-accent, #4561ff);
+`;

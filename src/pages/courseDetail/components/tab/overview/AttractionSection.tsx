@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import * as S from './Section.styled';
+import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 import type { CourseTabType, SpotData } from '@/types/course';
 
 import AttractionItem from '@/components/AttractionItem';
@@ -16,6 +17,7 @@ interface AttractionSectionProps {
 
 const AttractionSection = ({ onTabChange, spots, loading, error }: AttractionSectionProps) => {
   const [t] = useTranslation();
+  const { scrollContainerRef, handleMouseDown } = useHorizontalScroll();
 
   const handleAttractionDetail = () => {
     onTabChange('attractions');
@@ -58,7 +60,7 @@ const AttractionSection = ({ onTabChange, spots, loading, error }: AttractionSec
     <S.SectionContainer>
       <S.ContentContainer>
         <S.SectionTitle>{t('attractions')}</S.SectionTitle>
-        <AttractionList>
+        <AttractionList ref={scrollContainerRef} onMouseDown={handleMouseDown}>
           {spots.map(spot => (
             <AttractionItem key={spot.spotId} spot={spot} hideMoreButton />
           ))}
@@ -92,22 +94,16 @@ const AttractionList = styled.div`
   @media (max-width: 600px) {
     display: flex;
     justify-content: flex-start;
+    margin: 0 calc(-1 * var(--spacing-16));
+    padding: 0 var(--spacing-16);
+
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    margin: 0 calc(-1 * var(--spacing-16));
-    padding: 0 var(--spacing-16);
-
-    /* 터치 동작 개선 */
     touch-action: pan-x;
-
-    /* 드래그 시 선택 방지 */
     user-select: none;
     -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-
     cursor: grab;
 
     &:active {

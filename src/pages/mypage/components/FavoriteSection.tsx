@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import * as S from '../MyPage.styled';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
+import { useFavorites } from '@/hooks/useFavorites';
 
 import FavoriteCourseCard from './FavoriteCourseCard';
 import SVGColor from '@/components/SvgColor';
@@ -15,10 +16,12 @@ interface FavoriteSectionProps {
 const FavoriteSection = ({ isAuthenticated }: FavoriteSectionProps) => {
   const [t] = useTranslation();
   const navigate = useNavigate();
-  const { scrollContainerRef, handleMouseDown, handleWheel } = useHorizontalScroll();
+  const { scrollContainerRef, handleMouseDown } = useHorizontalScroll();
 
-  // 테스트용
-  const favoriteCourseCount = 0;
+  const { data: favoriteCourseData, isLoading } = useFavorites({ area: null });
+  const favoriteCourses = favoriteCourseData?.data || [];
+  const displayedCourses = favoriteCourses.slice(0, 5);
+  const favoriteCourseCount = favoriteCourses.length;
 
   return (
     <S.SectionContainer>
@@ -26,6 +29,7 @@ const FavoriteSection = ({ isAuthenticated }: FavoriteSectionProps) => {
         <S.SectionTitle>
           <SVGColor src={HeartIconSrc} width={16} height={16} color="#4561FF" />
           {t('mypage.favoriteCourse')}
+          <S.CountText>{favoriteCourseCount}</S.CountText>
         </S.SectionTitle>
         {isAuthenticated && favoriteCourseCount > 0 && (
           <S.MoreButton onClick={() => navigate('/mypage/favorites')}>
@@ -35,13 +39,15 @@ const FavoriteSection = ({ isAuthenticated }: FavoriteSectionProps) => {
         )}
       </S.SectionTitleWrapper>
       {isAuthenticated ? (
-        favoriteCourseCount > 0 ? (
-          <S.CardList ref={scrollContainerRef} onMouseDown={handleMouseDown} onWheel={handleWheel}>
-            <FavoriteCourseCard />
-            <FavoriteCourseCard />
-            <FavoriteCourseCard />
-            <FavoriteCourseCard />
-            <FavoriteCourseCard />
+        isLoading ? (
+          <S.SectionContent>
+            <S.ContentDescription>{t('loading')}</S.ContentDescription>
+          </S.SectionContent>
+        ) : favoriteCourseCount > 0 ? (
+          <S.CardList ref={scrollContainerRef} onMouseDown={handleMouseDown}>
+            {displayedCourses.map(course => (
+              <FavoriteCourseCard key={course.courseId} course={course} />
+            ))}
           </S.CardList>
         ) : (
           <S.SectionContent>
@@ -60,3 +66,4 @@ const FavoriteSection = ({ isAuthenticated }: FavoriteSectionProps) => {
 };
 
 export default FavoriteSection;
+

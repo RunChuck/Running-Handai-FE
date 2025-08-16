@@ -5,17 +5,30 @@ import { css } from '@emotion/react';
 import { theme } from '@/styles/theme';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 import { COURSE_LOCATIONS } from '@/constants/locations';
+import type { AreaCode } from '@/types/course';
 
 import SVGColor from '@/components/SvgColor';
 import ArrowIconSrc from '@/assets/icons/arrow-down-16px.svg';
 
-const CourseFilter = () => {
+interface CourseFilterProps {
+  selectedArea: AreaCode | null;
+  onAreaChange: (area: AreaCode | null) => void;
+}
+
+const CourseFilter = ({ selectedArea, onAreaChange }: CourseFilterProps) => {
   const [t] = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState('all');
-  const { scrollContainerRef, handleMouseDown, handleWheel } = useHorizontalScroll();
+  const { scrollContainerRef, handleMouseDown } = useHorizontalScroll();
 
   const locationOptions = ['all', ...Object.keys(COURSE_LOCATIONS)];
+
+  const handleLocationSelect = (location: string) => {
+    if (location === 'all') {
+      onAreaChange(null);
+    } else {
+      onAreaChange(location as AreaCode);
+    }
+  };
 
   return (
     <FilterContainer isOpen={isOpen}>
@@ -30,9 +43,13 @@ const CourseFilter = () => {
           style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
         />
       </FilterButton>
-      <FilterList isOpen={isOpen} ref={scrollContainerRef} onMouseDown={handleMouseDown} onWheel={handleWheel}>
+      <FilterList isOpen={isOpen} ref={scrollContainerRef} onMouseDown={handleMouseDown}>
         {locationOptions.map(location => (
-          <FilterOption key={location} isSelected={selectedLocation === location} onClick={() => setSelectedLocation(location)}>
+          <FilterOption
+            key={location}
+            isSelected={location === 'all' ? selectedArea === null : selectedArea === location}
+            onClick={() => handleLocationSelect(location)}
+          >
             {t(`location.${location.toLowerCase()}`).replace('\n', '/')}
           </FilterOption>
         ))}
@@ -75,12 +92,28 @@ const FilterList = styled.div<{ isOpen: boolean }>`
   padding: 0 var(--spacing-16);
   gap: var(--spacing-8);
   align-self: flex-start;
-  overflow: hidden;
   opacity: ${props => (props.isOpen ? 1 : 0)};
   max-height: ${props => (props.isOpen ? '50px' : '0')};
   transition:
     opacity 0.3s ease,
     max-height 0.3s ease;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  touch-action: pan-x;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 const FilterOption = styled.button<{ isSelected: boolean }>`
