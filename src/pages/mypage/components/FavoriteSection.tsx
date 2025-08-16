@@ -16,7 +16,7 @@ interface FavoriteSectionProps {
 const FavoriteSection = ({ isAuthenticated }: FavoriteSectionProps) => {
   const [t] = useTranslation();
   const navigate = useNavigate();
-  const { scrollContainerRef, handleMouseDown, handleWheel } = useHorizontalScroll();
+  const { scrollContainerRef, handleMouseDown } = useHorizontalScroll();
 
   const { data: favoriteCourseData, isLoading } = useFavorites({ area: null });
   const favoriteCourses = favoriteCourseData?.data || [];
@@ -44,7 +44,7 @@ const FavoriteSection = ({ isAuthenticated }: FavoriteSectionProps) => {
             <S.ContentDescription>{t('loading')}</S.ContentDescription>
           </S.SectionContent>
         ) : favoriteCourseCount > 0 ? (
-          <S.CardList ref={scrollContainerRef} onMouseDown={handleMouseDown} onWheel={handleWheel}>
+          <S.CardList ref={scrollContainerRef} onMouseDown={handleMouseDown}>
             {displayedCourses.map(course => (
               <FavoriteCourseCard key={course.courseId} course={course} />
             ))}

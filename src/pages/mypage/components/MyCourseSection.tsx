@@ -16,7 +16,7 @@ interface MyCourseSectionProps {
 const MyCourseSection = ({ isAuthenticated }: MyCourseSectionProps) => {
   const [t] = useTranslation();
   const navigate = useNavigate();
-  const { scrollContainerRef, handleMouseDown, handleWheel } = useHorizontalScroll();
+  const { scrollContainerRef, handleMouseDown } = useHorizontalScroll();
   const { showInfoToast } = useToast();
 
   // 테스트용
@@ -42,7 +42,7 @@ const MyCourseSection = ({ isAuthenticated }: MyCourseSectionProps) => {
       </S.SectionTitleWrapper>
       {isAuthenticated ? (
         myCourseCount > 0 ? (
-          <S.CardList ref={scrollContainerRef} onMouseDown={handleMouseDown} onWheel={handleWheel}>
+          <S.CardList ref={scrollContainerRef} onMouseDown={handleMouseDown}>
             <MyCourseCard />
             <MyCourseCard />
             <MyCourseCard />
