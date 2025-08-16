@@ -22,9 +22,9 @@ export const useBookmark = ({ onUpdateCourse, onError, onUnauthenticated }: UseB
   const bookmarkMutation = useMutation({
     mutationFn: async ({ courseId, shouldBookmark }: { courseId: number; shouldBookmark: boolean }) => {
       if (shouldBookmark) {
-        await courseAPI.bookmarkCourse({ courseId });
+        await courseAPI.bookmarkCourse(courseId);
       } else {
-        await courseAPI.deleteBookmarkCourse({ courseId });
+        await courseAPI.deleteBookmarkCourse(courseId);
       }
     },
     onSuccess: () => {
