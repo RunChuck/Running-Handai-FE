@@ -43,8 +43,7 @@ const MyReviewItem = ({ review }: MyReviewItemProps) => {
   };
 
   const handleGoToReview = () => {
-    // TODO: 해당 리뷰로 이동
-    navigate(`/course-detail/${review.courseId}`);
+    navigate(`/course-detail/${review.courseId}?tab=reviews`);
   };
 
   const handleEditClick = () => {
