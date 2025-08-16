@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import type { CourseTabType, CourseTabItem, CourseDetailResponse } from '@/types/course';
@@ -22,7 +23,15 @@ const TAB_ITEMS: CourseTabItem[] = [
 
 const Tabs = ({ courseDetail }: CourseTabProps) => {
   const [t] = useTranslation();
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<CourseTabType>('overview');
+
+  useEffect(() => {
+    const tabParam = searchParams.get('tab') as CourseTabType;
+    if (tabParam && ['overview', 'course', 'attractions', 'reviews'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
 
   const handleTabChange = (tabKey: CourseTabType) => {
     setActiveTab(tabKey);

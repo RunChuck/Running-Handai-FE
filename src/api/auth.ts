@@ -1,5 +1,12 @@
 import { http } from '@/constants/http';
-import type { RefreshTokenRequest, RefreshTokenResponse, UserInfoResponse, CheckNicknameResponse, BookmarkedCoursesResponse } from '@/types/auth';
+import type {
+  RefreshTokenRequest,
+  RefreshTokenResponse,
+  UserInfoResponse,
+  CheckNicknameResponse,
+  BookmarkedCoursesResponse,
+  MyReviewsResponse,
+} from '@/types/auth';
 import type { AreaCode } from '@/types/course';
 
 const PREFIX = 'api/members';
@@ -28,6 +35,11 @@ export const authAPI = {
 
   getBookmarkedCourses: async (area: AreaCode): Promise<BookmarkedCoursesResponse> => {
     const response = await http.get<BookmarkedCoursesResponse>(`${PREFIX}/me/courses/bookmarks`, { params: { area } });
+    return response.data;
+  },
+
+  getMyReviews: async (): Promise<MyReviewsResponse> => {
+    const response = await http.get<MyReviewsResponse>(`${PREFIX}/me/reviews`);
     return response.data;
   },
 };
