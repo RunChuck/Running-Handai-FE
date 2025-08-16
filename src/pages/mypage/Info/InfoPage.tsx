@@ -96,7 +96,10 @@ const InfoPage = () => {
     setIsUpdating(true);
     try {
       const response = await authAPI.updateUserInfo(nickname);
-      setUserInfo(response.data);
+      setUserInfo({
+        ...userInfo,
+        nickname: response.data.nickname,
+      });
       showSuccessToast(t('mypage.Info.nicknameStatus.updateSuccess'), { position: 'top' });
       navigate(-1);
     } catch (error: unknown) {
