@@ -29,7 +29,7 @@ const FavoriteSection = ({ isAuthenticated }: FavoriteSectionProps) => {
         <S.SectionTitle>
           <SVGColor src={HeartIconSrc} width={16} height={16} color="#4561FF" />
           {t('mypage.favoriteCourse')}
-          <S.CountText>{favoriteCourseCount}</S.CountText>
+          {favoriteCourseCount > 0 && <S.CountText>{favoriteCourseCount}</S.CountText>}
         </S.SectionTitle>
         {isAuthenticated && favoriteCourseCount > 0 && (
           <S.MoreButton onClick={() => navigate('/mypage/favorites')}>
