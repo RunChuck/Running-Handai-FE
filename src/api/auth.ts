@@ -1,5 +1,5 @@
 import { http } from '@/constants/http';
-import type { RefreshTokenRequest, RefreshTokenResponse, UserInfoResponse } from '@/types/auth';
+import type { RefreshTokenRequest, RefreshTokenResponse, UserInfoResponse, CheckNicknameResponse } from '@/types/auth';
 
 const PREFIX = 'api/members';
 
@@ -13,6 +13,11 @@ export const authAPI = {
 
   getUserInfo: async (): Promise<UserInfoResponse> => {
     const response = await http.get<UserInfoResponse>(`${PREFIX}/me`);
+    return response.data;
+  },
+
+  checkNickname: async (value: string): Promise<CheckNicknameResponse> => {
+    const response = await http.get<CheckNicknameResponse>(`${PREFIX}/nickname`, { params: { value } });
     return response.data;
   },
 

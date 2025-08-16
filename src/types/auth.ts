@@ -28,3 +28,11 @@ export interface UserInfoResponse {
     email: string;
   };
 }
+
+export interface CheckNicknameResponse {
+  statusCode: number;
+  responseCode: string;
+  message: string;
+  totalCount: number;
+  data: boolean;
+}
