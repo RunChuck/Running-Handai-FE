@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import type { Review } from '@/types/auth';
+import { useReviews } from '@/hooks/useReviews';
 import { formatDate } from '@/utils/dateFormat';
 import { getAreaDisplayName } from '@/utils/areaCodeMap';
 
@@ -25,6 +26,11 @@ const MyReviewItem = ({ review }: MyReviewItemProps) => {
   const [needsTruncation, setNeedsTruncation] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const { editReviewAsync, deleteReviewAsync, isEditing, isDeleting } = useReviews({
+    courseId: review.courseId,
+    skipQuery: true,
+  });
 
   const checkTextOverflow = (element: HTMLDivElement | null) => {
     if (element) {
@@ -51,8 +57,12 @@ const MyReviewItem = ({ review }: MyReviewItemProps) => {
 
   const handleEditConfirm = async (reviewText: string, newRating?: number) => {
     try {
-      // TODO: API 호출
-      console.log('Edit review:', { reviewText, newRating });
+      await editReviewAsync({
+        reviewId: review.reviewId,
+        stars: newRating || review.stars,
+        contents: reviewText,
+      });
+
       setIsEditModalOpen(false);
     } catch (error) {
       console.error('Failed to edit review:', error);
@@ -61,8 +71,10 @@ const MyReviewItem = ({ review }: MyReviewItemProps) => {
 
   const handleDeleteConfirm = async () => {
     try {
-      // TODO: API 호출
-      console.log('Delete review:', review.reviewId);
+      await deleteReviewAsync({
+        reviewId: review.reviewId,
+      });
+
       setIsDeleteModalOpen(false);
     } catch (error) {
       console.error('Failed to delete review:', error);
@@ -117,7 +129,7 @@ const MyReviewItem = ({ review }: MyReviewItemProps) => {
 
       <ReviewModal
         isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
+        onClose={() => !isEditing && setIsEditModalOpen(false)}
         onConfirm={handleEditConfirm}
         confirmText={t('modal.reviewModal.edit')}
         mode="edit"
@@ -126,7 +138,7 @@ const MyReviewItem = ({ review }: MyReviewItemProps) => {
       />
       <CommonModal
         isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
+        onClose={() => !isDeleting && setIsDeleteModalOpen(false)}
         onConfirm={handleDeleteConfirm}
         content={t('modal.reviewModal.deleteWarning')}
         cancelText={t('modal.reviewModal.deleteCancel')}

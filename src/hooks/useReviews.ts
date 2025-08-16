@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/useToast';
 import { reviewAPI } from '@/api/review';
-import { reviewKeys, courseKeys } from '@/constants/queryKeys';
+import { reviewKeys, courseKeys, authKeys } from '@/constants/queryKeys';
 import { useAuth } from '@/hooks/useAuth';
 import type {
   ReviewData,
@@ -103,6 +103,9 @@ export const useReviews = ({ courseId, onLoginRequired, skipQuery = false }: Use
       queryClient.invalidateQueries({
         queryKey: courseKeys.summary(variables.courseId),
       });
+      queryClient.invalidateQueries({
+        queryKey: authKeys.myReviews(),
+      });
       showSuccessToast(t('toast.reviewSuccess'));
     },
     onError: error => {
@@ -123,6 +126,9 @@ export const useReviews = ({ courseId, onLoginRequired, skipQuery = false }: Use
       queryClient.invalidateQueries({
         queryKey: courseKeys.summary(courseId),
       });
+      queryClient.invalidateQueries({
+        queryKey: authKeys.myReviews(),
+      });
       showSuccessToast(t('toast.reviewUpdated'));
     },
     onError: error => {
@@ -142,6 +148,9 @@ export const useReviews = ({ courseId, onLoginRequired, skipQuery = false }: Use
       });
       queryClient.invalidateQueries({
         queryKey: courseKeys.summary(courseId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: authKeys.myReviews(),
       });
       showSuccessToast(t('toast.reviewDeleted'));
     },
