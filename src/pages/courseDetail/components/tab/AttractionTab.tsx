@@ -150,4 +150,5 @@ const CloseButton = styled.button`
 const TooltipDescription = styled.p`
   ${theme.typography.caption3};
   color: var(--text-text-secondary, #555555);
+  white-space: pre-line;
 `;
