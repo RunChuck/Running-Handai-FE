@@ -19,7 +19,7 @@ const FavoriteCourseCard = ({ course, onUpdateCourse }: FavoriteCourseCardProps)
   const { handleBookmarkById } = useBookmark({ onUpdateCourse });
 
   const handleCardClick = () => {
-    navigate(`/course/${course.courseId}`);
+    navigate(`/course-detail/${course.courseId}`);
   };
 
   const handleBookmarkClick = (e: React.MouseEvent) => {

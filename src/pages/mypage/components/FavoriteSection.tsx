@@ -29,6 +29,7 @@ const FavoriteSection = ({ isAuthenticated }: FavoriteSectionProps) => {
         <S.SectionTitle>
           <SVGColor src={HeartIconSrc} width={16} height={16} color="#4561FF" />
           {t('mypage.favoriteCourse')}
+          <S.CountText>{favoriteCourseCount}</S.CountText>
         </S.SectionTitle>
         {isAuthenticated && favoriteCourseCount > 0 && (
           <S.MoreButton onClick={() => navigate('/mypage/favorites')}>
@@ -40,7 +41,7 @@ const FavoriteSection = ({ isAuthenticated }: FavoriteSectionProps) => {
       {isAuthenticated ? (
         isLoading ? (
           <S.SectionContent>
-            <S.ContentDescription>로딩 중...</S.ContentDescription>
+            <S.ContentDescription>{t('loading')}</S.ContentDescription>
           </S.SectionContent>
         ) : favoriteCourseCount > 0 ? (
           <S.CardList ref={scrollContainerRef} onMouseDown={handleMouseDown} onWheel={handleWheel}>
@@ -65,3 +66,4 @@ const FavoriteSection = ({ isAuthenticated }: FavoriteSectionProps) => {
 };
 
 export default FavoriteSection;
+
