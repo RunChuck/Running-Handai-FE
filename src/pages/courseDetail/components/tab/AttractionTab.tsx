@@ -47,7 +47,7 @@ const AttractionTab = ({ courseId }: AttractionTabProps) => {
     );
   }
 
-  if (!attractions.length) {
+  if (!attractions.length || attractions[0]?.spotCount === 0) {
     return (
       <Container>
         <StateText>{t('courseDetail.attractions.empty')}</StateText>
