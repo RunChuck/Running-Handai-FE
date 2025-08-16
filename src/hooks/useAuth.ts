@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/useToast';
+import { useUserStore } from '@/stores/userStore';
 
 interface AuthState {
   isLoading: boolean;
@@ -13,6 +14,7 @@ export const useAuth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { showSuccessToast, showErrorToast } = useToast();
+  const { fetchUserInfo, clearUserInfo } = useUserStore();
   const [state, setState] = useState<AuthState>({
     isLoading: false,
     error: null,
@@ -60,6 +62,7 @@ export const useAuth = () => {
 
       if (accessToken) {
         setToken(accessToken, refreshToken || undefined);
+        await fetchUserInfo();
         showSuccessToast(t('toast.loginSuccess'), { position: 'top' });
         navigate('/course', { replace: true });
       } else {
@@ -79,6 +82,7 @@ export const useAuth = () => {
 
   const logout = () => {
     removeToken();
+    clearUserInfo();
     sessionStorage.clear();
     showSuccessToast(t('toast.logoutSuccess'), { position: 'top' });
     navigate('/', { replace: true });

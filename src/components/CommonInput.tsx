@@ -85,9 +85,9 @@ const StyledInput = styled.input<{
 
   /* Border Colors */
   border-color: ${({ state, isFocused }) => {
-    if (state === 'active' || isFocused) return 'var(--GrayScale-gray900)'; // #1C1C1C
     if (state === 'negative') return 'var(--system-error)'; // #FF0010
     if (state === 'positive') return 'var(--system-success)'; // #00BF6A
+    if (state === 'active' || isFocused) return 'var(--GrayScale-gray900)'; // #1C1C1C
     return 'var(--GrayScale-gray300)'; // #E0E0E0 (default)
   }};
 
@@ -127,6 +127,6 @@ const StyledInput = styled.input<{
 `;
 
 const ValidationText = styled.span<{ state: InputState }>`
-  ${theme.typography.caption2};
+  ${theme.typography.body2};
   color: ${({ state }) => (state === 'positive' ? 'var(--system-success)' : 'var(--system-error)')};
 `;
