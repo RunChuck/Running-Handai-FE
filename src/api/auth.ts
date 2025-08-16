@@ -1,10 +1,10 @@
 import { http } from '@/constants/http';
-import type { RefreshTokenRequest, RefreshTokenResponse, UserInfoResponse, CheckNicknameResponse } from '@/types/auth';
+import type { RefreshTokenRequest, RefreshTokenResponse, UserInfoResponse, CheckNicknameResponse, BookmarkedCoursesResponse } from '@/types/auth';
+import type { AreaCode } from '@/types/course';
 
 const PREFIX = 'api/members';
 
 export const authAPI = {
-  // 토큰 재발급
   refreshToken: async (refreshToken: string): Promise<RefreshTokenResponse> => {
     const requestData: RefreshTokenRequest = { refreshToken };
     const response = await http.post<RefreshTokenResponse>(`${PREFIX}/oauth/token`, requestData);
@@ -23,6 +23,11 @@ export const authAPI = {
 
   updateUserInfo: async (nickname: string): Promise<UserInfoResponse> => {
     const response = await http.patch<UserInfoResponse>(`${PREFIX}/me`, { nickname });
+    return response.data;
+  },
+
+  getBookmarkedCourses: async (area: AreaCode): Promise<BookmarkedCoursesResponse> => {
+    const response = await http.get<BookmarkedCoursesResponse>(`${PREFIX}/me/courses/bookmarks`, { params: { area } });
     return response.data;
   },
 };
