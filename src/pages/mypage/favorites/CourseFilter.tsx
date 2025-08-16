@@ -5,17 +5,30 @@ import { css } from '@emotion/react';
 import { theme } from '@/styles/theme';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 import { COURSE_LOCATIONS } from '@/constants/locations';
+import type { AreaCode } from '@/types/course';
 
 import SVGColor from '@/components/SvgColor';
 import ArrowIconSrc from '@/assets/icons/arrow-down-16px.svg';
 
-const CourseFilter = () => {
+interface CourseFilterProps {
+  selectedArea: AreaCode | null;
+  onAreaChange: (area: AreaCode | null) => void;
+}
+
+const CourseFilter = ({ selectedArea, onAreaChange }: CourseFilterProps) => {
   const [t] = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState('all');
   const { scrollContainerRef, handleMouseDown, handleWheel } = useHorizontalScroll();
 
   const locationOptions = ['all', ...Object.keys(COURSE_LOCATIONS)];
+  
+  const handleLocationSelect = (location: string) => {
+    if (location === 'all') {
+      onAreaChange(null);
+    } else {
+      onAreaChange(location as AreaCode);
+    }
+  };
 
   return (
     <FilterContainer isOpen={isOpen}>
@@ -32,7 +45,7 @@ const CourseFilter = () => {
       </FilterButton>
       <FilterList isOpen={isOpen} ref={scrollContainerRef} onMouseDown={handleMouseDown} onWheel={handleWheel}>
         {locationOptions.map(location => (
-          <FilterOption key={location} isSelected={selectedLocation === location} onClick={() => setSelectedLocation(location)}>
+          <FilterOption key={location} isSelected={location === 'all' ? selectedArea === null : selectedArea === location} onClick={() => handleLocationSelect(location)}>
             {t(`location.${location.toLowerCase()}`).replace('\n', '/')}
           </FilterOption>
         ))}

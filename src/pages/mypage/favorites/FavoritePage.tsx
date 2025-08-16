@@ -1,42 +1,49 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import Lottie from 'lottie-react';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import { css } from '@emotion/react';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { useFavorites } from '@/hooks/useFavorites';
+import type { AreaCode } from '@/types/course';
 
 import Header from '../components/Header';
 import CourseFilter from './CourseFilter';
 import FavoriteCourseItem from './FavoriteCourseItem';
 import EmptyIconSrc from '@/assets/icons/no-course.svg';
+import LoadingMotion from '@/assets/animations/run-loading.json';
 
 const FavoritePage = () => {
   const [t] = useTranslation();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const [selectedArea, setSelectedArea] = useState<AreaCode | null>(null);
 
-  // 테스트용
-  const favoriteCourseCount = 0;
+  const { data: favoritesData, isLoading } = useFavorites({ area: selectedArea });
+  const favorites = favoritesData?.data || [];
+  const favoriteCourseCount = favorites.length;
 
   return (
     <Container>
       <Header title={t('mypage.favorites.title')} onBack={() => navigate(-1)} />
-      <CourseFilter />
-      {favoriteCourseCount > 0 ? (
+      <CourseFilter selectedArea={selectedArea} onAreaChange={setSelectedArea} />
+      {isLoading ? (
+        <StatusContainer>
+          <Lottie animationData={LoadingMotion} style={{ width: 100, height: 100 }} loop={true} />
+        </StatusContainer>
+      ) : favoriteCourseCount > 0 ? (
         <CourseGrid isMobile={isMobile}>
-          <FavoriteCourseItem />
-          <FavoriteCourseItem />
-          <FavoriteCourseItem />
-          <FavoriteCourseItem />
-          <FavoriteCourseItem />
-          <FavoriteCourseItem />
-          <FavoriteCourseItem />
+          {favorites.map(course => (
+            <FavoriteCourseItem key={course.courseId} course={course} />
+          ))}
         </CourseGrid>
       ) : (
-        <EmptyContainer>
+        <StatusContainer>
           <img src={EmptyIconSrc} alt="empty" />
           <EmptyText>{t('mypage.favorites.empty')}</EmptyText>
-        </EmptyContainer>
+        </StatusContainer>
       )}
     </Container>
   );
@@ -64,7 +71,7 @@ const CourseGrid = styled.div<{ isMobile: boolean }>`
     `}
 `;
 
-const EmptyContainer = styled.div`
+const StatusContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
