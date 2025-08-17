@@ -135,6 +135,16 @@
     "more": "...더보기",
     "collapse": "접기"
   },
+  "courseCreation": {
+    "title": "코스 생성",
+    "course": {
+      "min": "분",
+      "distance": "거리",
+      "time": "예상 시간",
+      "maxAltitude": "최고 고도",
+      "minAltitude": "최저 고도"
+    }
+  },
   "mypage": {
     "defaultNickname": "러너",
     "greeting": "님,\n오늘은 어디로 달려볼까요?",
