@@ -108,6 +108,17 @@
       "confirm": "좋아요!",
       "cancel": "나중에",
       "installing": "설치 중..."
+    },
+    "onboarding": {
+      "step": "단계",
+      "next": "다음",
+      "start": "시작하기",
+      "skip": "건너뛰기",
+      "title1": "출발 포인트를 터치하세요.",
+      "title2": "경유 포인트를 설정하세요.",
+      "description2": "경유지에 따라 코스가 변경될 수 있어요.",
+      "title3": "도착지를 터치하세요.",
+      "description3": "최종 저장 시 마지막 마커를 도착지로 설정해요."
     }
   },
   "courseDetail": {
