@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
-import { useTranslation } from 'react-i18next';
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import { motion, useAnimation } from 'framer-motion';
@@ -34,6 +35,7 @@ const INITIAL_SNAP = 1; // 60%
 const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
   ({ children, titleData, floatButtons, onHeightChange, showAnimation = false, hasScrollableContent = false }, ref) => {
     const [t] = useTranslation();
+    const navigate = useNavigate();
     const [currentSnap, setCurrentSnap] = useState(INITIAL_SNAP);
     const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
     const controls = useAnimation();
@@ -236,7 +238,7 @@ const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
                   {finalTitleData.prefix && <FilterText>{finalTitleData.prefix}&nbsp;</FilterText>}
                   <BaseText>{finalTitleData.suffix}</BaseText>
                 </Title>
-                <PenButton showAnimation={showAnimation}>
+                <PenButton showAnimation={showAnimation} onClick={() => navigate('/course-creation')}>
                   <img src={PenIconSrc} alt="코스 등록" width={20} height={20} />
                 </PenButton>
               </TitleWrapper>

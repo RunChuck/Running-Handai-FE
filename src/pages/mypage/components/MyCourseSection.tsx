@@ -2,7 +2,6 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import * as S from '../MyPage.styled';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
-import { useToast } from '@/hooks/useToast';
 
 import MyCourseCard from './MyCourseCard';
 import SVGColor from '@/components/SvgColor';
@@ -17,13 +16,12 @@ const MyCourseSection = ({ isAuthenticated }: MyCourseSectionProps) => {
   const [t] = useTranslation();
   const navigate = useNavigate();
   const { scrollContainerRef, handleMouseDown } = useHorizontalScroll();
-  const { showInfoToast } = useToast();
 
   // 테스트용
   const myCourseCount = 0;
 
   const handleGoToCreateCourse = () => {
-    showInfoToast(t('toast.preparing'), { position: 'top' });
+    navigate('/course-creation');
   };
 
   return (
