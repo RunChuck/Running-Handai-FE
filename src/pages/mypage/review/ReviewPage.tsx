@@ -6,7 +6,7 @@ import { theme } from '@/styles/theme';
 import { useMyReviews } from '@/hooks/useMyReviews';
 
 import MyReviewItem from './MyReviewItem';
-import Header from '../components/Header';
+import Header from '../../../components/Header';
 import NoReviewIconSrc from '@/assets/icons/no-review.svg';
 import LoadingMotion from '@/assets/animations/run-loading.json';
 
