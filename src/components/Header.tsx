@@ -6,9 +6,11 @@ import LogoIconSrc from '@/assets/icons/logo.svg';
 interface HeaderProps {
   onBack: () => void;
   title?: string;
+  rightIcon?: string;
+  onRightIconClick?: () => void;
 }
 
-const Header = ({ onBack, title }: HeaderProps) => {
+const Header = ({ onBack, title, rightIcon, onRightIconClick }: HeaderProps) => {
   return (
     <Container>
       <IconButton onClick={onBack}>
@@ -20,6 +22,13 @@ const Header = ({ onBack, title }: HeaderProps) => {
         <LogoWrapper>
           <img src={LogoIconSrc} alt="logo" />
         </LogoWrapper>
+      )}
+      {rightIcon ? (
+        <IconButton onClick={onRightIconClick}>
+          <img src={rightIcon} alt="right icon" />
+        </IconButton>
+      ) : (
+        <div style={{ width: '24px', height: '24px' }} />
       )}
     </Container>
   );
