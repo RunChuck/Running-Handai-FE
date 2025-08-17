@@ -28,6 +28,7 @@ export const theme = {
     // Labels
     label1: createTypography('0.75rem', 600, 1.2), // 12px, SemiBold, 120%
     label2: createTypography('0.75rem', 400, 1.2), // 12px, Regular, 120%
+    label3: createTypography('0.75rem', 500, 1.2), // 12px, Medium, 120%
 
     // Modal
     modalContent: createTypography('1.125rem', 400, 1.5), // 18px, Regular, 150%

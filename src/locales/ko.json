@@ -137,12 +137,19 @@
   },
   "courseCreation": {
     "title": "코스 생성",
+    "create": "코스 생성",
+    "save": "코스 저장",
     "course": {
       "min": "분",
       "distance": "거리",
       "time": "예상 시간",
       "maxAltitude": "최고 고도",
-      "minAltitude": "최저 고도"
+      "minAltitude": "최저 고도",
+      "upload": "GPX",
+      "undo": "되돌리기",
+      "redo": "다시실행",
+      "swap": "방향전환",
+      "delete": "초기화"
     }
   },
   "mypage": {
