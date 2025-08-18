@@ -35,8 +35,7 @@ client.interceptors.request.use(
 
     // 토큰이 있으면 Authorization 헤더에 추가
     const accessToken = localStorage.getItem('accessToken');
-    if (accessToken) {
-      config.headers = config.headers || {};
+    if (accessToken && config.headers) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
 
@@ -50,7 +49,10 @@ client.interceptors.request.use(
 
 // 토큰 재발급 중인지 확인하는 플래그
 let isRefreshing = false;
-let failedQueue: Array<{ resolve: (value: unknown) => void; reject: (error: unknown) => void }> = [];
+let failedQueue: Array<{
+  resolve: (value: string) => void;
+  reject: (error: unknown) => void;
+}> = [];
 
 const processQueue = (error: unknown, token?: string) => {
   failedQueue.forEach(({ resolve, reject }) => {
@@ -88,15 +90,24 @@ client.interceptors.response.use(
 
         if (refreshToken) {
           try {
+            const expiredAccessToken = localStorage.getItem('accessToken');
+
             const refreshResponse = await axios.post(`${envConfig.apiRoot}/api/members/oauth/token`, {
               refreshToken,
+              ...(expiredAccessToken && { accessToken: expiredAccessToken }),
             });
-            const newAccessToken = refreshResponse.data.accessToken;
+
+            const { accessToken: newAccessToken, refreshToken: newRefreshToken } = refreshResponse.data.data;
+
+            if (!newAccessToken) {
+              console.error('❌ 새 액세스 토큰이 응답에 없음:', refreshResponse.data);
+              throw new Error('Invalid token response: accessToken is missing');
+            }
 
             // 새 토큰 저장
             localStorage.setItem('accessToken', newAccessToken);
-            if (refreshResponse.data.refreshToken) {
-              localStorage.setItem('refreshToken', refreshResponse.data.refreshToken);
+            if (newRefreshToken) {
+              localStorage.setItem('refreshToken', newRefreshToken);
             }
 
             isRefreshing = false;
