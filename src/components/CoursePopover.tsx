@@ -103,7 +103,7 @@ const PopoverContainer = styled.div`
 
 const CourseOption = styled.button`
   width: 100%;
-  padding: 8px 16px;
+  padding: 8px;
   border: none;
   cursor: pointer;
   transition: background-color 0.2s;
