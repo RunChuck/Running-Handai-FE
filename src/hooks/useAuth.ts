@@ -20,20 +20,37 @@ export const useAuth = () => {
     error: null,
   });
 
-  const setToken = (accessToken: string, refreshToken?: string) => {
-    localStorage.setItem('accessToken', accessToken);
-    if (refreshToken) {
-      localStorage.setItem('refreshToken', refreshToken);
+  const setToken = (accessToken: string, refreshToken?: string, autoLogin?: boolean) => {
+    const shouldAutoLogin = autoLogin ?? localStorage.getItem('autoLoginPreference') === 'true';
+
+    if (shouldAutoLogin) {
+      localStorage.setItem('accessToken', accessToken);
+      if (refreshToken) {
+        localStorage.setItem('refreshToken', refreshToken);
+      }
+      localStorage.setItem('autoLogin', 'true');
+    } else {
+      sessionStorage.setItem('accessToken', accessToken);
+      if (refreshToken) {
+        sessionStorage.setItem('refreshToken', refreshToken);
+      }
+      localStorage.removeItem('autoLogin');
     }
+
+    // 사용 후 제거
+    localStorage.removeItem('autoLoginPreference');
   };
 
   const getToken = () => {
-    return localStorage.getItem('accessToken');
+    return localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
   };
 
   const removeToken = () => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('autoLogin');
+    sessionStorage.removeItem('accessToken');
+    sessionStorage.removeItem('refreshToken');
   };
 
   const isAuthenticated = () => {

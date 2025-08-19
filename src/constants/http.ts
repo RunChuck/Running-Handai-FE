@@ -34,9 +34,8 @@ client.interceptors.request.use(
     }
 
     // 토큰이 있으면 Authorization 헤더에 추가
-    const accessToken = localStorage.getItem('accessToken');
-    if (accessToken) {
-      config.headers = config.headers || {};
+    const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+    if (accessToken && config.headers) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
 
@@ -50,7 +49,10 @@ client.interceptors.request.use(
 
 // 토큰 재발급 중인지 확인하는 플래그
 let isRefreshing = false;
-let failedQueue: Array<{ resolve: (value: unknown) => void; reject: (error: unknown) => void }> = [];
+let failedQueue: Array<{
+  resolve: (value: string) => void;
+  reject: (error: unknown) => void;
+}> = [];
 
 const processQueue = (error: unknown, token?: string) => {
   failedQueue.forEach(({ resolve, reject }) => {
@@ -84,19 +86,36 @@ client.interceptors.response.use(
     if (response?.status === 401 && !config.url?.includes('oauth/token')) {
       if (!isRefreshing) {
         isRefreshing = true;
-        const refreshToken = localStorage.getItem('refreshToken');
+        const refreshToken = localStorage.getItem('refreshToken') || sessionStorage.getItem('refreshToken');
 
         if (refreshToken) {
           try {
+            const expiredAccessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+
             const refreshResponse = await axios.post(`${envConfig.apiRoot}/api/members/oauth/token`, {
               refreshToken,
+              ...(expiredAccessToken && { accessToken: expiredAccessToken }),
             });
-            const newAccessToken = refreshResponse.data.accessToken;
+
+            const { accessToken: newAccessToken, refreshToken: newRefreshToken } = refreshResponse.data.data;
+
+            if (!newAccessToken) {
+              console.error('❌ 새 액세스 토큰이 응답에 없음:', refreshResponse.data);
+              throw new Error('Invalid token response: accessToken is missing');
+            }
 
             // 새 토큰 저장
-            localStorage.setItem('accessToken', newAccessToken);
-            if (refreshResponse.data.refreshToken) {
-              localStorage.setItem('refreshToken', refreshResponse.data.refreshToken);
+            const isAutoLogin = localStorage.getItem('autoLogin') === 'true';
+            if (isAutoLogin) {
+              localStorage.setItem('accessToken', newAccessToken);
+              if (newRefreshToken) {
+                localStorage.setItem('refreshToken', newRefreshToken);
+              }
+            } else {
+              sessionStorage.setItem('accessToken', newAccessToken);
+              if (newRefreshToken) {
+                sessionStorage.setItem('refreshToken', newRefreshToken);
+              }
             }
 
             isRefreshing = false;
@@ -112,6 +131,9 @@ client.interceptors.response.use(
             // 리프레시 토큰도 만료된 경우 로그아웃 처리
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
+            localStorage.removeItem('autoLogin');
+            sessionStorage.removeItem('accessToken');
+            sessionStorage.removeItem('refreshToken');
             window.location.href = '/';
 
             return Promise.reject(refreshError);
@@ -120,6 +142,9 @@ client.interceptors.response.use(
           // 리프레시 토큰이 없는 경우 로그아웃
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
+          localStorage.removeItem('autoLogin');
+          sessionStorage.removeItem('accessToken');
+          sessionStorage.removeItem('refreshToken');
           window.location.href = '/';
         }
       } else {
