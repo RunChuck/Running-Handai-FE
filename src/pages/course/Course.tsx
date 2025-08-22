@@ -3,11 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import * as S from './Course.styled';
 
-import { useDebounce } from '@/hooks/useDebounce';
 import { useCourses } from '@/hooks/useCourses';
 import { useBookmark } from '@/hooks/useBookmark';
-import { getUserLocation } from '@/utils/geolocation';
-import { BUSAN_CITY_HALL } from '@/constants/locations';
+import { moveToCurrentLocation, useDebouncedCurrentLocation } from '@/utils/locationUtils';
 import { useMap } from '@/contexts/MapContext';
 import type { AreaCode, ThemeCode, CourseData } from '@/types/course';
 
@@ -96,23 +94,7 @@ const Course = () => {
     [courses, mapRef, setLastMapViewport]
   );
 
-  const moveToCurrentLocationHandler = async () => {
-    try {
-      const location = await getUserLocation();
-
-      if (mapRef.current) {
-        mapRef.current.moveToLocation(location.lat, location.lng);
-        console.log('현재 위치로 이동:', location);
-      }
-    } catch (error) {
-      console.warn('현재 위치를 가져올 수 없습니다:', error);
-      if (mapRef.current) {
-        mapRef.current.moveToLocation(BUSAN_CITY_HALL.lat, BUSAN_CITY_HALL.lng);
-      }
-    }
-  };
-
-  const { debouncedCallback: moveToCurrentLocation } = useDebounce(moveToCurrentLocationHandler, 300);
+  const moveToCurrentLocationDebounced = useDebouncedCurrentLocation(mapRef.current);
 
   const handleRecommendCourseClick = () => {
     setIsModalOpen(true);
@@ -137,7 +119,7 @@ const Course = () => {
 
   const handleNearbySelect = async () => {
     await fetchNearbyCourses();
-    await moveToCurrentLocationHandler();
+    await moveToCurrentLocation(mapRef.current);
   };
 
   const handleAreaSelect = async (area: AreaCode) => {
@@ -245,7 +227,7 @@ const Course = () => {
         <img src={ArrowUprightIconSrc} alt={t('main.exploreCourses')} />
       </FloatButton>
 
-      <FloatButton onClick={moveToCurrentLocation} position={{ bottom: 0, right: 16 }} variant="circular">
+      <FloatButton onClick={moveToCurrentLocationDebounced} position={{ bottom: 0, right: 16 }} variant="circular">
         <img src={LocationIconSrc} alt={t('currentLocation')} width={20} height={20} />
       </FloatButton>
     </>
