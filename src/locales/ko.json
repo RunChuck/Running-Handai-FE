@@ -239,6 +239,12 @@
       "filter": "지역 선택",
       "empty": "이 지역에 즐겨찾는 코스가 없어요"
     },
+    "myCourseDetail": {
+      "title": "내 코스 관리",
+      "gpxDownload": "GPX 다운로드",
+      "copyLink": "링크 복사",
+      "altitudeGraph": "고도 그래프"
+    },
     "terms": {
       "title": "러닝 용어 사전",
       "tip": "초보 러너를 위한 팁",

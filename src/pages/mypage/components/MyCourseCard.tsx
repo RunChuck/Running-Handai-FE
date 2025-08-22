@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 
@@ -33,9 +34,10 @@ interface MyCourseCardProps {
 
 const MyCourseCard = ({ variant = 'mypage' }: MyCourseCardProps) => {
   const [t] = useTranslation();
+  const navigate = useNavigate();
 
   const handleCardClick = () => {
-    console.log('card clicked');
+    navigate(`/mypage/mycourse/${1}`);
   };
 
   const handleEditClick = () => {

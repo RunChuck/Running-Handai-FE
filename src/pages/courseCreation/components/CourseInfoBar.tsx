@@ -12,9 +12,10 @@ interface CourseInfoBarProps {
   time: number;
   maxAltitude: number;
   minAltitude: number;
+  ContainerStyle?: React.CSSProperties;
 }
 
-const CourseInfoBar = ({ distance, time, maxAltitude, minAltitude }: CourseInfoBarProps) => {
+const CourseInfoBar = ({ distance, time, maxAltitude, minAltitude, ContainerStyle }: CourseInfoBarProps) => {
   const [t] = useTranslation();
 
   const CourseInfo = [
@@ -45,7 +46,7 @@ const CourseInfoBar = ({ distance, time, maxAltitude, minAltitude }: CourseInfoB
   ];
 
   return (
-    <Container>
+    <Container style={ContainerStyle}>
       {CourseInfo.map(info => (
         <InfoItem key={info.id}>
           <InfoWrapper>
@@ -61,7 +62,7 @@ const CourseInfoBar = ({ distance, time, maxAltitude, minAltitude }: CourseInfoB
 
 export default CourseInfoBar;
 
-const Container = styled.div`
+const Container = styled.div<{ $style?: React.CSSProperties }>`
   display: flex;
   justify-content: space-between;
   padding: var(--spacing-12) 0;

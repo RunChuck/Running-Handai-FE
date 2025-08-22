@@ -11,6 +11,7 @@ import InfoPage from '@/pages/mypage/Info/InfoPage';
 import ReviewPage from '@/pages/mypage/review/ReviewPage';
 import FavoritePage from '@/pages/mypage/favorites/FavoritePage';
 import MyCoursePage from '@/pages/mypage/mycourse/MyCoursePage';
+import MyCourseDetail from '@/pages/mypage/mycourse/MyCourseDetail';
 import NotFound from '@/pages/NotFound';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
@@ -29,6 +30,7 @@ const AppRoutes = () => {
         <Route path="review" element={<ReviewPage />} />
         <Route path="favorites" element={<FavoritePage />} />
         <Route path="mycourse" element={<MyCoursePage />} />
+        <Route path="mycourse/:id" element={<MyCourseDetail />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
