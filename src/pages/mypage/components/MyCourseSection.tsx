@@ -18,10 +18,10 @@ const MyCourseSection = ({ isAuthenticated }: MyCourseSectionProps) => {
   const { scrollContainerRef, handleMouseDown } = useHorizontalScroll();
 
   // 테스트용
-  const myCourseCount = 0;
+  const myCourseCount = 10;
 
   const handleGoToCreateCourse = () => {
-    navigate('/course-creation');
+    navigate('/mypage/mycourse');
   };
 
   return (

@@ -10,6 +10,7 @@ import TermsPage from '@/pages/mypage/terms/TermsPage';
 import InfoPage from '@/pages/mypage/Info/InfoPage';
 import ReviewPage from '@/pages/mypage/review/ReviewPage';
 import FavoritePage from '@/pages/mypage/favorites/FavoritePage';
+import MyCoursePage from '@/pages/mypage/mycourse/MyCoursePage';
 import NotFound from '@/pages/NotFound';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
@@ -27,6 +28,7 @@ const AppRoutes = () => {
         <Route path="info" element={<InfoPage />} />
         <Route path="review" element={<ReviewPage />} />
         <Route path="favorites" element={<FavoritePage />} />
+        <Route path="mycourse" element={<MyCoursePage />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
