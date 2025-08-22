@@ -1,19 +1,24 @@
 import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
+import { useDebouncedCurrentLocation, type MapInstance } from '@/utils/locationUtils';
 
+import FloatButton from '@/components/FloatButton';
 import UploadIconSrc from '@/assets/icons/gpx-upload.svg';
 import UndoIconSrc from '@/assets/icons/undo-icon.svg';
 import RedoIconSrc from '@/assets/icons/redo-icon.svg';
 import SwapIconSrc from '@/assets/icons/swap-icon.svg';
 import DeleteIconSrc from '@/assets/icons/delete-icon.svg';
+import LocationIconSrc from '@/assets/icons/location-icon.svg';
 
 interface CreationBarProps {
+  mapInstance?: MapInstance | null;
   onCreateCourse?: () => void;
 }
 
-const CreationBar = ({ onCreateCourse }: CreationBarProps) => {
+const CreationBar = ({ mapInstance, onCreateCourse }: CreationBarProps) => {
   const [t] = useTranslation();
+  const moveToCurrentLocation = useDebouncedCurrentLocation(mapInstance);
 
   const CreationMenu = [
     {
@@ -46,6 +51,9 @@ const CreationBar = ({ onCreateCourse }: CreationBarProps) => {
   return (
     <Container>
       <CreateButton onClick={onCreateCourse}>{t('courseCreation.create')}</CreateButton>
+      <FloatButton position={{ top: -56, right: 16 }} onClick={moveToCurrentLocation}>
+        <img src={LocationIconSrc} alt={t('currentLocation')} width={20} height={20} />
+      </FloatButton>
       <CreationBarContainer>
         {CreationMenu.map(menu => (
           <MenuButton key={menu.id}>

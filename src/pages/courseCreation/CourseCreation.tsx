@@ -8,7 +8,7 @@ import Header from '@/components/Header';
 import CommonModal from '@/components/CommonModal';
 import CourseInfoBar from './components/CourseInfoBar';
 import CreationBar from './components/CreationBar';
-import MapView from '@/components/MapView';
+import RouteView, { type RouteViewMapInstance } from './components/RouteView';
 import OnboardingModal from './components/OnboardingModal';
 import CourseCreationModal from '@/components/CourseCreationModal';
 import InfoIconSrc from '@/assets/icons/info-24px.svg';
@@ -20,6 +20,7 @@ const CourseCreation = () => {
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isCourseCreationModalOpen, setIsCourseCreationModalOpen] = useState(false);
+  const [mapInstance, setMapInstance] = useState<RouteViewMapInstance | null>(null);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -59,9 +60,9 @@ const CourseCreation = () => {
         rightIcon={InfoIconSrc}
         onRightIconClick={() => setIsOnboardingOpen(true)}
       />
-      <CourseInfoBar distance={10} time={100} maxAltitude={1000} minAltitude={0} />
-      <MapView />
-      <CreationBar onCreateCourse={() => setIsCourseCreationModalOpen(true)} />
+      <CourseInfoBar distance={0} time={0} maxAltitude={0} minAltitude={0} />
+      <RouteView onMapLoad={setMapInstance} />
+      <CreationBar mapInstance={mapInstance} onCreateCourse={() => setIsCourseCreationModalOpen(true)} />
 
       <OnboardingModal isOpen={isOnboardingOpen} onClose={handleOnboardingClose} />
 
