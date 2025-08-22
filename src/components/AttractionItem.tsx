@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import { useState } from 'react';
 import { theme } from '@/styles/theme';
 import type { SpotData } from '@/types/course';
+import { formatDescription } from '@/utils/format';
 
 import AttractionTumbnailSrc from '@/assets/images/thumbnail-default.png';
 
@@ -42,7 +43,7 @@ const AttractionItem = ({ spot, onMoreClick, hideMoreButton = false }: Attractio
       <Title>{spot.name}</Title>
       <DescriptionContainer>
         <DescriptionTruncated>
-          <Description ref={checkTextOverflow}>{spot.description}</Description>
+          <Description ref={checkTextOverflow}>{formatDescription(spot.description)}</Description>
           {!hideMoreButton && needsTruncation && <MoreButton onClick={handleMoreButtonClick}>...더보기</MoreButton>}
         </DescriptionTruncated>
       </DescriptionContainer>

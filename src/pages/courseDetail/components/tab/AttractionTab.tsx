@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import { useState } from 'react';
 import { useAttractions } from '@/hooks/useAttractions';
+import { formatDescription } from '@/utils/format';
 import AttractionItem from '@/components/AttractionItem';
 import type { SpotData } from '@/types/course';
 import CloseIconSrc from '@/assets/icons/close-24px.svg';
@@ -76,7 +77,7 @@ const AttractionTab = ({ courseId }: AttractionTabProps) => {
             }}
             onClick={e => e.stopPropagation()}
           >
-            <TooltipDescription>{selectedSpot.description}</TooltipDescription>
+            <TooltipDescription>{formatDescription(selectedSpot.description)}</TooltipDescription>
             <CloseButton onClick={() => setSelectedSpot(null)}>
               <img src={CloseIconSrc} alt="close" width={16} height={16} />
             </CloseButton>
