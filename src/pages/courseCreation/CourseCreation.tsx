@@ -10,6 +10,7 @@ import CourseInfoBar from './components/CourseInfoBar';
 import CreationBar from './components/CreationBar';
 import MapView from '@/components/MapView';
 import OnboardingModal from './components/OnboardingModal';
+import CourseCreationModal from '@/components/CourseCreationModal';
 import InfoIconSrc from '@/assets/icons/info-24px.svg';
 
 const CourseCreation = () => {
@@ -18,6 +19,7 @@ const CourseCreation = () => {
   const { isAuthenticated } = useAuth();
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isCourseCreationModalOpen, setIsCourseCreationModalOpen] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -40,6 +42,15 @@ const CourseCreation = () => {
     navigate(-1);
   };
 
+  const handleCourseCreationModalClose = () => {
+    setIsCourseCreationModalOpen(false);
+  };
+
+  const handleCourseCreate = () => {
+    console.log('코스 생성:');
+    setIsCourseCreationModalOpen(false);
+  };
+
   return (
     <S.Container>
       <Header
@@ -50,7 +61,7 @@ const CourseCreation = () => {
       />
       <CourseInfoBar distance={10} time={100} maxAltitude={1000} minAltitude={0} />
       <MapView />
-      <CreationBar />
+      <CreationBar onCreateCourse={() => setIsCourseCreationModalOpen(true)} />
 
       <OnboardingModal isOpen={isOnboardingOpen} onClose={handleOnboardingClose} />
 
@@ -61,6 +72,13 @@ const CourseCreation = () => {
         content={t('main.loginMessage.create')}
         cancelText={t('cancel')}
         confirmText={t('main.simpleLogin')}
+      />
+
+      <CourseCreationModal
+        isOpen={isCourseCreationModalOpen}
+        onClose={handleCourseCreationModalClose}
+        onConfirm={handleCourseCreate}
+        confirmText={t('modal.courseCreation.complete')}
       />
     </S.Container>
   );

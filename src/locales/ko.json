@@ -120,6 +120,18 @@
       "description2": "경유지에 따라 코스가 변경될 수 있어요.",
       "title3": "도착지를 터치하세요.",
       "description3": "최종 저장 시 마지막 마커를 도착지로 설정해요."
+    },
+    "courseCreation": {
+      "create.title": "내 코스 등록",
+      "edit.title": "내 코스 수정",
+      "startPoint": "시작포인트명",
+      "endPoint": "종료포인트명",
+      "startPointPlaceholder": "동의대학교가야캠퍼스",
+      "endPointPlaceholder": "수정산가족체육공원",
+      "PointValidation": "글자수 초과 (20자 이내)",
+      "thumbnail": "썸네일 등록",
+      "zoom": "확대",
+      "complete": "코스 그리기 완료"
     }
   },
   "courseDetail": {

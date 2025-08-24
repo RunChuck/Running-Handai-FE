@@ -8,7 +8,11 @@ import RedoIconSrc from '@/assets/icons/redo-icon.svg';
 import SwapIconSrc from '@/assets/icons/swap-icon.svg';
 import DeleteIconSrc from '@/assets/icons/delete-icon.svg';
 
-const CreationBar = () => {
+interface CreationBarProps {
+  onCreateCourse?: () => void;
+}
+
+const CreationBar = ({ onCreateCourse }: CreationBarProps) => {
   const [t] = useTranslation();
 
   const CreationMenu = [
@@ -41,7 +45,7 @@ const CreationBar = () => {
 
   return (
     <Container>
-      <CreateButton>{t('courseCreation.create')}</CreateButton>
+      <CreateButton onClick={onCreateCourse}>{t('courseCreation.create')}</CreateButton>
       <CreationBarContainer>
         {CreationMenu.map(menu => (
           <MenuButton key={menu.id}>
