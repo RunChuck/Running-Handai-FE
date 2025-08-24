@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 
-import Header from '../../../components/Header';
+import Header from '@/components/Header';
 import ToolTip from './ToopTip';
 import KeyTab from './KeyTab';
 
