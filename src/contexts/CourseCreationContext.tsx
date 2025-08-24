@@ -1,5 +1,9 @@
 import { createContext, useContext, useRef, useState, type ReactNode } from 'react';
 import type { RouteViewMapInstance } from '@/pages/courseCreation/components/RouteView';
+import { createCourse } from '@/api/create';
+import { generateGPXFile } from '@/utils/gpxGenerator';
+import { convertImageToWebP } from '@/utils/imageConverter';
+import { useToast } from '@/hooks/useToast';
 
 export interface MarkerPosition {
   lat: number;
@@ -42,6 +46,7 @@ interface CourseCreationContextType {
   redoStack: CourseAction[];
   isGpxUploaded: boolean;
   gpxData: GPXData | null;
+  uploadedGpxFile: File | null;
   mapInstance: RouteViewMapInstance | null;
   buttonStates: ButtonStates;
   isRouteGenerated: boolean;
@@ -54,10 +59,12 @@ interface CourseCreationContextType {
   handleSwap: () => void;
   handleDelete: () => void;
   handleCourseCreate: () => Promise<void>;
+  submitCourse: (courseData: { startPoint: string; endPoint: string; thumbnailBlob: Blob; isInBusan: boolean }) => Promise<number>;
   setMapInstance: (instance: RouteViewMapInstance) => void;
 
   // 로딩 상태
   isLoading: boolean;
+  isSavingCourse: boolean;
   error: string | null;
 }
 
@@ -68,14 +75,18 @@ interface CourseCreationProviderProps {
 }
 
 export const CourseCreationProvider = ({ children }: CourseCreationProviderProps) => {
+  const { showErrorToast } = useToast();
+
   // 상태
   const [markers, setMarkers] = useState<MarkerPosition[]>([]);
   const [undoStack, setUndoStack] = useState<CourseAction[]>([]);
   const [redoStack, setRedoStack] = useState<CourseAction[]>([]);
   const [isGpxUploaded, setIsGpxUploaded] = useState(false);
   const [gpxData, setGpxData] = useState<GPXData | null>(null);
+  const [uploadedGpxFile, setUploadedGpxFile] = useState<File | null>(null);
   const [mapInstance, setMapInstance] = useState<RouteViewMapInstance | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSavingCourse, setIsSavingCourse] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isRouteGenerated, setIsRouteGenerated] = useState(false);
 
@@ -97,11 +108,6 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
     // console.log('📍 새 액션 추가:', action.type, action.markerIndex, action.payload);
     setUndoStack(prev => {
       const newStack = [...prev, action];
-      // console.log(
-      //   '📚 현재 undoStack 길이:',
-      //   newStack.length,
-      //   newStack.map(a => a.type)
-      // );
       return newStack;
     });
     setRedoStack([]); // 새 작업 시 redo 스택 초기화
@@ -110,7 +116,6 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
   // 마커 상태 변경 핸들러 (지도에서 직접 추가/이동 시)
   const handleMarkersChange = (newMarkers: MarkerPosition[]) => {
     const previousMarkers = previousMarkersRef.current;
-    // console.log('🔄 마커 변경:', { prev: previousMarkers.length, new: newMarkers.length });
 
     setMarkers(newMarkers);
     previousMarkersRef.current = newMarkers; // 이전 상태 업데이트
@@ -152,7 +157,7 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
     isUndoRedoInProgress.current = true;
 
     const lastAction = undoStack[undoStack.length - 1];
-    // console.log('⏪ Undo 실행:', lastAction.type, lastAction.markerIndex, lastAction.payload);
+
     setUndoStack(prev => prev.slice(0, -1));
     setRedoStack(prev => [...prev, lastAction]);
 
@@ -185,7 +190,7 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
     isUndoRedoInProgress.current = true;
 
     const redoAction = redoStack[redoStack.length - 1];
-    // console.log('⏩ Redo 실행:', redoAction.type, redoAction.markerIndex, redoAction.newPosition);
+
     setRedoStack(prev => prev.slice(0, -1));
     setUndoStack(prev => [...prev, redoAction]);
 
@@ -218,6 +223,9 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
     setError(null);
 
     try {
+      // 업로드된 GPX 파일 저장
+      setUploadedGpxFile(file);
+
       // GPX 파일을 텍스트로 읽기
       const fileText = await file.text();
       const { parseGPX } = await import('@/utils/gpxParser');
@@ -356,6 +364,73 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
     }
   };
 
+  const submitCourse = async (courseData: { startPoint: string; endPoint: string; thumbnailBlob: Blob; isInBusan: boolean }): Promise<number> => {
+    setIsSavingCourse(true);
+    setError(null);
+
+    try {
+      const { startPoint, endPoint, thumbnailBlob, isInBusan } = courseData;
+
+      // 좌표 데이터 확인
+      const coordinates = isGpxUploaded && gpxData?.coordinates ? gpxData.coordinates : gpxData?.coordinates || [];
+      if (!coordinates.length) {
+        throw new Error('경로 데이터가 없습니다.');
+      }
+
+      let gpxFile: File;
+
+      if (isGpxUploaded && uploadedGpxFile) {
+        // GPX 파일이 업로드된 경우: 기존 파일 사용
+        gpxFile = uploadedGpxFile;
+      } else {
+        // 마커로 경로를 생성한 경우: 새 GPX 파일 생성
+        const trackPoints = coordinates.map((coord, index) => ({
+          lat: coord.lat,
+          lng: coord.lng,
+          elevation: 0,
+          time: new Date(Date.now() + index * 1000),
+        }));
+
+        gpxFile = generateGPXFile(trackPoints, {
+          trackName: `${startPoint} → ${endPoint}`,
+          description: `Course from ${startPoint} to ${endPoint}`,
+          creator: 'Running Handai',
+        });
+      }
+
+      // 썸네일 이미지를 800x800 WebP로 변환
+      const thumbnailFile = await convertImageToWebP(thumbnailBlob, {
+        width: 800,
+        height: 800,
+        quality: 0.95,
+        format: 'webp',
+      });
+
+      const apiCourseData = {
+        startPointName: startPoint,
+        endPointName: endPoint,
+        gpxFile,
+        thumbnailImage: thumbnailFile,
+        isInsideBusan: isInBusan,
+      };
+
+      const result = await createCourse(apiCourseData);
+      return result.data;
+    } catch (error) {
+      const errorMessage = error?.response?.data?.message || error?.message || '코스 등록 중 오류가 발생했습니다.';
+      setError(errorMessage);
+
+      // 중복 코스명이 아닌 경우에만 Context에서 토스트 표시
+      if (error?.response?.data?.responseCode !== 'DUPLICATE_COURSE_NAME') {
+        showErrorToast(errorMessage, { position: 'top' });
+      }
+
+      throw error;
+    } finally {
+      setIsSavingCourse(false);
+    }
+  };
+
   const value: CourseCreationContextType = {
     // 상태
     markers,
@@ -363,6 +438,7 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
     redoStack,
     isGpxUploaded,
     gpxData,
+    uploadedGpxFile,
     mapInstance,
     buttonStates,
     isRouteGenerated,
@@ -375,10 +451,12 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
     handleSwap,
     handleDelete,
     handleCourseCreate,
+    submitCourse,
     setMapInstance,
 
     // 로딩 상태
     isLoading,
+    isSavingCourse,
     error,
   };
 
