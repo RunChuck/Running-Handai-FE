@@ -13,3 +13,12 @@ export const mapCourseInfo = (courseData: { distance: number; duration: number; 
     level: courseData.level,
   };
 };
+
+// 즐길거리 설명 HTML 태그 포맷팅
+export const formatDescription = (description: string) => {
+  return description
+    .replace(/&nbsp;/g, ' ')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<[^>]*>/g, '') // 나머지 태그 제거
+    .trim();
+};

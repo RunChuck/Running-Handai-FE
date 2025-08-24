@@ -6,9 +6,11 @@ import LogoIconSrc from '@/assets/icons/logo.svg';
 interface HeaderProps {
   onBack: () => void;
   title?: string;
+  rightIcon?: string;
+  onRightIconClick?: () => void;
 }
 
-const Header = ({ onBack, title }: HeaderProps) => {
+const Header = ({ onBack, title, rightIcon, onRightIconClick }: HeaderProps) => {
   return (
     <Container>
       <IconButton onClick={onBack}>
@@ -18,8 +20,15 @@ const Header = ({ onBack, title }: HeaderProps) => {
         <Title>{title}</Title>
       ) : (
         <LogoWrapper>
-          <img src={LogoIconSrc} alt="logo" />
+          <LogoIcon src={LogoIconSrc} alt="logo" />
         </LogoWrapper>
+      )}
+      {rightIcon ? (
+        <IconButton onClick={onRightIconClick}>
+          <img src={rightIcon} alt="right icon" />
+        </IconButton>
+      ) : (
+        <div style={{ width: '24px', height: '24px' }} />
       )}
     </Container>
   );
@@ -47,12 +56,25 @@ const LogoWrapper = styled.div`
   justify-content: center;
 `;
 
+const LogoIcon = styled.img`
+  width: auto;
+  height: 24px;
+
+  @media (max-width: 600px) {
+    height: 20px;
+  }
+`;
+
 const Title = styled.div`
   ${theme.typography.subtitle2};
   color: var(--text-text-title, #1c1c1c);
   flex: 1;
   display: flex;
   justify-content: center;
+
+  @media (max-width: 600px) {
+    ${theme.typography.subtitle3}
+  }
 `;
 
 const IconButton = styled.button`

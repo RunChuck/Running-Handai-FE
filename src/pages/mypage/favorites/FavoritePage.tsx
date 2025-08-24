@@ -9,7 +9,7 @@ import { useIsMobile } from '@/hooks/useIsMobile';
 import { useFavorites } from '@/hooks/useFavorites';
 import type { AreaCode } from '@/types/course';
 
-import Header from '../components/Header';
+import Header from '@/components/Header';
 import CourseFilter from './CourseFilter';
 import FavoriteCourseItem from './FavoriteCourseItem';
 import EmptyIconSrc from '@/assets/icons/no-course.svg';

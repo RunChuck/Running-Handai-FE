@@ -9,6 +9,7 @@ interface DropdownProps {
   isOpen?: boolean;
   onToggle?: (isOpen: boolean) => void;
   width?: number;
+  padding?: string;
 }
 
 interface DropdownItemProps {
@@ -17,14 +18,15 @@ interface DropdownItemProps {
   variant?: 'default' | 'danger';
 }
 
-const Dropdown = ({ trigger, children, isOpen: controlledIsOpen, onToggle, width = 80 }: DropdownProps) => {
+const Dropdown = ({ trigger, children, isOpen: controlledIsOpen, onToggle, width = 80, padding = '4px' }: DropdownProps) => {
   const [internalIsOpen, setInternalIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen;
   const setIsOpen = onToggle || setInternalIsOpen;
 
-  const handleTriggerClick = () => {
+  const handleTriggerClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setIsOpen(!isOpen);
   };
 
@@ -46,7 +48,9 @@ const Dropdown = ({ trigger, children, isOpen: controlledIsOpen, onToggle, width
 
   return (
     <DropdownContainer ref={dropdownRef}>
-      <TriggerButton onClick={handleTriggerClick}>{trigger}</TriggerButton>
+      <TriggerButton onClick={handleTriggerClick} $padding={padding}>
+        {trigger}
+      </TriggerButton>
       {isOpen && <DropdownMenu width={width}>{children}</DropdownMenu>}
     </DropdownContainer>
   );
@@ -66,13 +70,13 @@ const DropdownContainer = styled.div`
   position: relative;
 `;
 
-const TriggerButton = styled.button`
+const TriggerButton = styled.div<{ $padding: string }>`
   background: none;
   border: none;
   cursor: pointer;
   border-radius: 4px;
   transition: background-color 0.2s ease;
-  padding: 4px;
+  padding: ${({ $padding }) => $padding};
 
   &:hover {
     background: var(--surface-surface-highlight, #f5f5f5);

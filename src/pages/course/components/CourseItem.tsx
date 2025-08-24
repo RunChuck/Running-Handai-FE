@@ -46,8 +46,8 @@ const CourseItem = ({ course, index, isSelected, onBookmarkClick, onCourseClick 
   };
 
   return (
-    <ItemContainer>
-      <ThumbnailWrapper onClick={handleClick} isSelected={isSelected}>
+    <ItemContainer onClick={handleClick}>
+      <ThumbnailWrapper isSelected={isSelected}>
         <CourseBadge>{getCourseName(index)}</CourseBadge>
         <BookmarkButton onClick={handleBookmarkClick}>
           {course.isBookmarked ? <img src={HeartIconFilledSrc} alt="북마크" /> : <img src={HeartIconSrc} alt="북마크" />}
@@ -75,13 +75,13 @@ const ItemContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: var(--spacing-8);
+  cursor: pointer;
 `;
 
 const ThumbnailWrapper = styled.div<{ isSelected?: boolean }>`
   position: relative;
   width: 100%;
   aspect-ratio: 1;
-  cursor: pointer;
   border-radius: 4px;
   overflow: hidden;
 

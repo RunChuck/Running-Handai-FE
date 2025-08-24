@@ -80,6 +80,7 @@
     "noCourses": "이 근처에는 추천 코스가 없어요.\n테마별 코스를 둘러보거나, 나만의 코스를 만들어보는 건 어떨까요?",
     "noCourses.mobile": "이 근처에는 추천 코스가 없어요.\n테마별 코스를 둘러보거나,\n나만의 코스를 만들어보는 건 어떨까요?",
     "loginMessage": "로그인하고\n마음에 드는 코스를 저장해보세요!",
+    "loginMessage.create": "로그인하고\n나만의 코스를 직접 만들어보세요!",
     "simpleLogin": "간편 로그인 하기",
     "bookmark": "명이 저장한 코스"
   },
@@ -108,6 +109,29 @@
       "confirm": "좋아요!",
       "cancel": "나중에",
       "installing": "설치 중..."
+    },
+    "onboarding": {
+      "step": "단계",
+      "next": "다음",
+      "start": "시작하기",
+      "skip": "건너뛰기",
+      "title1": "출발 포인트를 터치하세요.",
+      "title2": "경유 포인트를 설정하세요.",
+      "description2": "경유지에 따라 코스가 변경될 수 있어요.",
+      "title3": "도착지를 터치하세요.",
+      "description3": "최종 저장 시 마지막 마커를 도착지로 설정해요."
+    },
+    "courseCreation": {
+      "create.title": "내 코스 등록",
+      "edit.title": "내 코스 수정",
+      "startPoint": "시작포인트명",
+      "endPoint": "종료포인트명",
+      "startPointPlaceholder": "동의대학교가야캠퍼스",
+      "endPointPlaceholder": "수정산가족체육공원",
+      "PointValidation": "글자수 초과 (20자 이내)",
+      "thumbnail": "썸네일 등록",
+      "zoom": "확대",
+      "complete": "코스 그리기 완료"
     }
   },
   "courseDetail": {
@@ -134,6 +158,23 @@
     "scrollToTop": "맨 위로",
     "more": "...더보기",
     "collapse": "접기"
+  },
+  "courseCreation": {
+    "title": "코스 생성",
+    "create": "코스 생성",
+    "save": "코스 저장",
+    "course": {
+      "min": "분",
+      "distance": "거리",
+      "time": "예상 시간",
+      "maxAltitude": "최고 고도",
+      "minAltitude": "최저 고도",
+      "upload": "GPX",
+      "undo": "되돌리기",
+      "redo": "다시실행",
+      "swap": "방향전환",
+      "delete": "초기화"
+    }
   },
   "mypage": {
     "defaultNickname": "러너",
@@ -197,6 +238,12 @@
       "title": "즐겨찾는 코스",
       "filter": "지역 선택",
       "empty": "이 지역에 즐겨찾는 코스가 없어요"
+    },
+    "myCourseDetail": {
+      "title": "내 코스 관리",
+      "gpxDownload": "GPX 다운로드",
+      "copyLink": "링크 복사",
+      "altitudeGraph": "고도 그래프"
     },
     "terms": {
       "title": "러닝 용어 사전",

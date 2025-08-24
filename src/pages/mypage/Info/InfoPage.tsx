@@ -7,7 +7,7 @@ import { useUserStore } from '@/stores/userStore';
 import { authAPI } from '@/api/auth';
 import { useToast } from '@/hooks/useToast';
 
-import Header from '../components/Header';
+import Header from '@/components/Header';
 import CommonInput from '@/components/CommonInput';
 import Button from '@/components/Button';
 

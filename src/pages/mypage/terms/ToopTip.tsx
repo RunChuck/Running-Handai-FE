@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
@@ -9,7 +9,15 @@ import ArrowIconSrc from '@/assets/icons/arrow-down-16px.svg';
 
 const ToolTip = () => {
   const [t] = useTranslation();
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    const hasVisitedTerms = localStorage.getItem('hasVisitedTerms');
+    if (!hasVisitedTerms) {
+      setIsOpen(true);
+      localStorage.setItem('hasVisitedTerms', 'true');
+    }
+  }, []);
 
   return (
     <Container>

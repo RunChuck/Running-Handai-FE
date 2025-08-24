@@ -2,7 +2,6 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import * as S from '../MyPage.styled';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
-import { useToast } from '@/hooks/useToast';
 
 import MyCourseCard from './MyCourseCard';
 import SVGColor from '@/components/SvgColor';
@@ -17,13 +16,12 @@ const MyCourseSection = ({ isAuthenticated }: MyCourseSectionProps) => {
   const [t] = useTranslation();
   const navigate = useNavigate();
   const { scrollContainerRef, handleMouseDown } = useHorizontalScroll();
-  const { showInfoToast } = useToast();
 
   // 테스트용
-  const myCourseCount = 0;
+  const myCourseCount = 10;
 
   const handleGoToCreateCourse = () => {
-    showInfoToast(t('toast.preparing'), { position: 'top' });
+    navigate('/mypage/mycourse');
   };
 
   return (
@@ -32,6 +30,7 @@ const MyCourseSection = ({ isAuthenticated }: MyCourseSectionProps) => {
         <S.SectionTitle>
           <img src={PenIconSrc} />
           {t('mypage.myCourse')}
+          {myCourseCount > 0 && <S.CountText>{myCourseCount}</S.CountText>}
         </S.SectionTitle>
         {isAuthenticated && myCourseCount > 0 && (
           <S.MoreButton onClick={handleGoToCreateCourse}>
