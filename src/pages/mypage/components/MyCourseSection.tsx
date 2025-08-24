@@ -30,6 +30,7 @@ const MyCourseSection = ({ isAuthenticated }: MyCourseSectionProps) => {
         <S.SectionTitle>
           <img src={PenIconSrc} />
           {t('mypage.myCourse')}
+          {myCourseCount > 0 && <S.CountText>{myCourseCount}</S.CountText>}
         </S.SectionTitle>
         {isAuthenticated && myCourseCount > 0 && (
           <S.MoreButton onClick={handleGoToCreateCourse}>
