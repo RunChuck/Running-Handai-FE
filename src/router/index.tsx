@@ -5,6 +5,7 @@ import Auth from '@/pages/auth/Auth';
 import Course from '@/pages/course/Course';
 import CourseDetail from '@/pages/courseDetail/CourseDetail';
 import CourseCreation from '@/pages/courseCreation/CourseCreation';
+import { CourseCreationProvider } from '@/contexts/CourseCreationContext';
 import MyPage from '@/pages/mypage/MyPage';
 import TermsPage from '@/pages/mypage/terms/TermsPage';
 import InfoPage from '@/pages/mypage/Info/InfoPage';
@@ -22,7 +23,14 @@ const AppRoutes = () => {
       <Route path="/auth" element={<Auth />} />
       <Route path="/course" element={<Course />} />
       <Route path="/course-detail/:id" element={<CourseDetail />} />
-      <Route path="/course-creation" element={<CourseCreation />} />
+      <Route
+        path="/course-creation"
+        element={
+          <CourseCreationProvider>
+            <CourseCreation />
+          </CourseCreationProvider>
+        }
+      />
       <Route path="/mypage" element={<MyPage />} />
       <Route path="/mypage/terms" element={<TermsPage />} />
       <Route path="/mypage" element={<ProtectedRoute />}>

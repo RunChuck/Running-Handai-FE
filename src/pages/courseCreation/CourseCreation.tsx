@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import * as S from './CourseCreation.styled';
 import { useAuth } from '@/hooks/useAuth';
+import { useCourseCreation } from '@/contexts/CourseCreationContext';
 
 import Header from '@/components/Header';
 import CommonModal from '@/components/CommonModal';
 import CourseInfoBar from './components/CourseInfoBar';
 import CreationBar from './components/CreationBar';
-import RouteView, { type RouteViewMapInstance } from './components/RouteView';
+import RouteView from './components/RouteView';
 import OnboardingModal from './components/OnboardingModal';
 import CourseCreationModal from '@/components/CourseCreationModal';
 import InfoIconSrc from '@/assets/icons/info-24px.svg';
@@ -20,7 +21,8 @@ const CourseCreation = () => {
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isCourseCreationModalOpen, setIsCourseCreationModalOpen] = useState(false);
-  const [mapInstance, setMapInstance] = useState<RouteViewMapInstance | null>(null);
+
+  const { gpxData, handleMarkersChange, handleCourseCreate, setMapInstance } = useCourseCreation();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -47,8 +49,8 @@ const CourseCreation = () => {
     setIsCourseCreationModalOpen(false);
   };
 
-  const handleCourseCreate = () => {
-    console.log('코스 생성:');
+  const handleCourseCreateWrapper = async () => {
+    await handleCourseCreate();
     setIsCourseCreationModalOpen(false);
   };
 
@@ -60,9 +62,14 @@ const CourseCreation = () => {
         rightIcon={InfoIconSrc}
         onRightIconClick={() => setIsOnboardingOpen(true)}
       />
-      <CourseInfoBar distance={0} time={0} maxAltitude={0} minAltitude={0} />
-      <RouteView onMapLoad={setMapInstance} />
-      <CreationBar mapInstance={mapInstance} onCreateCourse={() => setIsCourseCreationModalOpen(true)} />
+      <CourseInfoBar
+        distance={gpxData?.distance || 0}
+        time={gpxData?.time || 0}
+        maxAltitude={gpxData?.maxAltitude || 0}
+        minAltitude={gpxData?.minAltitude || 0}
+      />
+      <RouteView onMapLoad={setMapInstance} onMarkersChange={handleMarkersChange} />
+      <CreationBar onCreateCourse={() => setIsCourseCreationModalOpen(true)} />
 
       <OnboardingModal isOpen={isOnboardingOpen} onClose={handleOnboardingClose} />
 
@@ -78,7 +85,7 @@ const CourseCreation = () => {
       <CourseCreationModal
         isOpen={isCourseCreationModalOpen}
         onClose={handleCourseCreationModalClose}
-        onConfirm={handleCourseCreate}
+        onConfirm={handleCourseCreateWrapper}
         confirmText={t('modal.courseCreation.complete')}
       />
     </S.Container>
