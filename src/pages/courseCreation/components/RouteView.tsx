@@ -15,6 +15,10 @@ interface MarkerData {
 
 export interface RouteViewMapInstance {
   moveToLocation: (lat: number, lng: number, level?: number) => void;
+  clearAllMarkers: () => void;
+  removeLastMarker: () => void;
+  addMarkerAt: (lat: number, lng: number) => void;
+  getMarkers: () => { lat: number; lng: number }[];
 }
 
 interface RouteViewProps {
@@ -126,6 +130,30 @@ const RouteView = ({ onMapLoad, onMarkersChange }: RouteViewProps) => {
     }
   };
 
+  const removeLastMarker = () => {
+    if (markersRef.current.length === 0) return;
+
+    const lastMarker = markersRef.current[markersRef.current.length - 1];
+    lastMarker.marker.setMap(null);
+    markersRef.current = markersRef.current.slice(0, -1);
+
+    if (onMarkersChange) {
+      const positions = markersRef.current.map(m => m.position);
+      onMarkersChange(positions);
+    }
+  };
+
+  const addMarkerAt = (lat: number, lng: number) => {
+    if (!mapInstance.current) return;
+
+    const position = new window.kakao.maps.LatLng(lat, lng);
+    addMarker(position);
+  };
+
+  const getMarkers = () => {
+    return markersRef.current.map(m => m.position);
+  };
+
   useEffect(() => {
     if (!mapContainer.current || isMapInitialized.current) return;
 
@@ -171,6 +199,10 @@ const RouteView = ({ onMapLoad, onMarkersChange }: RouteViewProps) => {
                   map.panTo(position);
                 }
               },
+              clearAllMarkers,
+              removeLastMarker,
+              addMarkerAt,
+              getMarkers,
             };
             onMapLoad(mapInstanceWithMethods);
           }

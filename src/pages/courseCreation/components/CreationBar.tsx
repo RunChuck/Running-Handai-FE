@@ -1,9 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
-import { useDebouncedCurrentLocation, type MapInstance } from '@/utils/locationUtils';
+import { useDebouncedCurrentLocation } from '@/utils/locationUtils';
+import { useCourseCreation } from '@/contexts/CourseCreationContext';
 
 import FloatButton from '@/components/FloatButton';
+import SVGColor from '@/components/SvgColor';
 import UploadIconSrc from '@/assets/icons/gpx-upload.svg';
 import UndoIconSrc from '@/assets/icons/undo-icon.svg';
 import RedoIconSrc from '@/assets/icons/redo-icon.svg';
@@ -12,12 +14,13 @@ import DeleteIconSrc from '@/assets/icons/delete-icon.svg';
 import LocationIconSrc from '@/assets/icons/location-icon.svg';
 
 interface CreationBarProps {
-  mapInstance?: MapInstance | null;
   onCreateCourse?: () => void;
 }
 
-const CreationBar = ({ mapInstance, onCreateCourse }: CreationBarProps) => {
+const CreationBar = ({ onCreateCourse }: CreationBarProps) => {
   const [t] = useTranslation();
+  const { mapInstance, buttonStates, handleGpxUpload, handleUndo, handleRedo, handleSwap, handleDelete } = useCourseCreation();
+
   const moveToCurrentLocation = useDebouncedCurrentLocation(mapInstance);
 
   const CreationMenu = [
@@ -25,40 +28,63 @@ const CreationBar = ({ mapInstance, onCreateCourse }: CreationBarProps) => {
       id: 1,
       icon: UploadIconSrc,
       label: t('courseCreation.course.upload'),
+      enabled: buttonStates.gpx,
+      onClick: () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.gpx';
+        input.onchange = e => {
+          const file = (e.target as HTMLInputElement).files?.[0];
+          if (file) handleGpxUpload(file);
+        };
+        input.click();
+      },
     },
     {
       id: 2,
       icon: UndoIconSrc,
       label: t('courseCreation.course.undo'),
+      enabled: buttonStates.undo,
+      onClick: handleUndo,
     },
     {
       id: 3,
       icon: RedoIconSrc,
       label: t('courseCreation.course.redo'),
+      enabled: buttonStates.redo,
+      onClick: handleRedo,
     },
     {
       id: 4,
       icon: SwapIconSrc,
       label: t('courseCreation.course.swap'),
+      enabled: buttonStates.swap,
+      onClick: handleSwap,
     },
     {
       id: 5,
       icon: DeleteIconSrc,
       label: t('courseCreation.course.delete'),
+      enabled: buttonStates.delete,
+      onClick: handleDelete,
     },
   ];
 
   return (
     <Container>
-      <CreateButton onClick={onCreateCourse}>{t('courseCreation.create')}</CreateButton>
+      <CreateButton enabled={buttonStates.create} onClick={buttonStates.create ? onCreateCourse : undefined}>
+        {t('courseCreation.create')}
+      </CreateButton>
       <FloatButton position={{ top: -56, right: 16 }} onClick={moveToCurrentLocation}>
         <img src={LocationIconSrc} alt={t('currentLocation')} width={20} height={20} />
       </FloatButton>
       <CreationBarContainer>
         {CreationMenu.map(menu => (
-          <MenuButton key={menu.id}>
-            <MenuIcon src={menu.icon} alt={menu.label} />
-            <MenuLabel>{menu.label}</MenuLabel>
+          <MenuButton key={menu.id} enabled={menu.enabled} onClick={menu.enabled ? menu.onClick : undefined}>
+            <IconWrapper>
+              <SVGColor src={menu.icon} color={menu.enabled ? '#333' : '#BBBBBB'} width="100%" height="100%" />
+            </IconWrapper>
+            <MenuLabel enabled={menu.enabled}>{menu.label}</MenuLabel>
           </MenuButton>
         ))}
       </CreationBarContainer>
@@ -72,7 +98,7 @@ const Container = styled.div`
   position: relative;
 `;
 
-const CreateButton = styled.button`
+const CreateButton = styled.button<{ enabled: boolean }>`
   ${theme.typography.subtitle3}
   color: #FFF;
   position: absolute;
@@ -81,26 +107,22 @@ const CreateButton = styled.button`
   transform: translateX(-50%);
   padding: 8px 24px;
   border-radius: 100px;
-  background: var(--primary-primary, #4561ff);
+  background: ${({ enabled }) => (enabled ? 'var(--primary-primary, #4561ff)' : '#BBBBBB')};
   box-shadow: 1px 1px 4px 0 rgba(0, 0, 0, 0.2);
-  cursor: pointer;
+  cursor: ${({ enabled }) => (enabled ? 'pointer' : 'not-allowed')};
   z-index: 1;
+  transition: all 0.3s ease;
 
   @media (max-width: 600px) {
     ${theme.typography.caption1}
   }
 
   &:hover {
-    background: var(--primary-primary002, #2845e9);
+    background: ${({ enabled }) => (enabled ? 'var(--primary-primary002, #2845e9)' : '#BBBBBB')};
   }
 
   &:active {
-    background: var(--primary-primary003, #1b37d3);
-  }
-
-  &:disabled {
-    background: var(--GrayScale-gray400, #bbb);
-    cursor: not-allowed;
+    background: ${({ enabled }) => (enabled ? 'var(--primary-primary003, #1b37d3)' : '#BBBBBB')};
   }
 `;
 
@@ -116,7 +138,7 @@ const CreationBarContainer = styled.div`
   }
 `;
 
-const MenuButton = styled.div`
+const MenuButton = styled.div<{ enabled: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -124,7 +146,11 @@ const MenuButton = styled.div`
   gap: var(--spacing-4);
   width: 42px;
   height: 44px;
-  cursor: pointer;
+  cursor: ${({ enabled }) => (enabled ? 'pointer' : 'not-allowed')};
+  opacity: ${({ enabled }) => (enabled ? 1 : 0.6)};
+  transition:
+    opacity 0.3s ease,
+    cursor 0.3s ease;
 
   @media (max-width: 600px) {
     width: 42px;
@@ -132,16 +158,23 @@ const MenuButton = styled.div`
   }
 `;
 
-const MenuIcon = styled.img`
+const IconWrapper = styled.div`
   width: 28px;
   height: 28px;
+  transition: all 0.3s ease;
 
   @media (max-width: 600px) {
     width: 24px;
     height: 24px;
   }
+
+  svg {
+    transition: all 0.3s ease;
+  }
 `;
 
-const MenuLabel = styled.span`
+const MenuLabel = styled.span<{ enabled: boolean }>`
   ${theme.typography.label3}
+  color: ${({ enabled }) => (enabled ? '#333' : '#BBBBBB')};
+  transition: color 0.3s ease;
 `;
