@@ -18,6 +18,7 @@ export interface RouteViewMapInstance {
   clearAllMarkers: () => void;
   removeLastMarker: () => void;
   addMarkerAt: (lat: number, lng: number) => void;
+  moveMarkerTo: (index: number, lat: number, lng: number) => void;
   getMarkers: () => { lat: number; lng: number }[];
 }
 
@@ -154,6 +155,17 @@ const RouteView = ({ onMapLoad, onMarkersChange }: RouteViewProps) => {
     return markersRef.current.map(m => m.position);
   };
 
+  const moveMarkerTo = (index: number, lat: number, lng: number) => {
+    if (index < 0 || index >= markersRef.current.length || !mapInstance.current) return;
+
+    const markerData = markersRef.current[index];
+    const newPosition = new window.kakao.maps.LatLng(lat, lng);
+
+    // 카카오맵 마커 위치, 데이터 업데이트
+    markerData.marker.setPosition(newPosition);
+    markerData.position = { lat, lng };
+  };
+
   useEffect(() => {
     if (!mapContainer.current || isMapInitialized.current) return;
 
@@ -202,6 +214,7 @@ const RouteView = ({ onMapLoad, onMarkersChange }: RouteViewProps) => {
               clearAllMarkers,
               removeLastMarker,
               addMarkerAt,
+              moveMarkerTo,
               getMarkers,
             };
             onMapLoad(mapInstanceWithMethods);

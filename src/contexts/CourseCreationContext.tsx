@@ -10,6 +10,7 @@ export interface CourseAction {
   type: 'ADD_MARKER' | 'REMOVE_MARKER' | 'MOVE_MARKER' | 'CLEAR_ALL' | 'GPX_UPLOAD';
   payload?: MarkerPosition;
   markerIndex?: number;
+  newPosition?: MarkerPosition; // 마커 이동 시 새 위치 저장 (redo용)
 }
 
 export interface ButtonStates {
@@ -72,6 +73,7 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
   const [error, setError] = useState<string | null>(null);
 
   const isUndoRedoInProgress = useRef(false);
+  const previousMarkersRef = useRef<MarkerPosition[]>([]);
 
   // 버튼 활성화 상태
   const buttonStates: ButtonStates = {
@@ -85,24 +87,55 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
 
   // 실행취소/재실행 처리
   const executeAction = (action: CourseAction) => {
-    setUndoStack(prev => [...prev, action]);
+    console.log('📍 새 액션 추가:', action.type, action.markerIndex, action.payload);
+    setUndoStack(prev => {
+      const newStack = [...prev, action];
+      console.log(
+        '📚 현재 undoStack 길이:',
+        newStack.length,
+        newStack.map(a => a.type)
+      );
+      return newStack;
+    });
     setRedoStack([]); // 새 작업 시 redo 스택 초기화
   };
 
   // 마커 상태 변경 핸들러 (지도에서 직접 추가/이동 시)
   const handleMarkersChange = (newMarkers: MarkerPosition[]) => {
-    const previousMarkers = markers;
+    const previousMarkers = previousMarkersRef.current;
+    console.log('🔄 마커 변경:', { prev: previousMarkers.length, new: newMarkers.length });
+
     setMarkers(newMarkers);
+    previousMarkersRef.current = newMarkers; // 이전 상태 업데이트
 
     // undo/redo 중이 아닐 때만 새 액션 추가
-    if (!isUndoRedoInProgress.current && newMarkers.length > previousMarkers.length) {
-      const addedMarker = newMarkers[newMarkers.length - 1];
-      const action: CourseAction = {
-        type: 'ADD_MARKER',
-        payload: addedMarker,
-        markerIndex: newMarkers.length - 1,
-      };
-      executeAction(action);
+    if (!isUndoRedoInProgress.current) {
+      if (newMarkers.length > previousMarkers.length) {
+        // 마커 추가
+        const addedMarker = newMarkers[newMarkers.length - 1];
+        const action: CourseAction = {
+          type: 'ADD_MARKER',
+          payload: addedMarker,
+          markerIndex: newMarkers.length - 1,
+        };
+        executeAction(action);
+      } else if (newMarkers.length === previousMarkers.length) {
+        // 마커 이동 - 변경된 마커 찾기
+        for (let i = 0; i < newMarkers.length; i++) {
+          const prev = previousMarkers[i];
+          const curr = newMarkers[i];
+          if (prev && (prev.lat !== curr.lat || prev.lng !== curr.lng)) {
+            const action: CourseAction = {
+              type: 'MOVE_MARKER',
+              payload: prev, // 이전 위치 저장 (undo용)
+              newPosition: curr, // 새 위치 저장 (redo용)
+              markerIndex: i,
+            };
+            executeAction(action);
+            break; // 한 번에 하나의 마커만 이동 가능
+          }
+        }
+      }
     }
   };
 
@@ -112,6 +145,7 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
     isUndoRedoInProgress.current = true;
 
     const lastAction = undoStack[undoStack.length - 1];
+    console.log('⏪ Undo 실행:', lastAction.type, lastAction.markerIndex, lastAction.payload);
     setUndoStack(prev => prev.slice(0, -1));
     setRedoStack(prev => [...prev, lastAction]);
 
@@ -119,7 +153,15 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
       // 마지막 마커 제거
       const newMarkers = markers.slice(0, -1);
       setMarkers(newMarkers);
+      previousMarkersRef.current = newMarkers; // ref 업데이트
       mapInstance.removeLastMarker();
+    } else if (lastAction.type === 'MOVE_MARKER' && lastAction.payload && lastAction.markerIndex !== undefined) {
+      // 마커를 이전 위치로 이동
+      const newMarkers = [...markers];
+      newMarkers[lastAction.markerIndex] = lastAction.payload;
+      setMarkers(newMarkers);
+      previousMarkersRef.current = newMarkers; // ref 업데이트
+      mapInstance.moveMarkerTo(lastAction.markerIndex, lastAction.payload.lat, lastAction.payload.lng);
     }
 
     isUndoRedoInProgress.current = false;
@@ -131,6 +173,7 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
     isUndoRedoInProgress.current = true;
 
     const redoAction = redoStack[redoStack.length - 1];
+    console.log('⏩ Redo 실행:', redoAction.type, redoAction.markerIndex, redoAction.newPosition);
     setRedoStack(prev => prev.slice(0, -1));
     setUndoStack(prev => [...prev, redoAction]);
 
@@ -138,7 +181,15 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
       // 마커 다시 추가
       const newMarkers = [...markers, redoAction.payload];
       setMarkers(newMarkers);
+      previousMarkersRef.current = newMarkers; // ref 업데이트
       mapInstance.addMarkerAt(redoAction.payload.lat, redoAction.payload.lng);
+    } else if (redoAction.type === 'MOVE_MARKER' && redoAction.newPosition && redoAction.markerIndex !== undefined) {
+      // 마커를 다시 새 위치로 이동 (redo는 newPosition 사용)
+      const newMarkers = [...markers];
+      newMarkers[redoAction.markerIndex] = redoAction.newPosition;
+      setMarkers(newMarkers);
+      previousMarkersRef.current = newMarkers; // ref 업데이트
+      mapInstance.moveMarkerTo(redoAction.markerIndex, redoAction.newPosition.lat, redoAction.newPosition.lng);
     }
 
     isUndoRedoInProgress.current = false;
@@ -176,6 +227,7 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
 
     // 초기화는 모든 상태 완전 리셋 (undo/redo 불가)
     setMarkers([]);
+    previousMarkersRef.current = []; // ref 업데이트
     setUndoStack([]);
     setRedoStack([]);
     setIsGpxUploaded(false);
