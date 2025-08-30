@@ -79,16 +79,12 @@ export const calculateRoute = async (coordinates: Coordinate[], profile: RoutePr
     }
 
     const route = data.routes[0];
-    console.log('Route 데이터:', route);
-    console.log('Geometry 타입:', typeof route.geometry);
-    console.log('Geometry 내용:', route.geometry);
 
     // geometry 구조 확인 및 처리
     let routeCoordinates: Array<{ lat: number; lng: number; ele?: number }>;
 
     if (typeof route.geometry === 'string') {
       // encoded polyline - 디코딩 처리 (elevation=true일 때 3D 디코딩)
-      console.log('Encoded polyline 디코딩 중...');
       const decodedCoords = decodePolyline(route.geometry, true);
       routeCoordinates = decodedCoords.map(coord => {
         if (coord.length === 3) {

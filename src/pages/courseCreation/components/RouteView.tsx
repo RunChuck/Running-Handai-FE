@@ -25,6 +25,8 @@ export interface RouteViewMapInstance {
   moveMarkerTo: (index: number, lat: number, lng: number) => void;
   swapMarkers: (newMarkers: { lat: number; lng: number }[]) => void;
   getMarkers: () => { lat: number; lng: number }[];
+  displayRoute: (coordinates: { lat: number; lng: number }[]) => void;
+  clearRoute: () => void;
 }
 
 interface RouteViewProps {
@@ -37,6 +39,7 @@ const RouteView = ({ onMapLoad, onMarkersChange }: RouteViewProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<kakao.maps.Map | null>(null);
   const markersRef = useRef<MarkerData[]>([]);
+  const routePolylineRef = useRef<kakao.maps.Polyline | null>(null);
   const isMapInitialized = useRef(false);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
 
@@ -265,6 +268,43 @@ const RouteView = ({ onMapLoad, onMarkersChange }: RouteViewProps) => {
     updateAllMarkerStyles();
   };
 
+  const displayRoute = (coordinates: { lat: number; lng: number }[]) => {
+    if (!mapInstance.current || coordinates.length < 2) return;
+
+    // 기존 경로 제거
+    clearRoute();
+
+    // 좌표를 카카오맵 LatLng 객체로 변환
+    const path = coordinates.map(coord => 
+      new window.kakao.maps.LatLng(coord.lat, coord.lng)
+    );
+
+    // 폴리라인 생성
+    const polyline = new window.kakao.maps.Polyline({
+      path: path,
+      strokeWeight: 6,
+      strokeColor: '#4561FF',
+      strokeOpacity: 0.8,
+      strokeStyle: 'solid'
+    });
+
+    // 지도에 폴리라인 표시
+    polyline.setMap(mapInstance.current);
+    routePolylineRef.current = polyline;
+
+    // 경로가 모두 보이도록 지도 영역 조정
+    const bounds = new window.kakao.maps.LatLngBounds();
+    path.forEach(latlng => bounds.extend(latlng));
+    mapInstance.current.setBounds(bounds);
+  };
+
+  const clearRoute = () => {
+    if (routePolylineRef.current) {
+      routePolylineRef.current.setMap(null);
+      routePolylineRef.current = null;
+    }
+  };
+
   useEffect(() => {
     if (!mapContainer.current || isMapInitialized.current) return;
 
@@ -316,6 +356,8 @@ const RouteView = ({ onMapLoad, onMarkersChange }: RouteViewProps) => {
               moveMarkerTo,
               swapMarkers,
               getMarkers,
+              displayRoute,
+              clearRoute,
             };
             onMapLoad(mapInstanceWithMethods);
           }
@@ -340,6 +382,7 @@ const RouteView = ({ onMapLoad, onMarkersChange }: RouteViewProps) => {
       }
 
       clearAllMarkers();
+      clearRoute();
       isMapInitialized.current = false;
     };
   }, []);

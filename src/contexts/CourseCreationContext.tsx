@@ -31,6 +31,10 @@ export interface GPXData {
   minAltitude: number;
 }
 
+export interface RouteState {
+  isRouteGenerated: boolean;
+}
+
 interface CourseCreationContextType {
   // 상태
   markers: MarkerPosition[];
@@ -40,6 +44,7 @@ interface CourseCreationContextType {
   gpxData: GPXData | null;
   mapInstance: RouteViewMapInstance | null;
   buttonStates: ButtonStates;
+  isRouteGenerated: boolean;
 
   // 액션
   handleMarkersChange: (newMarkers: MarkerPosition[]) => void;
@@ -72,30 +77,31 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
   const [mapInstance, setMapInstance] = useState<RouteViewMapInstance | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isRouteGenerated, setIsRouteGenerated] = useState(false);
 
   const isUndoRedoInProgress = useRef(false);
   const previousMarkersRef = useRef<MarkerPosition[]>([]);
 
   // 버튼 활성화 상태
   const buttonStates: ButtonStates = {
-    gpx: markers.length === 0 && !isGpxUploaded,
-    undo: undoStack.length > 0,
-    redo: redoStack.length > 0,
-    swap: markers.length >= 2,
+    gpx: markers.length === 0 && !isGpxUploaded && !isRouteGenerated,
+    undo: undoStack.length > 0 && !isRouteGenerated,
+    redo: redoStack.length > 0 && !isRouteGenerated,
+    swap: markers.length >= 2 && !isRouteGenerated,
     delete: markers.length > 0,
-    create: markers.length >= 2,
+    create: markers.length >= 2 && !isRouteGenerated,
   };
 
   // 실행취소/재실행 처리
   const executeAction = (action: CourseAction) => {
-    console.log('📍 새 액션 추가:', action.type, action.markerIndex, action.payload);
+    // console.log('📍 새 액션 추가:', action.type, action.markerIndex, action.payload);
     setUndoStack(prev => {
       const newStack = [...prev, action];
-      console.log(
-        '📚 현재 undoStack 길이:',
-        newStack.length,
-        newStack.map(a => a.type)
-      );
+      // console.log(
+      //   '📚 현재 undoStack 길이:',
+      //   newStack.length,
+      //   newStack.map(a => a.type)
+      // );
       return newStack;
     });
     setRedoStack([]); // 새 작업 시 redo 스택 초기화
@@ -104,7 +110,7 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
   // 마커 상태 변경 핸들러 (지도에서 직접 추가/이동 시)
   const handleMarkersChange = (newMarkers: MarkerPosition[]) => {
     const previousMarkers = previousMarkersRef.current;
-    console.log('🔄 마커 변경:', { prev: previousMarkers.length, new: newMarkers.length });
+    // console.log('🔄 마커 변경:', { prev: previousMarkers.length, new: newMarkers.length });
 
     setMarkers(newMarkers);
     previousMarkersRef.current = newMarkers; // 이전 상태 업데이트
@@ -141,12 +147,12 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
   };
 
   const handleUndo = () => {
-    if (undoStack.length === 0 || !mapInstance) return;
+    if (undoStack.length === 0 || !mapInstance || isRouteGenerated) return;
 
     isUndoRedoInProgress.current = true;
 
     const lastAction = undoStack[undoStack.length - 1];
-    console.log('⏪ Undo 실행:', lastAction.type, lastAction.markerIndex, lastAction.payload);
+    // console.log('⏪ Undo 실행:', lastAction.type, lastAction.markerIndex, lastAction.payload);
     setUndoStack(prev => prev.slice(0, -1));
     setRedoStack(prev => [...prev, lastAction]);
 
@@ -174,12 +180,12 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
   };
 
   const handleRedo = () => {
-    if (redoStack.length === 0 || !mapInstance) return;
+    if (redoStack.length === 0 || !mapInstance || isRouteGenerated) return;
 
     isUndoRedoInProgress.current = true;
 
     const redoAction = redoStack[redoStack.length - 1];
-    console.log('⏩ Redo 실행:', redoAction.type, redoAction.markerIndex, redoAction.newPosition);
+    // console.log('⏩ Redo 실행:', redoAction.type, redoAction.markerIndex, redoAction.newPosition);
     setRedoStack(prev => prev.slice(0, -1));
     setUndoStack(prev => [...prev, redoAction]);
 
@@ -228,22 +234,22 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
   };
 
   const handleSwap = () => {
-    if (markers.length < 2 || !mapInstance) return;
+    if (markers.length < 2 || !mapInstance || isRouteGenerated) return;
 
     isUndoRedoInProgress.current = true;
 
     // 현재 마커 순서 저장 (undo를 위해)
     const currentMarkers = [...markers];
-    
+
     // 출발지, 도착지를 바꾸고 나머지는 역순
     const swappedMarkers = [markers[markers.length - 1], ...markers.slice(1, -1).reverse(), markers[0]];
-    
+
     setMarkers(swappedMarkers);
     previousMarkersRef.current = swappedMarkers;
-    
+
     // 지도 업데이트
     mapInstance.swapMarkers(swappedMarkers);
-    
+
     // undo 스택에 추가
     executeAction({
       type: 'SWAP_MARKERS',
@@ -263,30 +269,42 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
     setRedoStack([]);
     setIsGpxUploaded(false);
     setGpxData(null);
+    setIsRouteGenerated(false); // 경로 생성 상태 리셋
     mapInstance.clearAllMarkers();
+    mapInstance.clearRoute(); // 경로도 함께 제거
   };
 
   const handleCourseCreate = async () => {
-    if (markers.length === 0) return;
+    if (markers.length < 2 || !mapInstance) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
-      // TODO: 코스 생성 API 호출
-      // const courseData = {
-      //   markers,
-      //   gpxData,
-      //   distance: gpxData?.distance || 0,
-      //   time: gpxData?.time || 0,
-      //   maxAltitude: gpxData?.maxAltitude || 0,
-      //   minAltitude: gpxData?.minAltitude || 0,
-      // };
-      // await createCourse(courseData);
+      // OpenRoute API를 사용해서 경로 계산
+      const { planRouteFromCoordinates, calculateElevationStats } = await import('@/utils/routeUtils');
 
-      console.log('코스 생성:', { markers, gpxData });
+      const routeResult = await planRouteFromCoordinates(markers, 'foot-walking');
+
+      // 고도 통계 계산
+      const elevationStats = calculateElevationStats(routeResult.coordinates);
+
+      // GPX 데이터 업데이트
+      const newGpxData: GPXData = {
+        coordinates: routeResult.coordinates,
+        distance: Math.floor(routeResult.distance),
+        time: Math.round((routeResult.distance / 9) * 60), // 9km/h 기준
+        maxAltitude: elevationStats.maxAltitude,
+        minAltitude: elevationStats.minAltitude,
+      };
+
+      setGpxData(newGpxData);
+      setIsRouteGenerated(true); // 경로 생성 완료 상태로 설정
+
+      // 지도에 경로 표시
+      mapInstance.displayRoute(routeResult.coordinates);
     } catch (err) {
-      setError('코스 생성 중 오류가 발생했습니다.');
+      setError('경로 생성 중 오류가 발생했습니다.');
       console.error('Course creation error:', err);
     } finally {
       setIsLoading(false);
@@ -302,6 +320,7 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
     gpxData,
     mapInstance,
     buttonStates,
+    isRouteGenerated,
 
     // 액션
     handleMarkersChange,

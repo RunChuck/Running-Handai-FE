@@ -19,7 +19,7 @@ interface CreationBarProps {
 
 const CreationBar = ({ onCreateCourse }: CreationBarProps) => {
   const [t] = useTranslation();
-  const { mapInstance, buttonStates, handleGpxUpload, handleUndo, handleRedo, handleSwap, handleDelete } = useCourseCreation();
+  const { mapInstance, buttonStates, handleGpxUpload, handleUndo, handleRedo, handleSwap, handleDelete, isLoading, isRouteGenerated } = useCourseCreation();
 
   const moveToCurrentLocation = useDebouncedCurrentLocation(mapInstance);
 
@@ -70,10 +70,25 @@ const CreationBar = ({ onCreateCourse }: CreationBarProps) => {
     },
   ];
 
+  // 버튼 텍스트 결정
+  const getButtonText = () => {
+    if (isLoading) {
+      return t('courseCreation.creating'); // "생성 중"
+    } else if (isRouteGenerated) {
+      return t('courseCreation.register'); // "코스 등록"
+    } else {
+      return t('courseCreation.create'); // "코스 생성"
+    }
+  };
+
   return (
     <Container>
-      <CreateButton enabled={buttonStates.create} onClick={buttonStates.create ? onCreateCourse : undefined}>
-        {t('courseCreation.create')}
+      <CreateButton 
+        enabled={buttonStates.create || isRouteGenerated} 
+        onClick={(buttonStates.create || isRouteGenerated) ? onCreateCourse : undefined}
+        isLoading={isLoading}
+      >
+        {getButtonText()}
       </CreateButton>
       <FloatButton position={{ top: -56, right: 16 }} onClick={moveToCurrentLocation}>
         <img src={LocationIconSrc} alt={t('currentLocation')} width={20} height={20} />
@@ -98,7 +113,7 @@ const Container = styled.div`
   position: relative;
 `;
 
-const CreateButton = styled.button<{ enabled: boolean }>`
+const CreateButton = styled.button<{ enabled: boolean; isLoading?: boolean }>`
   ${theme.typography.subtitle3}
   color: #FFF;
   position: absolute;

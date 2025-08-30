@@ -22,7 +22,7 @@ const CourseCreation = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isCourseCreationModalOpen, setIsCourseCreationModalOpen] = useState(false);
 
-  const { gpxData, handleMarkersChange, handleCourseCreate, setMapInstance } = useCourseCreation();
+  const { gpxData, handleMarkersChange, handleCourseCreate, setMapInstance, isLoading, isRouteGenerated } = useCourseCreation();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -51,7 +51,7 @@ const CourseCreation = () => {
 
   const handleCourseCreateWrapper = async () => {
     await handleCourseCreate();
-    setIsCourseCreationModalOpen(false);
+    setIsCourseCreationModalOpen(true);
   };
 
   return (
@@ -69,7 +69,7 @@ const CourseCreation = () => {
         minAltitude={gpxData?.minAltitude || 0}
       />
       <RouteView onMapLoad={setMapInstance} onMarkersChange={handleMarkersChange} />
-      <CreationBar onCreateCourse={() => setIsCourseCreationModalOpen(true)} />
+      <CreationBar onCreateCourse={isRouteGenerated ? () => setIsCourseCreationModalOpen(true) : handleCourseCreateWrapper} />
 
       <OnboardingModal isOpen={isOnboardingOpen} onClose={handleOnboardingClose} />
 
@@ -85,7 +85,7 @@ const CourseCreation = () => {
       <CourseCreationModal
         isOpen={isCourseCreationModalOpen}
         onClose={handleCourseCreationModalClose}
-        onConfirm={handleCourseCreateWrapper}
+        onConfirm={handleCourseCreationModalClose}
         confirmText={t('modal.courseCreation.complete')}
       />
     </S.Container>
