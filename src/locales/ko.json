@@ -163,6 +163,9 @@
     "title": "코스 생성",
     "create": "코스 생성",
     "save": "코스 저장",
+    "marker": {
+      "start": "출발"
+    },
     "course": {
       "min": "분",
       "distance": "거리",

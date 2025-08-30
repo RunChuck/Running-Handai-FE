@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
+import ReactDOMServer from 'react-dom/server';
 import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import Lottie from 'lottie-react';
 import { BUSAN_CITY_HALL, DEFAULT_MAP_LEVEL } from '@/constants/locations';
 import { getUserLocation, type LocationCoords } from '@/utils/geolocation';
+
 import LoadingMotion from '@/assets/animations/run-loading.json';
+import CustomMarker from '@/components/CustomMarker';
+import CircleMarker from '@/components/CircleMarker';
 
 interface MarkerData {
   id: string;
@@ -39,7 +43,6 @@ const RouteView = ({ onMapLoad, onMarkersChange }: RouteViewProps) => {
     try {
       return await getUserLocation();
     } catch {
-      console.log('부산 시청 좌표 사용:', BUSAN_CITY_HALL);
       return BUSAN_CITY_HALL;
     }
   };
@@ -81,10 +84,32 @@ const RouteView = ({ onMapLoad, onMarkersChange }: RouteViewProps) => {
     }
   };
 
-  const createRouteMarker = (position: kakao.maps.LatLng): MarkerData => {
+  const createRouteMarker = (position: kakao.maps.LatLng, index: number): MarkerData => {
+    const isFirstMarker = index === 0;
+    const isLastMarker = index === markersRef.current.length;
+    const totalMarkers = markersRef.current.length + 1;
+    const isDestination = totalMarkers >= 2 && isLastMarker;
+
+    // 커스텀 마커 이미지 생성
+    let markerContent;
+    if (isFirstMarker) {
+      markerContent = ReactDOMServer.renderToString(<CustomMarker label={t('courseCreation.marker.start')} isSelected={true} fontSize={11} />);
+    } else {
+      markerContent = ReactDOMServer.renderToString(<CircleMarker number={index} isDestination={isDestination} />);
+    }
+
+    const markerSize = isFirstMarker ? new window.kakao.maps.Size(26, 32) : new window.kakao.maps.Size(22, 22);
+    const svgString = `<svg xmlns="http://www.w3.org/2000/svg" width="${markerSize.width}" height="${markerSize.height}" viewBox="0 0 ${markerSize.width} ${markerSize.height}">${markerContent}</svg>`;
+    const encodedSvg = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
+
+    const markerImage = new window.kakao.maps.MarkerImage(encodedSvg, markerSize, {
+      offset: isFirstMarker ? new window.kakao.maps.Point(13, 32) : new window.kakao.maps.Point(11, 11),
+    });
+
     const marker = new window.kakao.maps.Marker({
       position: position,
       draggable: true,
+      image: markerImage,
     });
 
     const markerId = `marker_${Date.now()}_${Math.random()}`;
@@ -94,8 +119,19 @@ const RouteView = ({ onMapLoad, onMarkersChange }: RouteViewProps) => {
       marker: marker,
     };
 
-    window.kakao.maps.event.addListener(marker, 'dragend', () => {
-      const newPosition = marker.getPosition();
+    return markerData;
+  };
+
+  const addMarker = (position: kakao.maps.LatLng) => {
+    if (!mapInstance.current) return;
+
+    const currentIndex = markersRef.current.length;
+    const markerData = createRouteMarker(position, currentIndex);
+    markerData.marker.setMap(mapInstance.current);
+
+    // 드래그 이벤트 등록
+    window.kakao.maps.event.addListener(markerData.marker, 'dragend', () => {
+      const newPosition = markerData.marker.getPosition();
       markerData.position = { lat: newPosition.getLat(), lng: newPosition.getLng() };
 
       if (onMarkersChange) {
@@ -104,15 +140,10 @@ const RouteView = ({ onMapLoad, onMarkersChange }: RouteViewProps) => {
       }
     });
 
-    return markerData;
-  };
-
-  const addMarker = (position: kakao.maps.LatLng) => {
-    if (!mapInstance.current) return;
-
-    const markerData = createRouteMarker(position);
-    markerData.marker.setMap(mapInstance.current);
     markersRef.current.push(markerData);
+
+    // 기존 마커들의 스타일 업데이트 (마지막 마커가 바뀔 수 있음)
+    updateAllMarkerStyles();
 
     if (onMarkersChange) {
       const positions = markersRef.current.map(m => m.position);
@@ -138,10 +169,41 @@ const RouteView = ({ onMapLoad, onMarkersChange }: RouteViewProps) => {
     lastMarker.marker.setMap(null);
     markersRef.current = markersRef.current.slice(0, -1);
 
+    // 나머지 마커들의 스타일 업데이트
+    updateAllMarkerStyles();
+
     if (onMarkersChange) {
       const positions = markersRef.current.map(m => m.position);
       onMarkersChange(positions);
     }
+  };
+
+  const updateAllMarkerStyles = () => {
+    if (!mapInstance.current) return;
+
+    markersRef.current.forEach((markerData, index) => {
+      const isFirstMarker = index === 0;
+      const isLastMarker = index === markersRef.current.length - 1;
+      const totalMarkers = markersRef.current.length;
+      const isDestination = totalMarkers >= 2 && isLastMarker;
+
+      let markerContent;
+      if (isFirstMarker) {
+        markerContent = ReactDOMServer.renderToString(<CustomMarker label={t('courseCreation.marker.start')} isSelected={true} fontSize={11} />);
+      } else {
+        markerContent = ReactDOMServer.renderToString(<CircleMarker number={index} isDestination={isDestination} />);
+      }
+
+      const markerSize = isFirstMarker ? new window.kakao.maps.Size(26, 32) : new window.kakao.maps.Size(22, 22);
+      const svgString = `<svg xmlns="http://www.w3.org/2000/svg" width="${markerSize.width}" height="${markerSize.height}" viewBox="0 0 ${markerSize.width} ${markerSize.height}">${markerContent}</svg>`;
+      const encodedSvg = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
+
+      const markerImage = new window.kakao.maps.MarkerImage(encodedSvg, markerSize, {
+        offset: isFirstMarker ? new window.kakao.maps.Point(13, 32) : new window.kakao.maps.Point(11, 11),
+      });
+
+      markerData.marker.setImage(markerImage);
+    });
   };
 
   const addMarkerAt = (lat: number, lng: number) => {

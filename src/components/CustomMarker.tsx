@@ -3,9 +3,10 @@ interface CourseMarkerIconProps {
   isSelected: boolean;
   width?: number;
   height?: number;
+  fontSize?: number;
 }
 
-const CourseMarkerIcon = ({ label, isSelected, width = 26, height = 32 }: CourseMarkerIconProps) => {
+const CourseMarkerIcon = ({ label, isSelected, width = 26, height = 32, fontSize = 14 }: CourseMarkerIconProps) => {
   const fillColor = isSelected ? '#4561FF' : 'white';
   const strokeColor = isSelected ? '#1B37D3' : '#4561FF';
   const textColor = isSelected ? 'white' : '#4561FF';
@@ -23,9 +24,9 @@ const CourseMarkerIcon = ({ label, isSelected, width = 26, height = 32 }: Course
         textAnchor="middle"
         dominantBaseline="middle"
         fill={textColor}
-        fontSize="14"
+        fontSize={fontSize}
         fontWeight="600"
-        fontFamily="system-ui, -apple-system, sans-serif"
+        fontFamily="Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif"
       >
         {label}
       </text>
