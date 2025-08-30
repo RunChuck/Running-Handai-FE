@@ -85,11 +85,11 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
   // 버튼 활성화 상태
   const buttonStates: ButtonStates = {
     gpx: markers.length === 0 && !isGpxUploaded && !isRouteGenerated,
-    undo: undoStack.length > 0 && !isRouteGenerated,
-    redo: redoStack.length > 0 && !isRouteGenerated,
-    swap: markers.length >= 2 && !isRouteGenerated,
-    delete: markers.length > 0,
-    create: markers.length >= 2 && !isRouteGenerated,
+    undo: undoStack.length > 0 && !isRouteGenerated && !isGpxUploaded,
+    redo: redoStack.length > 0 && !isRouteGenerated && !isGpxUploaded,
+    swap: markers.length >= 2 && !isRouteGenerated && !isGpxUploaded,
+    delete: markers.length > 0 || isGpxUploaded || isRouteGenerated,
+    create: (markers.length >= 2 && !isRouteGenerated) || isGpxUploaded,
   };
 
   // 실행취소/재실행 처리
@@ -213,17 +213,56 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
     isUndoRedoInProgress.current = false;
   };
 
-  const handleGpxUpload = async (_file: File) => {
+  const handleGpxUpload = async (file: File) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      // TODO: GPX 파일 파싱 로직 구현
-      // const parsedGpx = await parseGPXFile(file);
-      // setGpxData(parsedGpx);
-      // setMarkers(parsedGpx.coordinates);
+      // GPX 파일을 텍스트로 읽기
+      const fileText = await file.text();
+      const { parseGPX } = await import('@/utils/gpxParser');
+      const parsedGpx = parseGPX(fileText);
 
+      if (parsedGpx.points.length === 0) {
+        throw new Error('유효한 경로 데이터가 없습니다.');
+      }
+
+      // 거리 및 고도 계산 유틸 임포트
+      const { calculateTotalDistance, convertToKilometers, calculateEstimatedTime, calculateElevationStats } = await import(
+        '@/utils/distanceCalculator'
+      );
+
+      // 거리 계산
+      const distanceInMeters = calculateTotalDistance(parsedGpx.points);
+      const distanceInKm = convertToKilometers(distanceInMeters);
+      const time = calculateEstimatedTime(distanceInKm, 9); // 9km/h 기준
+
+      // 고도 정보 계산
+      const elevationStats = calculateElevationStats(parsedGpx.points);
+
+      // GPX 데이터 설정
+      const gpxData: GPXData = {
+        coordinates: parsedGpx.points.map(p => ({ lat: p.lat, lng: p.lng })),
+        distance: distanceInKm,
+        time,
+        maxAltitude: elevationStats.maxAltitude,
+        minAltitude: elevationStats.minAltitude,
+      };
+
+      setGpxData(gpxData);
       setIsGpxUploaded(true);
+      setIsRouteGenerated(true); // GPX 업로드시에도 경로 생성 상태로 설정
+
+      // 마커는 빈 배열로 설정 (GPX는 마커가 아닌 경로 자체)
+      setMarkers([]);
+      previousMarkersRef.current = [];
+
+      // 지도에 GPX 경로 표시
+      if (mapInstance) {
+        mapInstance.clearAllMarkers(); // 기존 마커 제거
+        mapInstance.displayRoute(gpxData.coordinates); // GPX 경로 표시
+      }
+
       executeAction({ type: 'GPX_UPLOAD' });
     } catch (err) {
       setError('GPX 파일 업로드 중 오류가 발생했습니다.');
@@ -260,7 +299,7 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
   };
 
   const handleDelete = () => {
-    if (markers.length === 0 || !mapInstance) return;
+    if ((markers.length === 0 && !isGpxUploaded && !isRouteGenerated) || !mapInstance) return;
 
     // 초기화는 모든 상태 완전 리셋 (undo/redo 불가)
     setMarkers([]);
@@ -275,7 +314,13 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
   };
 
   const handleCourseCreate = async () => {
-    if (markers.length < 2 || !mapInstance) return;
+    if ((!isGpxUploaded && markers.length < 2) || !mapInstance) return;
+
+    // GPX가 이미 업로드된 경우 추가 처리 없이 완료 처리만
+    if (isGpxUploaded && gpxData) {
+      setIsRouteGenerated(true);
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
