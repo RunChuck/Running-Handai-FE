@@ -7,10 +7,11 @@ export interface MarkerPosition {
 }
 
 export interface CourseAction {
-  type: 'ADD_MARKER' | 'REMOVE_MARKER' | 'MOVE_MARKER' | 'CLEAR_ALL' | 'GPX_UPLOAD';
+  type: 'ADD_MARKER' | 'REMOVE_MARKER' | 'MOVE_MARKER' | 'CLEAR_ALL' | 'GPX_UPLOAD' | 'SWAP_MARKERS';
   payload?: MarkerPosition;
   markerIndex?: number;
   newPosition?: MarkerPosition; // 마커 이동 시 새 위치 저장 (redo용)
+  previousMarkers?: MarkerPosition[]; // swap을 위한 이전 마커 배열 저장
 }
 
 export interface ButtonStates {
@@ -162,6 +163,11 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
       setMarkers(newMarkers);
       previousMarkersRef.current = newMarkers; // ref 업데이트
       mapInstance.moveMarkerTo(lastAction.markerIndex, lastAction.payload.lat, lastAction.payload.lng);
+    } else if (lastAction.type === 'SWAP_MARKERS' && lastAction.previousMarkers) {
+      // 이전 마커 순서로 복원
+      setMarkers(lastAction.previousMarkers);
+      previousMarkersRef.current = lastAction.previousMarkers;
+      mapInstance.swapMarkers(lastAction.previousMarkers);
     }
 
     isUndoRedoInProgress.current = false;
@@ -190,6 +196,12 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
       setMarkers(newMarkers);
       previousMarkersRef.current = newMarkers; // ref 업데이트
       mapInstance.moveMarkerTo(redoAction.markerIndex, redoAction.newPosition.lat, redoAction.newPosition.lng);
+    } else if (redoAction.type === 'SWAP_MARKERS') {
+      // swap 다시 실행 (현재 마커들을 역순으로)
+      const swappedMarkers = [markers[markers.length - 1], ...markers.slice(1, -1).reverse(), markers[0]];
+      setMarkers(swappedMarkers);
+      previousMarkersRef.current = swappedMarkers;
+      mapInstance.swapMarkers(swappedMarkers);
     }
 
     isUndoRedoInProgress.current = false;
@@ -216,10 +228,29 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
   };
 
   const handleSwap = () => {
-    if (markers.length < 2) return;
-    const swapped = [markers[markers.length - 1], ...markers.slice(1, -1), markers[0]];
-    setMarkers(swapped);
-    executeAction({ type: 'REMOVE_MARKER' }); // placeholder
+    if (markers.length < 2 || !mapInstance) return;
+
+    isUndoRedoInProgress.current = true;
+
+    // 현재 마커 순서 저장 (undo를 위해)
+    const currentMarkers = [...markers];
+    
+    // 출발지, 도착지를 바꾸고 나머지는 역순
+    const swappedMarkers = [markers[markers.length - 1], ...markers.slice(1, -1).reverse(), markers[0]];
+    
+    setMarkers(swappedMarkers);
+    previousMarkersRef.current = swappedMarkers;
+    
+    // 지도 업데이트
+    mapInstance.swapMarkers(swappedMarkers);
+    
+    // undo 스택에 추가
+    executeAction({
+      type: 'SWAP_MARKERS',
+      previousMarkers: currentMarkers,
+    });
+
+    isUndoRedoInProgress.current = false;
   };
 
   const handleDelete = () => {

@@ -23,6 +23,7 @@ export interface RouteViewMapInstance {
   removeLastMarker: () => void;
   addMarkerAt: (lat: number, lng: number) => void;
   moveMarkerTo: (index: number, lat: number, lng: number) => void;
+  swapMarkers: (newMarkers: { lat: number; lng: number }[]) => void;
   getMarkers: () => { lat: number; lng: number }[];
 }
 
@@ -228,6 +229,42 @@ const RouteView = ({ onMapLoad, onMarkersChange }: RouteViewProps) => {
     markerData.position = { lat, lng };
   };
 
+  const swapMarkers = (newMarkers: { lat: number; lng: number }[]) => {
+    if (!mapInstance.current) return;
+
+    // onMarkersChange 콜백 호출을 방지하기 위해 임시로 비활성화
+    const originalOnMarkersChange = onMarkersChange;
+    
+    // 기존 마커들 제거 (콜백 없이)
+    markersRef.current.forEach(markerData => {
+      markerData.marker.setMap(null);
+    });
+    markersRef.current = [];
+
+    // 새로운 순서로 마커들 다시 추가
+    newMarkers.forEach((position, index) => {
+      const latlng = new window.kakao.maps.LatLng(position.lat, position.lng);
+      const markerData = createRouteMarker(latlng, index);
+      markerData.marker.setMap(mapInstance.current);
+
+      // 드래그 이벤트 등록
+      window.kakao.maps.event.addListener(markerData.marker, 'dragend', () => {
+        const newPosition = markerData.marker.getPosition();
+        markerData.position = { lat: newPosition.getLat(), lng: newPosition.getLng() };
+
+        if (originalOnMarkersChange) {
+          const positions = markersRef.current.map(m => m.position);
+          originalOnMarkersChange(positions);
+        }
+      });
+
+      markersRef.current.push(markerData);
+    });
+
+    // 모든 마커 스타일 업데이트
+    updateAllMarkerStyles();
+  };
+
   useEffect(() => {
     if (!mapContainer.current || isMapInitialized.current) return;
 
@@ -277,6 +314,7 @@ const RouteView = ({ onMapLoad, onMarkersChange }: RouteViewProps) => {
               removeLastMarker,
               addMarkerAt,
               moveMarkerTo,
+              swapMarkers,
               getMarkers,
             };
             onMapLoad(mapInstanceWithMethods);
