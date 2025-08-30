@@ -24,4 +24,6 @@ export const authKeys = {
   bookmarkedCourses: (area?: string) => [...authKeys.all, 'bookmarked-courses', area] as const,
   // 내 리뷰 조회
   myReviews: () => [...authKeys.all, 'my-reviews'] as const,
+  // 내 코스 조회
+  myCourses: (sortBy?: string) => [...authKeys.all, 'my-courses', sortBy] as const,
 };

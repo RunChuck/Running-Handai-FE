@@ -24,3 +24,29 @@ export interface CourseCreateResponse {
   message: string;
   data: number;
 }
+
+export interface Course {
+  distanceFromUser: number;
+  thumbnailUrl: string;
+  maxElevation: number;
+  distance: number;
+  name: string;
+  id: number;
+  duration: number;
+}
+
+export interface MyCoursesResponse {
+  statusCode: number;
+  responseCode: string;
+  message: string;
+  data: {
+    courseCount: number;
+    courses: Course[];
+  };
+}
+
+export type SortBy = 'latest' | 'oldest' | 'short' | 'long';
+
+export interface MyCoursesRequest {
+  sortBy?: SortBy;
+}

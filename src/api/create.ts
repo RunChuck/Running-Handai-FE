@@ -1,5 +1,12 @@
 import { http } from '@/constants/http';
-import type { LocationCheckRequest, LocationCheckResponse, CourseCreateRequest, CourseCreateResponse } from '@/types/create';
+import type {
+  LocationCheckRequest,
+  LocationCheckResponse,
+  CourseCreateRequest,
+  CourseCreateResponse,
+  MyCoursesRequest,
+  MyCoursesResponse,
+} from '@/types/create';
 
 const PREFIX = '/api/members/me';
 
@@ -23,5 +30,11 @@ export const createCourse = async (request: CourseCreateRequest): Promise<Course
     },
   });
 
+  return response.data;
+};
+
+export const getMyCourses = async (request: MyCoursesRequest = {}): Promise<MyCoursesResponse> => {
+  const { sortBy = 'latest' } = request;
+  const response = await http.get<MyCoursesResponse>(`${PREFIX}/courses?sortBy=${sortBy}`);
   return response.data;
 };
