@@ -32,16 +32,22 @@ export interface RouteViewMapInstance {
 interface RouteViewProps {
   onMapLoad?: (map: RouteViewMapInstance) => void;
   onMarkersChange?: (markers: { lat: number; lng: number }[]) => void;
+  isRouteGenerated?: boolean;
 }
 
-const RouteView = ({ onMapLoad, onMarkersChange }: RouteViewProps) => {
+const RouteView = ({ onMapLoad, onMarkersChange, isRouteGenerated = false }: RouteViewProps) => {
   const [t] = useTranslation();
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<kakao.maps.Map | null>(null);
   const markersRef = useRef<MarkerData[]>([]);
   const routePolylineRef = useRef<kakao.maps.Polyline | null>(null);
+  const mapClickListenerRef = useRef<kakao.maps.event.EventHandle | null>(null);
+  const isRouteGeneratedRef = useRef(isRouteGenerated);
   const isMapInitialized = useRef(false);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
+
+  // isRouteGenerated가 변경될 때마다 ref 업데이트
+  isRouteGeneratedRef.current = isRouteGenerated;
 
   const getInitialLocation = async (): Promise<LocationCoords> => {
     try {
@@ -112,7 +118,7 @@ const RouteView = ({ onMapLoad, onMarkersChange }: RouteViewProps) => {
 
     const marker = new window.kakao.maps.Marker({
       position: position,
-      draggable: true,
+      draggable: !isRouteGenerated, // 경로 생성 후에는 드래그 불가
       image: markerImage,
     });
 
@@ -127,22 +133,25 @@ const RouteView = ({ onMapLoad, onMarkersChange }: RouteViewProps) => {
   };
 
   const addMarker = (position: kakao.maps.LatLng) => {
-    if (!mapInstance.current) return;
+    console.log('🔍 addMarker 호출:', { isRouteGenerated: isRouteGeneratedRef.current, hasMapInstance: !!mapInstance.current });
+    if (!mapInstance.current || isRouteGeneratedRef.current) return;
 
     const currentIndex = markersRef.current.length;
     const markerData = createRouteMarker(position, currentIndex);
     markerData.marker.setMap(mapInstance.current);
 
-    // 드래그 이벤트 등록
-    window.kakao.maps.event.addListener(markerData.marker, 'dragend', () => {
-      const newPosition = markerData.marker.getPosition();
-      markerData.position = { lat: newPosition.getLat(), lng: newPosition.getLng() };
+    // 드래그 이벤트 등록 (경로 생성 전에만)
+    if (!isRouteGenerated) {
+      window.kakao.maps.event.addListener(markerData.marker, 'dragend', () => {
+        const newPosition = markerData.marker.getPosition();
+        markerData.position = { lat: newPosition.getLat(), lng: newPosition.getLng() };
 
-      if (onMarkersChange) {
-        const positions = markersRef.current.map(m => m.position);
-        onMarkersChange(positions);
-      }
-    });
+        if (onMarkersChange) {
+          const positions = markersRef.current.map(m => m.position);
+          onMarkersChange(positions);
+        }
+      });
+    }
 
     markersRef.current.push(markerData);
 
@@ -211,7 +220,7 @@ const RouteView = ({ onMapLoad, onMarkersChange }: RouteViewProps) => {
   };
 
   const addMarkerAt = (lat: number, lng: number) => {
-    if (!mapInstance.current) return;
+    if (!mapInstance.current || isRouteGeneratedRef.current) return;
 
     const position = new window.kakao.maps.LatLng(lat, lng);
     addMarker(position);
@@ -237,7 +246,7 @@ const RouteView = ({ onMapLoad, onMarkersChange }: RouteViewProps) => {
 
     // onMarkersChange 콜백 호출을 방지하기 위해 임시로 비활성화
     const originalOnMarkersChange = onMarkersChange;
-    
+
     // 기존 마커들 제거 (콜백 없이)
     markersRef.current.forEach(markerData => {
       markerData.marker.setMap(null);
@@ -250,16 +259,18 @@ const RouteView = ({ onMapLoad, onMarkersChange }: RouteViewProps) => {
       const markerData = createRouteMarker(latlng, index);
       markerData.marker.setMap(mapInstance.current);
 
-      // 드래그 이벤트 등록
-      window.kakao.maps.event.addListener(markerData.marker, 'dragend', () => {
-        const newPosition = markerData.marker.getPosition();
-        markerData.position = { lat: newPosition.getLat(), lng: newPosition.getLng() };
+      // 드래그 이벤트 등록 (경로 생성 전에만)
+      if (!isRouteGenerated) {
+        window.kakao.maps.event.addListener(markerData.marker, 'dragend', () => {
+          const newPosition = markerData.marker.getPosition();
+          markerData.position = { lat: newPosition.getLat(), lng: newPosition.getLng() };
 
-        if (originalOnMarkersChange) {
-          const positions = markersRef.current.map(m => m.position);
-          originalOnMarkersChange(positions);
-        }
-      });
+          if (originalOnMarkersChange) {
+            const positions = markersRef.current.map(m => m.position);
+            originalOnMarkersChange(positions);
+          }
+        });
+      }
 
       markersRef.current.push(markerData);
     });
@@ -275,9 +286,7 @@ const RouteView = ({ onMapLoad, onMarkersChange }: RouteViewProps) => {
     clearRoute();
 
     // 좌표를 카카오맵 LatLng 객체로 변환
-    const path = coordinates.map(coord => 
-      new window.kakao.maps.LatLng(coord.lat, coord.lng)
-    );
+    const path = coordinates.map(coord => new window.kakao.maps.LatLng(coord.lat, coord.lng));
 
     // 폴리라인 생성
     const polyline = new window.kakao.maps.Polyline({
@@ -285,7 +294,7 @@ const RouteView = ({ onMapLoad, onMarkersChange }: RouteViewProps) => {
       strokeWeight: 6,
       strokeColor: '#4561FF',
       strokeOpacity: 0.8,
-      strokeStyle: 'solid'
+      strokeStyle: 'solid',
     });
 
     // 지도에 폴리라인 표시
@@ -303,6 +312,13 @@ const RouteView = ({ onMapLoad, onMarkersChange }: RouteViewProps) => {
       routePolylineRef.current.setMap(null);
       routePolylineRef.current = null;
     }
+  };
+
+  // 기존 마커들의 드래그 가능 여부 업데이트
+  const updateMarkersDraggable = () => {
+    markersRef.current.forEach(markerData => {
+      markerData.marker.setDraggable(!isRouteGeneratedRef.current);
+    });
   };
 
   useEffect(() => {
@@ -332,10 +348,16 @@ const RouteView = ({ onMapLoad, onMarkersChange }: RouteViewProps) => {
 
           addLocationMarker(map, initialLocation, isUserLocation);
 
-          window.kakao.maps.event.addListener(map, 'click', (mouseEvent: kakao.maps.event.MouseEvent) => {
-            const latlng = mouseEvent.latLng;
-            addMarker(latlng);
-          });
+          // 지도 클릭 이벤트 등록
+          const handleMapClick = (mouseEvent: kakao.maps.event.MouseEvent) => {
+            if (!isRouteGeneratedRef.current) {
+              // 경로 생성 전에만 마커 추가 가능
+              const latlng = mouseEvent.latLng;
+              addMarker(latlng);
+            }
+          };
+
+          mapClickListenerRef.current = window.kakao.maps.event.addListener(map, 'click', handleMapClick);
 
           setIsMapLoaded(true);
 
@@ -383,9 +405,40 @@ const RouteView = ({ onMapLoad, onMarkersChange }: RouteViewProps) => {
 
       clearAllMarkers();
       clearRoute();
+
+      // 지도 클릭 이벤트 제거
+      if (mapClickListenerRef.current) {
+        window.kakao.maps.event.removeListener(mapClickListenerRef.current);
+      }
+
       isMapInitialized.current = false;
     };
   }, []);
+
+  // isRouteGenerated 상태가 변경될 때마다 지도 클릭 이벤트 재등록 및 마커 업데이트
+  useEffect(() => {
+    if (!mapInstance.current) return;
+
+    // 기존 마커들의 드래그 가능 여부 업데이트
+    updateMarkersDraggable();
+
+    // 지도 클릭 이벤트 재등록
+    if (mapClickListenerRef.current) {
+      // 기존 이벤트 제거
+      window.kakao.maps.event.removeListener(mapClickListenerRef.current);
+
+      // 새로운 이벤트 등록
+      const handleMapClick = (mouseEvent: kakao.maps.event.MouseEvent) => {
+        console.log('🖱️ 지도 클릭:', { isRouteGenerated: isRouteGeneratedRef.current });
+        if (!isRouteGeneratedRef.current) {
+          const latlng = mouseEvent.latLng;
+          addMarker(latlng);
+        }
+      };
+
+      mapClickListenerRef.current = window.kakao.maps.event.addListener(mapInstance.current, 'click', handleMapClick);
+    }
+  }, [isRouteGenerated]);
 
   return (
     <MapWrapper>

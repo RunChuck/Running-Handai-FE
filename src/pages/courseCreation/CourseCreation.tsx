@@ -22,7 +22,7 @@ const CourseCreation = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isCourseCreationModalOpen, setIsCourseCreationModalOpen] = useState(false);
 
-  const { gpxData, handleMarkersChange, handleCourseCreate, setMapInstance, isLoading, isRouteGenerated } = useCourseCreation();
+  const { gpxData, handleMarkersChange, handleCourseCreate, setMapInstance, isRouteGenerated } = useCourseCreation();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -68,7 +68,7 @@ const CourseCreation = () => {
         maxAltitude={gpxData?.maxAltitude || 0}
         minAltitude={gpxData?.minAltitude || 0}
       />
-      <RouteView onMapLoad={setMapInstance} onMarkersChange={handleMarkersChange} />
+      <RouteView onMapLoad={setMapInstance} onMarkersChange={handleMarkersChange} isRouteGenerated={isRouteGenerated} />
       <CreationBar onCreateCourse={isRouteGenerated ? () => setIsCourseCreationModalOpen(true) : handleCourseCreateWrapper} />
 
       <OnboardingModal isOpen={isOnboardingOpen} onClose={handleOnboardingClose} />
