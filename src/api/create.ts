@@ -8,7 +8,7 @@ import type {
   MyCoursesResponse,
 } from '@/types/create';
 
-const PREFIX = '/api/members/me';
+const PREFIX = '/api/members/me/courses';
 
 export const checkIsInBusan = async (request: LocationCheckRequest): Promise<LocationCheckResponse> => {
   const response = await http.get<LocationCheckResponse>(`/api/locations/is-in-busan?lon=${request.lon}&lat=${request.lat}`);
@@ -24,7 +24,7 @@ export const createCourse = async (request: CourseCreateRequest): Promise<Course
   formData.append('thumbnailImage', request.thumbnailImage);
   formData.append('isInsideBusan', request.isInsideBusan.toString());
 
-  const response = await http.post<CourseCreateResponse>(`${PREFIX}/courses`, formData, {
+  const response = await http.post<CourseCreateResponse>(`${PREFIX}`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
@@ -35,6 +35,11 @@ export const createCourse = async (request: CourseCreateRequest): Promise<Course
 
 export const getMyCourses = async (request: MyCoursesRequest = {}): Promise<MyCoursesResponse> => {
   const { sortBy = 'latest' } = request;
-  const response = await http.get<MyCoursesResponse>(`${PREFIX}/courses?sortBy=${sortBy}`);
+  const response = await http.get<MyCoursesResponse>(`${PREFIX}?sortBy=${sortBy}`);
+  return response.data;
+};
+
+export const deleteCourse = async (courseId: number): Promise<CourseCreateResponse> => {
+  const response = await http.delete<CourseCreateResponse>(`${PREFIX}/${courseId}`);
   return response.data;
 };

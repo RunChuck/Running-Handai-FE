@@ -1,54 +1,153 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useState, useEffect } from 'react';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { useCourseDetail } from '@/hooks/useCourseDetail';
+import { mapCourseInfo } from '@/utils/format';
 
 import Header from '@/components/Header';
 import { Dropdown, DropdownItem } from '@/components/Dropdown';
 import CourseInfoBar from '@/pages/courseCreation/components/CourseInfoBar';
+import CourseRouteMap from '@/components/CourseRouteMap';
+import CommonModal from '@/components/CommonModal';
 import MoreIconSrc from '@/assets/icons/more-24px.svg';
-import TempThumbnail from '@/assets/images/temp-courseCard.png';
+import { deleteCourse } from '@/api/create';
+import { useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@/hooks/useToast';
 
 const MyCourseDetail = () => {
   const [t] = useTranslation();
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const isMobile = useIsMobile();
+  const queryClient = useQueryClient();
+  const { showSuccessToast, showErrorToast } = useToast();
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const courseId = parseInt(id || '0', 10);
+  const { courseDetail, loading, error } = useCourseDetail(courseId);
+
+  useEffect(() => {
+    if (!courseId) {
+      navigate('/mypage/mycourse', { replace: true });
+    }
+  }, [courseId, navigate]);
 
   const handleCopyLink = () => {
-    console.log('copy link clicked');
+    const url = `${window.location.origin}/course/${courseId}`;
+    navigator.clipboard.writeText(url);
+    showSuccessToast('링크가 복사되었습니다.');
   };
 
-  const handleDeleteClick = () => {
-    console.log('delete clicked');
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsDeleteModalOpen(true);
   };
+
+  const handleDeleteConfirm = async () => {
+    if (!courseId) return;
+
+    try {
+      await deleteCourse(courseId);
+
+      // 캐시 무효화
+      queryClient.invalidateQueries({
+        predicate: query => {
+          const [prefix, type] = query.queryKey;
+          return prefix === 'courses' && type === 'list';
+        },
+      });
+      queryClient.invalidateQueries({
+        predicate: query => {
+          const [prefix, type] = query.queryKey;
+          return prefix === 'auth' && type === 'my-courses';
+        },
+      });
+
+      setIsDeleteModalOpen(false);
+      showSuccessToast('코스가 삭제되었습니다.');
+      navigate('/mypage/mycourse');
+    } catch (error) {
+      console.error('Course deletion failed:', error);
+      showErrorToast('코스 삭제 중 오류가 발생했습니다.');
+      setIsDeleteModalOpen(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setIsDeleteModalOpen(false);
+  };
+
+  if (loading || !courseDetail) {
+    return (
+      <Container>
+        <Header title={t('mypage.myCourseDetail.title')} onBack={() => navigate(-1)} />
+        <Content>
+          <div style={{ padding: '40px', textAlign: 'center' }}>Loading...</div>
+        </Content>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container>
+        <Header title={t('mypage.myCourseDetail.title')} onBack={() => navigate(-1)} />
+        <Content>
+          <div style={{ padding: '40px', textAlign: 'center' }}>Error: {error}</div>
+        </Content>
+      </Container>
+    );
+  }
+
+  const mappedCourseInfo = mapCourseInfo(courseDetail);
 
   return (
-    <Container>
-      <Header title={t('mypage.myCourseDetail.title')} onBack={() => navigate(-1)} />
-      <Content>
-        <CourseTitleContainer>
-          <CourseTitle>
-            부산에 놀러갔다가 러닝코스를 그려보고 싶어서 그려본 러닝코스 부산에 놀러갔다가 러닝코스를 그려보고 싶어서 그려본 러닝코스
-          </CourseTitle>
-          <ButtonWrapper>
-            <Button>{t('edit')}</Button>
-            <Button>{t('mypage.myCourseDetail.gpxDownload')}</Button>
-            <Dropdown trigger={<img src={MoreIconSrc} alt="more" width={24} height={24} />} width={80} padding="0">
-              <DropdownItem onClick={handleCopyLink}>{t('mypage.myCourseDetail.copyLink')}</DropdownItem>
-              <DropdownItem onClick={handleDeleteClick} variant="danger">
-                {t('delete')}
-              </DropdownItem>
-            </Dropdown>
-          </ButtonWrapper>
-        </CourseTitleContainer>
-        <CourseInfoBar distance={10} time={10} maxAltitude={10} minAltitude={10} ContainerStyle={{ padding: isMobile ? '16px 0' : '24px 0' }} />
-        <Thumbnail src={TempThumbnail} alt="thumbnail" />
-        <GraphContainer>
-          <GraphTitle>{t('mypage.myCourseDetail.altitudeGraph')}</GraphTitle>
-        </GraphContainer>
-      </Content>
-    </Container>
+    <>
+      <Container>
+        <Header title={t('mypage.myCourseDetail.title')} onBack={() => navigate(-1)} />
+        <Content>
+          <CourseTitleContainer>
+            <CourseTitle>{courseDetail.courseName}</CourseTitle>
+            <ButtonWrapper>
+              <Button>{t('edit')}</Button>
+              <Button>{t('mypage.myCourseDetail.gpxDownload')}</Button>
+              <Dropdown trigger={<img src={MoreIconSrc} alt="more" width={24} height={24} />} width={80} padding="0">
+                <DropdownItem onClick={handleCopyLink}>{t('mypage.myCourseDetail.copyLink')}</DropdownItem>
+                <DropdownItem onClick={handleDeleteClick} variant="danger">
+                  {t('delete')}
+                </DropdownItem>
+              </Dropdown>
+            </ButtonWrapper>
+          </CourseTitleContainer>
+          <CourseInfoBar
+            distance={mappedCourseInfo.distance}
+            time={mappedCourseInfo.duration}
+            maxAltitude={mappedCourseInfo.maxElevation}
+            minAltitude={mappedCourseInfo.minElevation}
+            ContainerStyle={{ padding: isMobile ? '16px 0' : '24px 0' }}
+          />
+          <MapContainer>
+            <CourseRouteMap courseDetail={courseDetail} />
+          </MapContainer>
+          <GraphContainer>
+            <GraphTitle>{t('mypage.myCourseDetail.altitudeGraph')}</GraphTitle>
+          </GraphContainer>
+        </Content>
+      </Container>
+
+      <CommonModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        content={t('modal.courseCreation.deleteDesc')}
+        cancelText={t('modal.courseCreation.deleteCancel')}
+        confirmText={t('modal.courseCreation.deleteConfirm')}
+      />
+    </>
   );
 };
 
@@ -108,11 +207,11 @@ const Button = styled.button`
   }
 `;
 
-const Thumbnail = styled.img`
+const MapContainer = styled.div`
   width: 100%;
-  height: 100%;
-  object-fit: cover;
   aspect-ratio: 1/1;
+  border-radius: 8px;
+  overflow: hidden;
 `;
 
 const GraphContainer = styled.div`
