@@ -577,6 +577,8 @@ const ZoomControls = styled.div`
   display: flex;
   align-items: center;
   gap: var(--spacing-16);
+  width: 100%;
+  max-width: 300px;
 `;
 
 const ZoomLabel = styled.div`

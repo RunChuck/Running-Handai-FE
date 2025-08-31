@@ -31,8 +31,7 @@ const CourseCreation = () => {
 
   const routeViewRef = useRef<HTMLDivElement>(null);
 
-  const { gpxData, handleMarkersChange, handleCourseCreate, setMapInstance, isRouteGenerated, isGpxUploaded, uploadedGpxFile, submitCourse } =
-    useCourseCreation();
+  const { gpxData, handleMarkersChange, handleCourseCreate, setMapInstance, isRouteGenerated, isGpxUploaded, uploadedGpxFile } = useCourseCreation();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -59,19 +58,17 @@ const CourseCreation = () => {
     setIsCourseCreationModalOpen(false);
   };
 
-  const handleCourseSubmit = async (courseData: { startPoint: string; endPoint: string; thumbnailBlob: Blob; isInBusan: boolean }) => {
+  const handleCourseSubmit = async () => {
     try {
       setIsCourseCreationModalOpen(false);
       setIsLoadingModalOpen(true);
-
-      const courseId = await submitCourse(courseData);
 
       // 코스 생성 성공 후 관련 쿼리 무효화
       queryClient.invalidateQueries({ queryKey: courseKeys.all });
 
       setTimeout(() => {
         setIsLoadingModalOpen(false);
-        navigate(`/mypage/mycourse/${courseId}`);
+        navigate(`/mypage/mycourse`);
       }, 1000);
     } catch (error) {
       setIsLoadingModalOpen(false);
