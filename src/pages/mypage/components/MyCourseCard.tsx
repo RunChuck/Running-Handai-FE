@@ -1,15 +1,20 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
+import { deleteCourse } from '@/api/create';
+import type { Course } from '@/types/create';
+import { useToast } from '@/hooks/useToast';
 
 import { Dropdown, DropdownItem } from '@/components/Dropdown';
+import CommonModal from '@/components/CommonModal';
 import TempThumbnailImgSrc from '@/assets/images/temp-courseCard.png';
 import MoreIconSrc from '@/assets/icons/more-24px.svg';
 import DistanceIconSrc from '@/assets/icons/course-distance.svg';
 import TimeIconSrc from '@/assets/icons/course-time.svg';
 import AltitudeIconSrc from '@/assets/icons/course-max-altitude.svg';
-import type { Course } from '@/types/create';
 
 interface MyCourseCardProps {
   variant?: 'mypage' | 'grid';
@@ -19,17 +24,55 @@ interface MyCourseCardProps {
 const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
   const [t] = useTranslation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { showSuccessToast, showErrorToast } = useToast();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const handleCardClick = () => {
     navigate(`/mypage/mycourse/${course?.id}`);
   };
 
-  const handleEditClick = () => {
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     console.log('edit clicked');
   };
 
-  const handleDeleteClick = () => {
-    console.log('delete clicked');
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!course?.id) return;
+
+    try {
+      await deleteCourse(course.id);
+
+      // 캐시 무효화
+      queryClient.invalidateQueries({
+        predicate: query => {
+          const [prefix, type] = query.queryKey;
+          return prefix === 'courses' && type === 'list';
+        },
+      });
+      queryClient.invalidateQueries({
+        predicate: query => {
+          const [prefix, type] = query.queryKey;
+          return prefix === 'auth' && type === 'my-courses';
+        },
+      });
+
+      setIsDeleteModalOpen(false);
+      showSuccessToast('코스가 삭제되었습니다.');
+    } catch (error) {
+      console.error('Course deletion failed:', error);
+      showErrorToast('코스 삭제 중 오류가 발생했습니다.');
+      setIsDeleteModalOpen(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setIsDeleteModalOpen(false);
   };
 
   const courseInfoItems = [
@@ -51,34 +94,45 @@ const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
   ];
 
   return (
-    <CardContainer $variant={variant} onClick={handleCardClick}>
-      <ThumbnailWrapper $variant={variant}>
-        <img src={course?.thumbnailUrl || TempThumbnailImgSrc} />
-      </ThumbnailWrapper>
-      <CourseInfoCard $variant={variant}>
-        <RowRapper>
-          <CreatedDate $variant={variant}>생성일</CreatedDate>
-          <Dropdown trigger={<img src={MoreIconSrc} alt="more" width={20} height={20} />} width={80} padding="0">
-            <DropdownItem onClick={handleEditClick}>{t('edit')}</DropdownItem>
-            <DropdownItem onClick={handleDeleteClick} variant="danger">
-              {t('delete')}
-            </DropdownItem>
-          </Dropdown>
-        </RowRapper>
-        <CourseName $variant={variant}>{course?.name || '코스 이름'}</CourseName>
-        <CourseInfoWrapper $variant={variant}>
-          {courseInfoItems.map((item, index) => (
-            <CourseInfoItemGroup key={index} $variant={variant}>
-              <CourseInfoItem $variant={variant}>
-                <CourseInfoIcon src={item.icon} alt={item.alt} $variant={variant} />
-                <span>{item.label}</span>
-              </CourseInfoItem>
-              {index < courseInfoItems.length - 1 && <Divider />}
-            </CourseInfoItemGroup>
-          ))}
-        </CourseInfoWrapper>
-      </CourseInfoCard>
-    </CardContainer>
+    <>
+      <CardContainer $variant={variant} onClick={handleCardClick}>
+        <ThumbnailWrapper $variant={variant}>
+          <img src={course?.thumbnailUrl || TempThumbnailImgSrc} />
+        </ThumbnailWrapper>
+        <CourseInfoCard $variant={variant}>
+          <RowRapper>
+            <CreatedDate $variant={variant}>생성일</CreatedDate>
+            <Dropdown trigger={<img src={MoreIconSrc} alt="more" width={20} height={20} />} width={80} padding="0">
+              <DropdownItem onClick={handleEditClick}>{t('edit')}</DropdownItem>
+              <DropdownItem onClick={handleDeleteClick} variant="danger">
+                {t('delete')}
+              </DropdownItem>
+            </Dropdown>
+          </RowRapper>
+          <CourseName $variant={variant}>{course?.name || '코스 이름'}</CourseName>
+          <CourseInfoWrapper $variant={variant}>
+            {courseInfoItems.map((item, index) => (
+              <CourseInfoItemGroup key={index} $variant={variant}>
+                <CourseInfoItem $variant={variant}>
+                  <CourseInfoIcon src={item.icon} alt={item.alt} $variant={variant} />
+                  <span>{item.label}</span>
+                </CourseInfoItem>
+                {index < courseInfoItems.length - 1 && <Divider />}
+              </CourseInfoItemGroup>
+            ))}
+          </CourseInfoWrapper>
+        </CourseInfoCard>
+      </CardContainer>
+
+      <CommonModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        content={t('modal.courseCreation.deleteDesc')}
+        cancelText={t('modal.courseCreation.deleteCancel')}
+        confirmText={t('modal.courseCreation.deleteConfirm')}
+      />
+    </>
   );
 };
 
