@@ -87,6 +87,7 @@ const CourseCreation = () => {
         onClose={handleCourseCreationModalClose}
         onConfirm={handleCourseCreationModalClose}
         confirmText={t('modal.courseCreation.complete')}
+        routeCoordinates={gpxData?.coordinates || []}
       />
     </S.Container>
   );

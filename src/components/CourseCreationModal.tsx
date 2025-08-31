@@ -1,10 +1,11 @@
 import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import Button from './Button';
 
 import CommonInput from './CommonInput';
+import MapThumbnailCapture, { type MapThumbnailCaptureRef } from './MapThumbnailCapture';
 import CloseIconSrc from '@/assets/icons/close-24px.svg';
 import ZoomIconSrc from '@/assets/icons/zoomIn-24px.svg';
 
@@ -18,6 +19,7 @@ interface CourseCreationModalProps {
   mode?: CourseCreationModalMode;
   initialStartPoint?: string;
   initialEndPoint?: string;
+  routeCoordinates?: { lat: number; lng: number }[];
 }
 
 const CourseCreationModal = ({
@@ -28,19 +30,38 @@ const CourseCreationModal = ({
   mode = 'create',
   initialStartPoint = '',
   initialEndPoint = '',
+  routeCoordinates = [],
 }: CourseCreationModalProps) => {
   const [t] = useTranslation();
   const [startPoint, setStartPoint] = useState(initialStartPoint);
   const [endPoint, setEndPoint] = useState(initialEndPoint);
-  const [zoomLevel, setZoomLevel] = useState(50);
+  const [zoomLevel, setZoomLevel] = useState(5); // 카카오맵 줌 레벨 (1-14)
+  const thumbnailMapRef = useRef<MapThumbnailCaptureRef>(null);
 
   const handleConfirm = () => {
     onConfirm(startPoint, endPoint);
   };
 
+  const handleZoomChange = (newZoomLevel: number) => {
+    setZoomLevel(newZoomLevel);
+  };
+
+  const handleZoomSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newZoomLevel = 15 - Number(e.target.value);
+    setZoomLevel(newZoomLevel);
+    thumbnailMapRef.current?.setZoom(newZoomLevel);
+  };
+
   const isStartPointValid = startPoint.length > 0 && startPoint.length <= 20;
   const isEndPointValid = endPoint.length > 0 && endPoint.length <= 20;
   const isButtonDisabled = !isStartPointValid || !isEndPointValid;
+
+  // 모달이 열릴 때 썸네일 맵 업데이트
+  useEffect(() => {
+    if (isOpen && routeCoordinates.length > 0) {
+      thumbnailMapRef.current?.updateRoute(routeCoordinates);
+    }
+  }, [isOpen, routeCoordinates]);
 
   if (!isOpen) return null;
 
@@ -80,15 +101,14 @@ const CourseCreationModal = ({
         <ThumbnailSection>
           <SectionTitle>{t('modal.courseCreation.thumbnail')}</SectionTitle>
           <MapPreview>
-            {/* TODO: 추후 UI 나오면 수정 필요 */}
-            <MapPlaceholder>코스 경로 미리보기</MapPlaceholder>
+            <MapThumbnailCapture ref={thumbnailMapRef} coordinates={routeCoordinates} zoomLevel={zoomLevel} onZoomChange={handleZoomChange} />
           </MapPreview>
           <ZoomControls>
             <ZoomLabel>
               <img src={ZoomIconSrc} alt="zoom" />
               {t('modal.courseCreation.zoom')}
             </ZoomLabel>
-            <ZoomSlider type="range" min="0" max="100" value={zoomLevel} onChange={e => setZoomLevel(Number(e.target.value))} />
+            <ZoomSlider type="range" min="1" max="14" value={15 - zoomLevel} onChange={handleZoomSliderChange} />
           </ZoomControls>
         </ThumbnailSection>
 
@@ -126,7 +146,7 @@ const ModalContainer = styled.div`
   padding: var(--spacing-32) var(--spacing-16) var(--spacing-16);
   display: flex;
   flex-direction: column;
-  /* align-items: center; */
+  align-items: center;
   gap: 12px;
   animation: fadeIn 0.3s ease-out;
   position: relative;
@@ -185,28 +205,23 @@ const ThumbnailSection = styled.div`
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-top: 8px;
 `;
 
 const SectionTitle = styled.div`
   ${theme.typography.subtitle2}
   color: var(--text-text-title, #1c1c1c);
+  text-align: center;
 `;
 
 const MapPreview = styled.div`
   width: 100%;
-  height: 200px;
+  height: 300px;
+  width: 300px;
   border: 1px solid var(--line-line-001, #eee);
-  border-radius: 8px;
   background: var(--surface-surface-highlight3, #f7f8fa);
   display: flex;
   align-items: center;
   justify-content: center;
-`;
-
-const MapPlaceholder = styled.div`
-  ${theme.typography.body2}
-  color: var(--text-text-placeholder, #9e9e9e);
 `;
 
 const ZoomControls = styled.div`
