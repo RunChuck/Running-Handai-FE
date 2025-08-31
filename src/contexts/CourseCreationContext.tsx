@@ -337,7 +337,7 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
       // GPX 데이터 업데이트
       const newGpxData: GPXData = {
         coordinates: routeResult.coordinates,
-        distance: Math.floor(routeResult.distance),
+        distance: Math.round(routeResult.distance),
         time: Math.round((routeResult.distance / 9) * 60), // 9km/h 기준
         maxAltitude: elevationStats.maxAltitude,
         minAltitude: elevationStats.minAltitude,
