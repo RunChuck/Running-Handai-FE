@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import * as S from './CourseCreation.styled';
@@ -21,6 +21,8 @@ const CourseCreation = () => {
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isCourseCreationModalOpen, setIsCourseCreationModalOpen] = useState(false);
+
+  const routeViewRef = useRef<HTMLDivElement>(null);
 
   const { gpxData, handleMarkersChange, handleCourseCreate, setMapInstance, isRouteGenerated } = useCourseCreation();
 
@@ -68,7 +70,7 @@ const CourseCreation = () => {
         maxAltitude={gpxData?.maxAltitude || 0}
         minAltitude={gpxData?.minAltitude || 0}
       />
-      <RouteView onMapLoad={setMapInstance} onMarkersChange={handleMarkersChange} isRouteGenerated={isRouteGenerated} />
+      <RouteView ref={routeViewRef} onMapLoad={setMapInstance} onMarkersChange={handleMarkersChange} isRouteGenerated={isRouteGenerated} />
       <CreationBar onCreateCourse={isRouteGenerated ? () => setIsCourseCreationModalOpen(true) : handleCourseCreateWrapper} />
 
       <OnboardingModal isOpen={isOnboardingOpen} onClose={handleOnboardingClose} />

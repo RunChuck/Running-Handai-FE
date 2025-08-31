@@ -42,7 +42,7 @@ const MapThumbnailCapture = forwardRef<MapThumbnailCaptureRef, MapThumbnailCaptu
     // 좌표를 카카오맵 LatLng 객체로 변환
     const path = routeCoordinates.map(coord => new window.kakao.maps.LatLng(coord.lat, coord.lng));
 
-    // 폴리라인 생성 (썸네일용으로 더 굵게)
+    // 폴리라인 생성
     const polyline = new window.kakao.maps.Polyline({
       path: path,
       strokeWeight: 4,
@@ -140,7 +140,11 @@ const MapThumbnailCapture = forwardRef<MapThumbnailCaptureRef, MapThumbnailCaptu
     }
   }, [coordinates]);
 
-  return <ThumbnailMapContainer ref={mapContainer} />;
+  return (
+    <ThumbnailMapContainer>
+      <div ref={mapContainer} style={{ width: '100%', height: '100%' }} />
+    </ThumbnailMapContainer>
+  );
 });
 
 MapThumbnailCapture.displayName = 'MapThumbnailCapture';

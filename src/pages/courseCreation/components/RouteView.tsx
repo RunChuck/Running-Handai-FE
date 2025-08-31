@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, forwardRef } from 'react';
 import ReactDOMServer from 'react-dom/server';
 import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
@@ -35,7 +35,7 @@ interface RouteViewProps {
   isRouteGenerated?: boolean;
 }
 
-const RouteView = ({ onMapLoad, onMarkersChange, isRouteGenerated = false }: RouteViewProps) => {
+const RouteView = forwardRef<HTMLDivElement, RouteViewProps>(({ onMapLoad, onMarkersChange, isRouteGenerated = false }, ref) => {
   const [t] = useTranslation();
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<kakao.maps.Map | null>(null);
@@ -441,7 +441,7 @@ const RouteView = ({ onMapLoad, onMarkersChange, isRouteGenerated = false }: Rou
   }, [isRouteGenerated]);
 
   return (
-    <MapWrapper>
+    <MapWrapper ref={ref}>
       {!isMapLoaded && (
         <LoadingOverlay>
           <Lottie animationData={LoadingMotion} style={{ width: 100, height: 100 }} loop={true} />
@@ -451,7 +451,9 @@ const RouteView = ({ onMapLoad, onMarkersChange, isRouteGenerated = false }: Rou
       <MapContainer ref={mapContainer} />
     </MapWrapper>
   );
-};
+});
+
+RouteView.displayName = 'RouteView';
 
 export default RouteView;
 
