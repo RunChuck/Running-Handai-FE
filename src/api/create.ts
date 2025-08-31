@@ -6,6 +6,7 @@ import type {
   CourseCreateResponse,
   MyCoursesRequest,
   MyCoursesResponse,
+  CourseUpdateRequest,
 } from '@/types/create';
 
 const PREFIX = '/api/members/me/courses';
@@ -42,4 +43,28 @@ export const getMyCourses = async (request: MyCoursesRequest = {}): Promise<MyCo
 export const deleteCourse = async (courseId: number): Promise<CourseCreateResponse> => {
   const response = await http.delete<CourseCreateResponse>(`${PREFIX}/${courseId}`);
   return response.data;
+};
+
+export const updateCourse = async (courseId: number, request: CourseUpdateRequest): Promise<CourseCreateResponse> => {
+  const formData = new FormData();
+
+  formData.append('startPointName', request.startPointName);
+  formData.append('endPointName', request.endPointName);
+
+  if (request.thumbnailImage) {
+    formData.append('thumbnailImage', request.thumbnailImage);
+  }
+
+  const response = await http.patch<CourseCreateResponse>(`${PREFIX}/${courseId}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+
+  return response.data;
+};
+
+export const downloadGpx = async (courseId: number): Promise<string> => {
+  const response = await http.get<{ data: { courseId: number; gpxPath: string } }>(`${PREFIX}/${courseId}/gpx`);
+  return response.data.data.gpxPath;
 };

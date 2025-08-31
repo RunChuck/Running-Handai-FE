@@ -13,7 +13,7 @@ import CourseInfoBar from '@/pages/courseCreation/components/CourseInfoBar';
 import CourseRouteMap from '@/components/CourseRouteMap';
 import CommonModal from '@/components/CommonModal';
 import MoreIconSrc from '@/assets/icons/more-24px.svg';
-import { deleteCourse } from '@/api/create';
+import { deleteCourse, downloadGpx } from '@/api/create';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/useToast';
 
@@ -81,6 +81,32 @@ const MyCourseDetail = () => {
     setIsDeleteModalOpen(false);
   };
 
+  const handleGpxDownload = async () => {
+    if (!courseId) return;
+
+    try {
+      const presignedUrl = await downloadGpx(courseId);
+      
+      // URL에서 원본 파일명 추출
+      const urlObj = new URL(presignedUrl);
+      const pathSegments = urlObj.pathname.split('/');
+      const fileName = decodeURIComponent(pathSegments[pathSegments.length - 1].split('?')[0]) || 'course.gpx';
+      
+      // presigned URL로 직접 다운로드
+      const a = document.createElement('a');
+      a.href = presignedUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      
+      showSuccessToast('GPX 파일이 다운로드되었습니다.');
+    } catch (error) {
+      console.error('GPX download failed:', error);
+      showErrorToast('GPX 다운로드 중 오류가 발생했습니다.');
+    }
+  };
+
   if (loading || !courseDetail) {
     return (
       <Container>
@@ -114,7 +140,7 @@ const MyCourseDetail = () => {
             <CourseTitle>{courseDetail.courseName}</CourseTitle>
             <ButtonWrapper>
               <Button>{t('edit')}</Button>
-              <Button>{t('mypage.myCourseDetail.gpxDownload')}</Button>
+              <Button onClick={handleGpxDownload}>{t('mypage.myCourseDetail.gpxDownload')}</Button>
               <Dropdown trigger={<img src={MoreIconSrc} alt="more" width={24} height={24} />} width={80} padding="0">
                 <DropdownItem onClick={handleCopyLink}>{t('mypage.myCourseDetail.copyLink')}</DropdownItem>
                 <DropdownItem onClick={handleDeleteClick} variant="danger">

@@ -50,3 +50,9 @@ export type SortBy = 'latest' | 'oldest' | 'short' | 'long';
 export interface MyCoursesRequest {
   sortBy?: SortBy;
 }
+
+export interface CourseUpdateRequest {
+  startPointName: string;
+  endPointName: string;
+  thumbnailImage?: File;
+}
