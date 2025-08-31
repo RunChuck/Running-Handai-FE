@@ -2,24 +2,29 @@ import { useTranslation } from 'react-i18next';
 import { useState, useRef, useEffect } from 'react';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
-import Button from './Button';
+import { checkIsInBusan } from '@/api/create';
 
-import CommonInput from './CommonInput';
 import MapThumbnailCapture, { type MapThumbnailCaptureRef } from './MapThumbnailCapture';
+import CommonInput from './CommonInput';
+import Button from './Button';
 import CloseIconSrc from '@/assets/icons/close-24px.svg';
 import UploadIconSrc from '@/assets/icons/zoomIn-24px.svg';
+import InfoIconSrc from '@/assets/icons/info-primary.svg';
 
 type CourseCreationModalMode = 'create' | 'edit';
 
 interface CourseCreationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (startPoint: string, endPoint: string) => void;
+  onConfirm: (courseData: { startPoint: string; endPoint: string; thumbnailBlob: Blob; isInBusan: boolean }) => void;
   confirmText: string;
   mode?: CourseCreationModalMode;
   initialStartPoint?: string;
   initialEndPoint?: string;
   routeCoordinates?: { lat: number; lng: number }[];
+  uploadedGpxFile?: File | null; // GPX 업로드 파일
+  isGpxUploaded?: boolean; // GPX 업로드 여부
+  gpxData?: { coordinates: { lat: number; lng: number }[] } | null; // GPX 데이터
 }
 
 const CourseCreationModal = ({
@@ -31,6 +36,8 @@ const CourseCreationModal = ({
   initialStartPoint = '',
   initialEndPoint = '',
   routeCoordinates = [],
+  isGpxUploaded = false,
+  gpxData = null,
 }: CourseCreationModalProps) => {
   const [t] = useTranslation();
   const [startPoint, setStartPoint] = useState(initialStartPoint);
@@ -55,8 +62,56 @@ const CourseCreationModal = ({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const imageContainerRef = useRef<HTMLDivElement>(null);
 
-  const handleConfirm = () => {
-    onConfirm(startPoint, endPoint);
+  // 부산 지역 체크 상태
+  const [isLoading, setIsLoading] = useState(false);
+  const [isInBusan, setIsInBusan] = useState<boolean | null>(null);
+  const [hasCheckedLocation, setHasCheckedLocation] = useState(false);
+
+  const handleConfirm = async () => {
+    if (!croppedImageBlob) return;
+
+    // 좌표 데이터 확인 - GPX 업로드된 경우 gpxData에서, 아니면 routeCoordinates에서
+    const coordinates = isGpxUploaded && gpxData?.coordinates ? gpxData.coordinates : routeCoordinates;
+    if (!coordinates.length) return;
+
+    const startCoordinate = coordinates[0];
+
+    try {
+      setIsLoading(true);
+
+      // 첫 번째 클릭: 부산 지역 체크
+      if (!hasCheckedLocation) {
+        const locationResult = await checkIsInBusan({
+          lat: startCoordinate.lat,
+          lon: startCoordinate.lng,
+        });
+
+        setIsInBusan(locationResult.data);
+        setHasCheckedLocation(true);
+
+        // 부산이면 바로 등록 진행
+        if (locationResult.data) {
+          onConfirm({
+            startPoint,
+            endPoint,
+            thumbnailBlob: croppedImageBlob,
+            isInBusan: true,
+          });
+        }
+      } else {
+        // 두 번째 클릭: 등록 진행 (비부산 지역)
+        onConfirm({
+          startPoint,
+          endPoint,
+          thumbnailBlob: croppedImageBlob,
+          isInBusan: isInBusan || false,
+        });
+      }
+    } catch (error) {
+      console.error('부산 지역 체크 실패:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleNextStep = () => {
@@ -121,9 +176,9 @@ const CourseCreationModal = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // 300x300 크기로 고정
-    canvas.width = 300;
-    canvas.height = 300;
+    // 600x600 고해상도 캔버스 생성
+    canvas.width = 600;
+    canvas.height = 600;
 
     const img = imgRef.current;
     const container = imageContainerRef.current;
@@ -136,11 +191,11 @@ const CourseCreationModal = ({
     const relativeX = imgRect.left - containerRect.left;
     const relativeY = imgRect.top - containerRect.top;
 
-    // 컨테이너 크기에 맞게 스케일 계산
-    const scaleX = 300 / containerRect.width;
-    const scaleY = 300 / containerRect.height;
+    // 고해상도 캔버스용 스케일 계산 (2배)
+    const scaleX = 600 / containerRect.width;
+    const scaleY = 600 / containerRect.height;
 
-    // 캔버스에 이미지 그리기
+    // 고해상도 캔버스에 이미지 그리기
     ctx.drawImage(img, relativeX * scaleX, relativeY * scaleY, imgRect.width * scaleX, imgRect.height * scaleY);
 
     canvas.toBlob(blob => {
@@ -238,12 +293,32 @@ const CourseCreationModal = ({
   const isEndPointValid = endPoint.length > 0 && endPoint.length <= 20;
   const isButtonDisabled = !isStartPointValid || !isEndPointValid;
 
-  // 모달이 열릴 때 썸네일 맵 업데이트
+  // 모달이 열릴 때 상태 초기화 및 썸네일 맵 업데이트
   useEffect(() => {
-    if (isOpen && routeCoordinates.length > 0) {
-      thumbnailMapRef.current?.updateRoute(routeCoordinates);
+    if (isOpen) {
+      // 모달이 열릴 때마다 1단계로 초기화
+      setCurrentStep('preview');
+      setSelectedImage(null);
+      setCroppedImageBlob(null);
+      setImageScale(1);
+      setImagePosition({ x: 0, y: 0 });
+      setIsDragging(false);
+      setIsLoading(false);
+      setIsInBusan(null);
+      setHasCheckedLocation(false);
+
+      // 파일 input 초기화
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+
+      // 썸네일 맵 업데이트
+      const coordinates = isGpxUploaded && gpxData?.coordinates ? gpxData.coordinates : routeCoordinates;
+      if (coordinates.length > 0) {
+        thumbnailMapRef.current?.updateRoute(coordinates);
+      }
     }
-  }, [isOpen, routeCoordinates]);
+  }, [isOpen, routeCoordinates, gpxData, isGpxUploaded]);
 
   if (!isOpen) return null;
 
@@ -317,6 +392,18 @@ const CourseCreationModal = ({
           // 2단계: 스크린샷 업로드 및 크롭
           <>
             <ThumbnailSection>
+              {/* 비부산 지역 경고 메시지 */}
+              {hasCheckedLocation && isInBusan === false && (
+                <WarningMessage>
+                  <WarningTitle>
+                    <img src={InfoIconSrc} alt="info" />
+                    현재 베타 버전이에요!
+                  </WarningTitle>
+                  부산 외 지역은
+                  <br />
+                  <strong>'마이페이지 &gt; 내 코스'</strong>에서만 볼 수 있어요. <br />곧 업데이트 예정이에요.
+                </WarningMessage>
+              )}
               <SectionTitle>썸네일 등록</SectionTitle>
 
               {!selectedImage ? (
@@ -370,8 +457,8 @@ const CourseCreationModal = ({
               <Button variant="secondary" onClick={handleBackToPreview}>
                 이전
               </Button>
-              <Button variant="primary" disabled={!croppedImageBlob} onClick={handleConfirm}>
-                완료
+              <Button variant="primary" disabled={!croppedImageBlob || isLoading} onClick={handleConfirm}>
+                {isLoading ? '처리 중...' : hasCheckedLocation && !isInBusan ? '등록하기' : '완료'}
               </Button>
             </ButtonRow>
           </>
@@ -394,7 +481,7 @@ const Overlay = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 99999;
+  z-index: 100;
 `;
 
 const ModalContainer = styled.div`
@@ -420,10 +507,6 @@ const ModalContainer = styled.div`
       opacity: 1;
       transform: scale(1);
     }
-  }
-
-  @media (max-width: 600px) {
-    height: 487px;
   }
 `;
 
@@ -468,7 +551,9 @@ const InputLabel = styled.div`
 const ThumbnailSection = styled.div`
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 8px;
+  width: 100%;
 `;
 
 const SectionTitle = styled.div`
@@ -492,6 +577,8 @@ const ZoomControls = styled.div`
   display: flex;
   align-items: center;
   gap: var(--spacing-16);
+  width: 100%;
+  max-width: 300px;
 `;
 
 const ZoomLabel = styled.div`
@@ -532,7 +619,7 @@ const StepIndicator = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   gap: 8px;
 `;
 
@@ -715,4 +802,30 @@ const WarningGuide = styled.div`
   ${theme.typography.body2}
   color: var(--text-text-subtitle, #666);
   text-align: center;
+`;
+
+const WarningMessage = styled.div`
+  ${theme.typography.body2}
+  color: var(--text-text-secondary, #555555);
+  background: var(--surface-surface-highlight3, #f7f8fa);
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 4px;
+  border: 1px solid var(--line-line-001, #eee);
+  width: 100%;
+
+  strong {
+    font-weight: 600;
+    display: inline;
+  }
+`;
+
+const WarningTitle = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  ${theme.typography.subtitle3}
+  color: var(--text-text-title, #1c1c1c);
+  margin-bottom: 4px;
 `;
