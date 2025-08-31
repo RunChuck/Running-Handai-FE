@@ -17,20 +17,56 @@ export const parseGPX = (gpxString: string): GPXData => {
   const nameElement = doc.querySelector('name');
   const name = nameElement?.textContent || 'Unknown Route';
 
-  // 경로 포인트 추출
-  const rtepts = doc.querySelectorAll('rtept');
   const points: GPXPoint[] = [];
 
-  rtepts.forEach(rtept => {
-    const lat = parseFloat(rtept.getAttribute('lat') || '0');
-    const lng = parseFloat(rtept.getAttribute('lon') || '0');
-    const eleElement = rtept.querySelector('ele');
-    const ele = eleElement
-      ? parseFloat(eleElement.textContent || '0')
-      : undefined;
+  const parsePoint = (element: Element) => {
+    const lat = parseFloat(element.getAttribute('lat') || '0');
+    const lng = parseFloat(element.getAttribute('lon') || element.getAttribute('lng') || '0');
 
-    points.push({ lat, lng, ele });
+    let ele: number | undefined;
+    const eleElement = element.querySelector('ele');
+    if (eleElement && eleElement.textContent) {
+      ele = parseFloat(eleElement.textContent);
+    } else {
+      const elevationAttr = element.getAttribute('elevation') || element.getAttribute('ele');
+      if (elevationAttr) {
+        ele = parseFloat(elevationAttr);
+      }
+    }
+
+    return { lat, lng, ele };
+  };
+
+  // 1. Track points (trkpt)
+  const trkpts = doc.querySelectorAll('trkpt');
+  trkpts.forEach(trkpt => {
+    const point = parsePoint(trkpt);
+    if (point.lat !== 0 && point.lng !== 0) {
+      points.push(point);
+    }
   });
+
+  // 2. Route points (rtept)
+  if (points.length === 0) {
+    const rtepts = doc.querySelectorAll('rtept');
+    rtepts.forEach(rtept => {
+      const point = parsePoint(rtept);
+      if (point.lat !== 0 && point.lng !== 0) {
+        points.push(point);
+      }
+    });
+  }
+
+  // 3. Waypoints (wpt)
+  if (points.length === 0) {
+    const wpts = doc.querySelectorAll('wpt');
+    wpts.forEach(wpt => {
+      const point = parsePoint(wpt);
+      if (point.lat !== 0 && point.lng !== 0) {
+        points.push(point);
+      }
+    });
+  }
 
   return { name, points };
 };

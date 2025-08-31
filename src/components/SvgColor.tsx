@@ -3,8 +3,8 @@ import { styled } from '@mui/material/styles';
 
 export type SVGColorProps = React.ComponentProps<'img'> & {
   src: string;
-  width: number;
-  height: number;
+  width: number | string;
+  height: number | string;
   color?: string;
 };
 
