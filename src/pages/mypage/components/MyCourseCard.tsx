@@ -9,35 +9,19 @@ import MoreIconSrc from '@/assets/icons/more-24px.svg';
 import DistanceIconSrc from '@/assets/icons/course-distance.svg';
 import TimeIconSrc from '@/assets/icons/course-time.svg';
 import AltitudeIconSrc from '@/assets/icons/course-max-altitude.svg';
-
-const courseInfoItems = [
-  {
-    icon: DistanceIconSrc,
-    alt: 'distance',
-    label: '8.7km',
-  },
-  {
-    icon: TimeIconSrc,
-    alt: 'time',
-    label: '50분',
-  },
-  {
-    icon: AltitudeIconSrc,
-    alt: 'altitude',
-    label: '20m',
-  },
-];
+import type { Course } from '@/types/create';
 
 interface MyCourseCardProps {
   variant?: 'mypage' | 'grid';
+  course?: Course;
 }
 
-const MyCourseCard = ({ variant = 'mypage' }: MyCourseCardProps) => {
+const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
   const [t] = useTranslation();
   const navigate = useNavigate();
 
   const handleCardClick = () => {
-    navigate(`/mypage/mycourse/${1}`);
+    navigate(`/mypage/mycourse/${course?.id}`);
   };
 
   const handleEditClick = () => {
@@ -48,14 +32,32 @@ const MyCourseCard = ({ variant = 'mypage' }: MyCourseCardProps) => {
     console.log('delete clicked');
   };
 
+  const courseInfoItems = [
+    {
+      icon: DistanceIconSrc,
+      alt: 'distance',
+      label: `${course?.distance?.toFixed(1) || '0.0'}km`,
+    },
+    {
+      icon: TimeIconSrc,
+      alt: 'time',
+      label: `${course?.duration || 0}분`,
+    },
+    {
+      icon: AltitudeIconSrc,
+      alt: 'altitude',
+      label: `${course?.maxElevation?.toFixed(0) || 0}m`,
+    },
+  ];
+
   return (
     <CardContainer $variant={variant} onClick={handleCardClick}>
       <ThumbnailWrapper $variant={variant}>
-        <img src={TempThumbnailImgSrc} />
+        <img src={course?.thumbnailUrl || TempThumbnailImgSrc} />
       </ThumbnailWrapper>
       <CourseInfoCard $variant={variant}>
         <RowRapper>
-          <CreatedDate $variant={variant}>2025.01.01</CreatedDate>
+          <CreatedDate $variant={variant}>생성일</CreatedDate>
           <Dropdown trigger={<img src={MoreIconSrc} alt="more" width={20} height={20} />} width={80} padding="0">
             <DropdownItem onClick={handleEditClick}>{t('edit')}</DropdownItem>
             <DropdownItem onClick={handleDeleteClick} variant="danger">
@@ -63,7 +65,7 @@ const MyCourseCard = ({ variant = 'mypage' }: MyCourseCardProps) => {
             </DropdownItem>
           </Dropdown>
         </RowRapper>
-        <CourseName $variant={variant}>부산에 놀러갔다가 러닝코스를 그려보고 싶어서 그려본 러닝코스</CourseName>
+        <CourseName $variant={variant}>{course?.name || '코스 이름'}</CourseName>
         <CourseInfoWrapper $variant={variant}>
           {courseInfoItems.map((item, index) => (
             <CourseInfoItemGroup key={index} $variant={variant}>
