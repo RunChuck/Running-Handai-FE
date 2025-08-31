@@ -22,7 +22,7 @@ const MyCourseSection = ({ isAuthenticated }: MyCourseSectionProps) => {
   const myCourseCount = isAuthenticated ? courseCount : 0;
 
   const handleGoToCreateCourse = () => {
-    navigate('/mypage/mycourse');
+    navigate('/course-creation');
   };
 
   return (
