@@ -22,18 +22,12 @@ const getServiceItemData = (t: (key: string) => string) => [
   },
   {
     id: 3,
-    title: t('mypage.service.locationTerms'),
-    icon: ArrowIconSrc,
-    link: 'https://www.notion.so/runninghandai/22c0df91dcd78068ac28ef684f10a4eb',
-  },
-  {
-    id: 4,
     title: t('mypage.service.privacyPolicy'),
     icon: ArrowIconSrc,
     link: 'https://www.notion.so/runninghandai/22c0df91dcd780208985c3167838daf8',
   },
   {
-    id: 5,
+    id: 4,
     title: t('mypage.service.version'),
     version: APP_VERSION,
     link: '',
@@ -77,7 +71,7 @@ const SectionTitle = styled.div`
 const ServiceItem = styled.div`
   display: flex;
   justify-content: space-between;
-  ${theme.typography.caption2};
+  ${theme.typography.body2};
   color: var(--text-text-title, #1c1c1c);
 
   &:hover {
