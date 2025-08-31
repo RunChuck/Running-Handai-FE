@@ -27,7 +27,8 @@ export type AreaCode =
   | 'WONDOSIM'
   | 'SOUTHERN_COAST'
   | 'WESTERN_NAKDONGRIVER'
-  | 'NORTHERN_BUSAN';
+  | 'NORTHERN_BUSAN'
+  | 'ETC';
 
 export type ThemeCode = 'SEA' | 'DOWNTOWN' | 'RIVERSIDE' | 'MOUNTAIN';
 
