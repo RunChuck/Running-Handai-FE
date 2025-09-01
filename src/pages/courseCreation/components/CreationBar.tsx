@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import { useDebouncedCurrentLocation } from '@/utils/locationUtils';
 import { useCourseCreation } from '@/contexts/CourseCreationContext';
+import { useToast } from '@/hooks/useToast';
 
 import FloatButton from '@/components/FloatButton';
 import SVGColor from '@/components/SvgColor';
@@ -19,7 +20,9 @@ interface CreationBarProps {
 
 const CreationBar = ({ onCreateCourse }: CreationBarProps) => {
   const [t] = useTranslation();
-  const { mapInstance, buttonStates, handleGpxUpload, handleUndo, handleRedo, handleSwap, handleDelete, isLoading, isRouteGenerated } = useCourseCreation();
+  const { mapInstance, buttonStates, handleGpxUpload, handleUndo, handleRedo, handleSwap, handleDelete, isLoading, isRouteGenerated } =
+    useCourseCreation();
+  const { showErrorToast } = useToast();
 
   const moveToCurrentLocation = useDebouncedCurrentLocation(mapInstance);
 
@@ -35,7 +38,13 @@ const CreationBar = ({ onCreateCourse }: CreationBarProps) => {
         input.accept = '.gpx';
         input.onchange = e => {
           const file = (e.target as HTMLInputElement).files?.[0];
-          if (file) handleGpxUpload(file);
+          if (file) {
+            if (!file.name.toLowerCase().endsWith('.gpx')) {
+              showErrorToast('GPX 파일만 업로드 가능합니다.');
+              return;
+            }
+            handleGpxUpload(file);
+          }
         };
         input.click();
       },
@@ -83,9 +92,9 @@ const CreationBar = ({ onCreateCourse }: CreationBarProps) => {
 
   return (
     <Container>
-      <CreateButton 
-        enabled={buttonStates.create || isRouteGenerated} 
-        onClick={(buttonStates.create || isRouteGenerated) ? onCreateCourse : undefined}
+      <CreateButton
+        enabled={buttonStates.create || isRouteGenerated}
+        onClick={buttonStates.create || isRouteGenerated ? onCreateCourse : undefined}
         isLoading={isLoading}
       >
         {getButtonText()}
