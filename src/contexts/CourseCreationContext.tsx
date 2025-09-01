@@ -387,7 +387,7 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
         const trackPoints = coordinates.map((coord, index) => ({
           lat: coord.lat,
           lng: coord.lng,
-          elevation: 0,
+          elevation: coord.ele || 0,
           time: new Date(Date.now() + index * 1000),
         }));
 
@@ -396,6 +396,18 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
           description: `Course from ${startPoint} to ${endPoint}`,
           creator: 'Running Handai',
         });
+
+        // 디버깅을 위해 생성된 GPX 파일 다운로드
+        // if (process.env.NODE_ENV === 'development') {
+        //   const url = URL.createObjectURL(gpxFile);
+        //   const a = document.createElement('a');
+        //   a.href = url;
+        //   a.download = `debug-${startPoint}-${endPoint}.gpx`;
+        //   document.body.appendChild(a);
+        //   a.click();
+        //   document.body.removeChild(a);
+        //   URL.revokeObjectURL(url);
+        // }
       }
 
       // 썸네일 이미지를 800x800 WebP로 변환
