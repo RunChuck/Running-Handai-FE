@@ -6,7 +6,6 @@ import * as S from './CourseCreation.styled';
 import { useAuth } from '@/hooks/useAuth';
 import { useCourseCreation } from '@/contexts/CourseCreationContext';
 import { useToast } from '@/hooks/useToast';
-import { courseKeys } from '@/constants/queryKeys';
 
 import Header from '@/components/Header';
 import CommonModal from '@/components/CommonModal';
@@ -31,7 +30,8 @@ const CourseCreation = () => {
 
   const routeViewRef = useRef<HTMLDivElement>(null);
 
-  const { gpxData, handleMarkersChange, handleCourseCreate, setMapInstance, isRouteGenerated, isGpxUploaded, uploadedGpxFile } = useCourseCreation();
+  const { gpxData, handleMarkersChange, handleCourseCreate, submitCourse, setMapInstance, isRouteGenerated, isGpxUploaded, uploadedGpxFile } =
+    useCourseCreation();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -58,13 +58,27 @@ const CourseCreation = () => {
     setIsCourseCreationModalOpen(false);
   };
 
-  const handleCourseSubmit = async () => {
+  const handleCourseSubmit = async (courseData: { startPoint: string; endPoint: string; thumbnailBlob: Blob; isInBusan: boolean }) => {
     try {
       setIsCourseCreationModalOpen(false);
       setIsLoadingModalOpen(true);
 
+      await handleCourseCreate();
+      await submitCourse(courseData);
+
       // 코스 생성 성공 후 관련 쿼리 무효화
-      queryClient.invalidateQueries({ queryKey: courseKeys.all });
+      queryClient.invalidateQueries({
+        predicate: query => {
+          const [prefix, type] = query.queryKey;
+          return prefix === 'courses' && type === 'list';
+        },
+      });
+      queryClient.invalidateQueries({
+        predicate: query => {
+          const [prefix, type] = query.queryKey;
+          return prefix === 'auth' && type === 'my-courses';
+        },
+      });
 
       setTimeout(() => {
         setIsLoadingModalOpen(false);

@@ -8,6 +8,7 @@ export const areaCodeToDisplayName: Record<AreaCode, string> = {
   SOUTHERN_COAST: '남부해안',
   WESTERN_NAKDONGRIVER: '서부낙동강',
   NORTHERN_BUSAN: '북부산',
+  ETC: '기타',
 };
 
 export const getAreaDisplayName = (areaCode: AreaCode): string => {

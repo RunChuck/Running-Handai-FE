@@ -1,82 +1,182 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
+import { deleteCourse, updateCourse } from '@/api/create';
+import type { Course } from '@/types/create';
+import { useToast } from '@/hooks/useToast';
+import { authKeys } from '@/constants/queryKeys';
 
 import { Dropdown, DropdownItem } from '@/components/Dropdown';
+import CommonModal from '@/components/CommonModal';
+import CourseEditModal from '@/components/CourseEditModal';
 import TempThumbnailImgSrc from '@/assets/images/temp-courseCard.png';
 import MoreIconSrc from '@/assets/icons/more-24px.svg';
 import DistanceIconSrc from '@/assets/icons/course-distance.svg';
 import TimeIconSrc from '@/assets/icons/course-time.svg';
 import AltitudeIconSrc from '@/assets/icons/course-max-altitude.svg';
 
-const courseInfoItems = [
-  {
-    icon: DistanceIconSrc,
-    alt: 'distance',
-    label: '8.7km',
-  },
-  {
-    icon: TimeIconSrc,
-    alt: 'time',
-    label: '50분',
-  },
-  {
-    icon: AltitudeIconSrc,
-    alt: 'altitude',
-    label: '20m',
-  },
-];
-
 interface MyCourseCardProps {
   variant?: 'mypage' | 'grid';
+  course?: Course;
 }
 
-const MyCourseCard = ({ variant = 'mypage' }: MyCourseCardProps) => {
+const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
   const [t] = useTranslation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { showSuccessToast, showErrorToast } = useToast();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleCardClick = () => {
-    navigate(`/mypage/mycourse/${1}`);
+    navigate(`/mypage/mycourse/${course?.id}`);
   };
 
-  const handleEditClick = () => {
-    console.log('edit clicked');
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsDropdownOpen(false);
+    setIsEditModalOpen(true);
   };
 
-  const handleDeleteClick = () => {
-    console.log('delete clicked');
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsDropdownOpen(false);
+    setIsDeleteModalOpen(true);
   };
+
+  const handleDeleteConfirm = async () => {
+    if (!course?.id) return;
+
+    try {
+      await deleteCourse(course.id);
+
+      // 캐시 무효화
+      queryClient.invalidateQueries({ queryKey: authKeys.all });
+      queryClient.invalidateQueries({
+        predicate: query => {
+          const [prefix, type] = query.queryKey;
+          return prefix === 'courses' && type === 'list';
+        },
+      });
+
+      setIsDeleteModalOpen(false);
+      showSuccessToast('코스가 삭제되었습니다.');
+    } catch (error) {
+      console.error('Course deletion failed:', error);
+      showErrorToast('코스 삭제 중 오류가 발생했습니다.');
+      setIsDeleteModalOpen(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setIsDeleteModalOpen(false);
+  };
+
+  const handleEditConfirm = async (startPoint: string, endPoint: string) => {
+    if (!course?.id) return;
+
+    try {
+      await updateCourse(course.id, {
+        startPointName: startPoint,
+        endPointName: endPoint,
+      });
+
+      // 캐시 무효화
+      queryClient.invalidateQueries({
+        predicate: query => {
+          const [prefix, type] = query.queryKey;
+          return prefix === 'auth' || (prefix === 'courses' && (type === 'list' || type === 'detail'));
+        },
+      });
+
+      setIsEditModalOpen(false);
+      showSuccessToast('코스가 수정되었습니다.');
+    } catch (error) {
+      console.error('Course update failed:', error);
+      showErrorToast('코스 수정 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleEditCancel = () => {
+    setIsEditModalOpen(false);
+  };
+
+  const courseInfoItems = [
+    {
+      icon: DistanceIconSrc,
+      alt: 'distance',
+      label: `${course?.distance?.toFixed(1) || '0.0'}km`,
+    },
+    {
+      icon: TimeIconSrc,
+      alt: 'time',
+      label: `${course?.duration || 0}분`,
+    },
+    {
+      icon: AltitudeIconSrc,
+      alt: 'altitude',
+      label: `${course?.maxElevation?.toFixed(0) || 0}m`,
+    },
+  ];
 
   return (
-    <CardContainer $variant={variant} onClick={handleCardClick}>
-      <ThumbnailWrapper $variant={variant}>
-        <img src={TempThumbnailImgSrc} />
-      </ThumbnailWrapper>
-      <CourseInfoCard $variant={variant}>
-        <RowRapper>
-          <CreatedDate $variant={variant}>2025.01.01</CreatedDate>
-          <Dropdown trigger={<img src={MoreIconSrc} alt="more" width={20} height={20} />} width={80} padding="0">
-            <DropdownItem onClick={handleEditClick}>{t('edit')}</DropdownItem>
-            <DropdownItem onClick={handleDeleteClick} variant="danger">
-              {t('delete')}
-            </DropdownItem>
-          </Dropdown>
-        </RowRapper>
-        <CourseName $variant={variant}>부산에 놀러갔다가 러닝코스를 그려보고 싶어서 그려본 러닝코스</CourseName>
-        <CourseInfoWrapper $variant={variant}>
-          {courseInfoItems.map((item, index) => (
-            <CourseInfoItemGroup key={index} $variant={variant}>
-              <CourseInfoItem $variant={variant}>
-                <CourseInfoIcon src={item.icon} alt={item.alt} $variant={variant} />
-                <span>{item.label}</span>
-              </CourseInfoItem>
-              {index < courseInfoItems.length - 1 && <Divider />}
-            </CourseInfoItemGroup>
-          ))}
-        </CourseInfoWrapper>
-      </CourseInfoCard>
-    </CardContainer>
+    <>
+      <CardContainer $variant={variant} onClick={handleCardClick}>
+        <ThumbnailWrapper $variant={variant}>
+          <img src={course?.thumbnailUrl || TempThumbnailImgSrc} />
+        </ThumbnailWrapper>
+        <CourseInfoCard $variant={variant}>
+          <RowRapper>
+            <CreatedDate $variant={variant}>생성일</CreatedDate>
+            <Dropdown
+              trigger={<img src={MoreIconSrc} alt="more" width={20} height={20} />}
+              width={80}
+              padding="0"
+              isOpen={isDropdownOpen}
+              onToggle={setIsDropdownOpen}
+            >
+              <DropdownItem onClick={handleEditClick}>{t('edit')}</DropdownItem>
+              <DropdownItem onClick={handleDeleteClick} variant="danger">
+                {t('delete')}
+              </DropdownItem>
+            </Dropdown>
+          </RowRapper>
+          <CourseName $variant={variant}>{course?.name || '코스 이름'}</CourseName>
+          <CourseInfoWrapper $variant={variant}>
+            {courseInfoItems.map((item, index) => (
+              <CourseInfoItemGroup key={index} $variant={variant}>
+                <CourseInfoItem $variant={variant}>
+                  <CourseInfoIcon src={item.icon} alt={item.alt} $variant={variant} />
+                  <span>{item.label}</span>
+                </CourseInfoItem>
+                {index < courseInfoItems.length - 1 && <Divider />}
+              </CourseInfoItemGroup>
+            ))}
+          </CourseInfoWrapper>
+        </CourseInfoCard>
+      </CardContainer>
+
+      <CourseEditModal
+        isOpen={isEditModalOpen}
+        onClose={handleEditCancel}
+        onConfirm={handleEditConfirm}
+        initialStartPoint={course?.name?.split('-')[0] || ''}
+        initialEndPoint={course?.name?.split('-')[1] || ''}
+      />
+
+      <CommonModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        content={t('modal.courseCreation.deleteDesc')}
+        cancelText={t('modal.courseCreation.deleteCancel')}
+        confirmText={t('modal.courseCreation.deleteConfirm')}
+      />
+    </>
   );
 };
 
@@ -90,7 +190,7 @@ const CardContainer = styled.div<{ $variant: 'mypage' | 'grid' }>`
   min-height: ${({ $variant }) => ($variant === 'mypage' ? '240px' : 'unset')};
   border-radius: 8px;
   box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.2);
-  overflow: hidden;
+  overflow: visible;
   cursor: pointer;
 
   ${({ $variant }) =>
@@ -106,6 +206,7 @@ const ThumbnailWrapper = styled.div<{ $variant: 'mypage' | 'grid' }>`
   width: 100%;
   height: ${({ $variant }) => ($variant === 'grid' ? '153px' : '135px')};
   overflow: hidden;
+  border-radius: 8px 8px 0 0;
 
   ${({ $variant }) =>
     $variant === 'grid' &&

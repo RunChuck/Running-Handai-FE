@@ -58,7 +58,7 @@ const ReviewSection = ({ onTabChange, reviewData, courseId }: ReviewSectionProps
         <ReviewList courseId={courseId} reviewData={reviewData} skipQuery={true} />
       </S.ContentContainer>
 
-      {reviewData && reviewData.reviewInfoDtos.length > 2 && (
+      {reviewData && reviewData.reviewInfoDtos.length > 0 && (
         <Button
           backgroundColor="var(--bg-background-primary, #fff)"
           border="1px solid var(--line-line-002, #e0e0e0)"

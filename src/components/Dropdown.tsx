@@ -13,7 +13,7 @@ interface DropdownProps {
 }
 
 interface DropdownItemProps {
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent) => void;
   children: ReactNode;
   variant?: 'default' | 'danger';
 }
@@ -57,8 +57,14 @@ const Dropdown = ({ trigger, children, isOpen: controlledIsOpen, onToggle, width
 };
 
 const DropdownItem = ({ onClick, children, variant = 'default' }: DropdownItemProps) => {
+  const handleClick = (e: React.MouseEvent) => {
+    if (onClick) {
+      onClick(e);
+    }
+  };
+
   return (
-    <StyledDropdownItem onClick={onClick} $variant={variant}>
+    <StyledDropdownItem onClick={handleClick} $variant={variant}>
       {children}
     </StyledDropdownItem>
   );

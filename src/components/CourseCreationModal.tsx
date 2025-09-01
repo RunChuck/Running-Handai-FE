@@ -11,14 +11,11 @@ import CloseIconSrc from '@/assets/icons/close-24px.svg';
 import UploadIconSrc from '@/assets/icons/zoomIn-24px.svg';
 import InfoIconSrc from '@/assets/icons/info-primary.svg';
 
-type CourseCreationModalMode = 'create' | 'edit';
-
 interface CourseCreationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (courseData: { startPoint: string; endPoint: string; thumbnailBlob: Blob; isInBusan: boolean }) => void;
   confirmText: string;
-  mode?: CourseCreationModalMode;
   initialStartPoint?: string;
   initialEndPoint?: string;
   routeCoordinates?: { lat: number; lng: number }[];
@@ -32,7 +29,6 @@ const CourseCreationModal = ({
   onClose,
   onConfirm,
   confirmText: _confirmText,
-  mode: _mode = 'create',
   initialStartPoint = '',
   initialEndPoint = '',
   routeCoordinates = [],

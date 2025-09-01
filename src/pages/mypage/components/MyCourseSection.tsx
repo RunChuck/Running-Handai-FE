@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import * as S from '../MyPage.styled';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
+import { useMyCourses } from '@/hooks/useMyCourses';
 
 import MyCourseCard from './MyCourseCard';
 import SVGColor from '@/components/SvgColor';
@@ -17,10 +18,14 @@ const MyCourseSection = ({ isAuthenticated }: MyCourseSectionProps) => {
   const navigate = useNavigate();
   const { scrollContainerRef, handleMouseDown } = useHorizontalScroll();
 
-  // 테스트용
-  const myCourseCount = 10;
+  const { courses, courseCount, isLoading } = useMyCourses();
+  const myCourseCount = isAuthenticated ? courseCount : 0;
 
   const handleGoToCreateCourse = () => {
+    navigate('/course-creation');
+  };
+
+  const handleGoToMyCourse = () => {
     navigate('/mypage/mycourse');
   };
 
@@ -33,7 +38,7 @@ const MyCourseSection = ({ isAuthenticated }: MyCourseSectionProps) => {
           {myCourseCount > 0 && <S.CountText>{myCourseCount}</S.CountText>}
         </S.SectionTitle>
         {isAuthenticated && myCourseCount > 0 && (
-          <S.MoreButton onClick={handleGoToCreateCourse}>
+          <S.MoreButton onClick={handleGoToMyCourse}>
             {t('mypage.more')}
             <SVGColor src={ArrowIconSrc} width={16} height={16} color="#BBBBBB" />
           </S.MoreButton>
@@ -42,9 +47,15 @@ const MyCourseSection = ({ isAuthenticated }: MyCourseSectionProps) => {
       {isAuthenticated ? (
         myCourseCount > 0 ? (
           <S.CardList ref={scrollContainerRef} onMouseDown={handleMouseDown}>
-            <MyCourseCard />
-            <MyCourseCard />
-            <MyCourseCard />
+            {isLoading ? (
+              <>
+                <MyCourseCard />
+                <MyCourseCard />
+                <MyCourseCard />
+              </>
+            ) : (
+              courses.slice(0, 3).map(course => <MyCourseCard key={course.id} course={course} />)
+            )}
           </S.CardList>
         ) : (
           <S.SectionContent>
