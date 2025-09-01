@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { theme } from '@/styles/theme';
@@ -8,14 +8,19 @@ import type { SortBy } from '@/types/create';
 
 import Header from '@/components/Header';
 import MyCourseCard from '../components/MyCourseCard';
+import { DropdownItem } from '@/components/Dropdown';
+import SVGColor from '@/components/SvgColor';
 import EmptyIconSrc from '@/assets/icons/no-course.svg';
+import ArrowIconSrc from '@/assets/icons/arrow-down-16px.svg';
 
 const MyCoursePage = () => {
   const [t] = useTranslation();
   const navigate = useNavigate();
   const [sortBy, setSortBy] = useState<SortBy>('latest');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const sortSelectorRef = useRef<HTMLDivElement>(null);
 
-  const { courses, courseCount, isLoading } = useMyCourses(sortBy);
+  const { courses, isLoading } = useMyCourses(sortBy);
 
   const sortOptions = [
     { value: 'latest', label: '최신순' },
@@ -24,20 +29,58 @@ const MyCoursePage = () => {
     { value: 'long', label: '긴 코스' },
   ];
 
+  const currentSortLabel = sortOptions.find(option => option.value === sortBy)?.label || '최신순';
+
+  const handleSortChange = (value: SortBy) => {
+    setSortBy(value);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sortSelectorRef.current && !sortSelectorRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDropdownOpen]);
+
   return (
     <Container>
       <Header title={t('mypage.myCourse')} onBack={() => navigate(-1)} />
       <Content>
         <HeaderSection>
-          <CourseCount>{courseCount}개의 코스</CourseCount>
-          <SortSelector>
-            <select value={sortBy} onChange={e => setSortBy(e.target.value as SortBy)}>
+          <SortSelector ref={sortSelectorRef}>
+            <SortButton onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
+              <SortText>{currentSortLabel}</SortText>
+              <SVGColor
+                src={ArrowIconSrc}
+                alt="arrow"
+                color="#BBBBBB"
+                width={16}
+                height={16}
+                style={{ transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+              />
+            </SortButton>
+            <SortList isOpen={isDropdownOpen}>
               {sortOptions.map(option => (
-                <option key={option.value} value={option.value}>
+                <DropdownItem
+                  key={option.value}
+                  onClick={() => {
+                    handleSortChange(option.value as SortBy);
+                    setIsDropdownOpen(false);
+                  }}
+                >
                   {option.label}
-                </option>
+                </DropdownItem>
               ))}
-            </select>
+            </SortList>
           </SortSelector>
         </HeaderSection>
         <CardGrid>
@@ -71,32 +114,51 @@ const Content = styled.div`
 
 const HeaderSection = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   margin: var(--spacing-24) 0 var(--spacing-16) 0;
 `;
 
-const CourseCount = styled.div`
-  font-size: 16px;
-  font-weight: 600;
-  color: #1c1c1c;
+const SortSelector = styled.div`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 `;
 
-const SortSelector = styled.div`
-  select {
-    padding: 8px 12px;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    background-color: white;
-    font-size: 14px;
-    color: #1c1c1c;
-    cursor: pointer;
+const SortButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  background: none;
+  border: none;
+  cursor: pointer;
+`;
 
-    &:focus {
-      outline: none;
-      border-color: #007bff;
-    }
+const SortText = styled.span`
+  ${theme.typography.caption1}
+  color: var(--text-text-secondary, #555555);
+
+  &:hover {
+    color: var(--GrayScale-gray600, #777777);
   }
+`;
+
+const SortList = styled.div<{ isOpen: boolean }>`
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid var(--line-line-001, #eeeeee);
+  border-radius: 4px;
+  box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  width: 120px;
+  overflow: hidden;
+  opacity: ${props => (props.isOpen ? 1 : 0)};
+  visibility: ${props => (props.isOpen ? 'visible' : 'hidden')};
+  transform: ${props => (props.isOpen ? 'translateY(4px)' : 'translateY(0)')};
+  transition: all 0.2s ease;
 `;
 
 const CardGrid = styled.div`
