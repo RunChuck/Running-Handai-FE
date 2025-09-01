@@ -11,6 +11,7 @@ import { authKeys } from '@/constants/queryKeys';
 
 import { Dropdown, DropdownItem } from '@/components/Dropdown';
 import CommonModal from '@/components/CommonModal';
+import CourseEditModal from '@/components/CourseEditModal';
 import TempThumbnailImgSrc from '@/assets/images/temp-courseCard.png';
 import MoreIconSrc from '@/assets/icons/more-24px.svg';
 import DistanceIconSrc from '@/assets/icons/course-distance.svg';
@@ -28,6 +29,7 @@ const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
   const queryClient = useQueryClient();
   const { showSuccessToast, showErrorToast } = useToast();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const handleCardClick = () => {
     navigate(`/mypage/mycourse/${course?.id}`);
@@ -35,7 +37,7 @@ const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
 
   const handleEditClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log('edit clicked');
+    setIsEditModalOpen(true);
   };
 
   const handleDeleteClick = (e: React.MouseEvent) => {
@@ -69,6 +71,17 @@ const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
 
   const handleDeleteCancel = () => {
     setIsDeleteModalOpen(false);
+  };
+
+  const handleEditConfirm = (startPoint: string, endPoint: string) => {
+    // TODO: API 연결 후 코스 수정 로직 구현
+    console.log('Edit course:', { startPoint, endPoint });
+    setIsEditModalOpen(false);
+    showSuccessToast('코스가 수정되었습니다.');
+  };
+
+  const handleEditCancel = () => {
+    setIsEditModalOpen(false);
   };
 
   const courseInfoItems = [
@@ -119,6 +132,14 @@ const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
           </CourseInfoWrapper>
         </CourseInfoCard>
       </CardContainer>
+
+      <CourseEditModal
+        isOpen={isEditModalOpen}
+        onClose={handleEditCancel}
+        onConfirm={handleEditConfirm}
+        initialStartPoint={course?.name?.split(' - ')[0] || ''}
+        initialEndPoint={course?.name?.split(' - ')[1] || ''}
+      />
 
       <CommonModal
         isOpen={isDeleteModalOpen}
