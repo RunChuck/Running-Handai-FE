@@ -13,8 +13,9 @@ import { Dropdown, DropdownItem } from '@/components/Dropdown';
 import CourseInfoBar from '@/pages/courseCreation/components/CourseInfoBar';
 import CourseRouteMap from '@/components/CourseRouteMap';
 import CommonModal from '@/components/CommonModal';
+import CourseEditModal from '@/components/CourseEditModal';
 import MoreIconSrc from '@/assets/icons/more-24px.svg';
-import { deleteCourse, downloadGpx } from '@/api/create';
+import { deleteCourse, downloadGpx, updateCourse } from '@/api/create';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/useToast';
 
@@ -27,6 +28,7 @@ const MyCourseDetail = () => {
   const { showSuccessToast, showErrorToast } = useToast();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const courseId = parseInt(id || '0', 10);
   const { courseDetail, loading, error } = useCourseDetail(courseId);
@@ -36,6 +38,11 @@ const MyCourseDetail = () => {
       navigate('/mypage/mycourse', { replace: true });
     }
   }, [courseId, navigate]);
+
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsEditModalOpen(true);
+  };
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -69,6 +76,35 @@ const MyCourseDetail = () => {
 
   const handleDeleteCancel = () => {
     setIsDeleteModalOpen(false);
+  };
+
+  const handleEditConfirm = async (startPoint: string, endPoint: string) => {
+    if (!courseId) return;
+
+    try {
+      await updateCourse(courseId, {
+        startPointName: startPoint,
+        endPointName: endPoint,
+      });
+
+      // 캐시 무효화
+      queryClient.invalidateQueries({
+        predicate: query => {
+          const [prefix, type] = query.queryKey;
+          return prefix === 'auth' || (prefix === 'courses' && (type === 'list' || type === 'detail'));
+        },
+      });
+
+      setIsEditModalOpen(false);
+      showSuccessToast('코스가 수정되었습니다.');
+    } catch (error) {
+      console.error('Course update failed:', error);
+      showErrorToast('코스 수정 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleEditCancel = () => {
+    setIsEditModalOpen(false);
   };
 
   const handleGpxDownload = async () => {
@@ -129,7 +165,7 @@ const MyCourseDetail = () => {
           <CourseTitleContainer>
             <CourseTitle>{courseDetail.courseName}</CourseTitle>
             <ButtonWrapper>
-              <Button>{t('edit')}</Button>
+              <Button onClick={handleEditClick}>{t('edit')}</Button>
               <Button onClick={handleGpxDownload}>{t('mypage.myCourseDetail.gpxDownload')}</Button>
               <Dropdown trigger={<img src={MoreIconSrc} alt="more" width={24} height={24} />} width={80} padding="0">
                 <DropdownItem onClick={handleDeleteClick} variant="danger">
@@ -153,6 +189,14 @@ const MyCourseDetail = () => {
           </GraphContainer>
         </Content>
       </Container>
+
+      <CourseEditModal
+        isOpen={isEditModalOpen}
+        onClose={handleEditCancel}
+        onConfirm={handleEditConfirm}
+        initialStartPoint={courseDetail?.courseName?.split('-')[0] || ''}
+        initialEndPoint={courseDetail?.courseName?.split('-')[1] || ''}
+      />
 
       <CommonModal
         isOpen={isDeleteModalOpen}

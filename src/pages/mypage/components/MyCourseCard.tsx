@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
-import { deleteCourse } from '@/api/create';
+import { deleteCourse, updateCourse } from '@/api/create';
 import type { Course } from '@/types/create';
 import { useToast } from '@/hooks/useToast';
 import { authKeys } from '@/constants/queryKeys';
@@ -76,11 +76,29 @@ const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
     setIsDeleteModalOpen(false);
   };
 
-  const handleEditConfirm = (startPoint: string, endPoint: string) => {
-    // TODO: API 연결 후 코스 수정 로직 구현
-    console.log('Edit course:', { startPoint, endPoint });
-    setIsEditModalOpen(false);
-    showSuccessToast('코스가 수정되었습니다.');
+  const handleEditConfirm = async (startPoint: string, endPoint: string) => {
+    if (!course?.id) return;
+
+    try {
+      await updateCourse(course.id, {
+        startPointName: startPoint,
+        endPointName: endPoint,
+      });
+
+      // 캐시 무효화
+      queryClient.invalidateQueries({
+        predicate: query => {
+          const [prefix, type] = query.queryKey;
+          return prefix === 'auth' || (prefix === 'courses' && (type === 'list' || type === 'detail'));
+        },
+      });
+
+      setIsEditModalOpen(false);
+      showSuccessToast('코스가 수정되었습니다.');
+    } catch (error) {
+      console.error('Course update failed:', error);
+      showErrorToast('코스 수정 중 오류가 발생했습니다.');
+    }
   };
 
   const handleEditCancel = () => {
