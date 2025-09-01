@@ -30,6 +30,7 @@ const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
   const { showSuccessToast, showErrorToast } = useToast();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleCardClick = () => {
     navigate(`/mypage/mycourse/${course?.id}`);
@@ -37,11 +38,13 @@ const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
 
   const handleEditClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    setIsDropdownOpen(false);
     setIsEditModalOpen(true);
   };
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    setIsDropdownOpen(false);
     setIsDeleteModalOpen(true);
   };
 
@@ -111,7 +114,13 @@ const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
         <CourseInfoCard $variant={variant}>
           <RowRapper>
             <CreatedDate $variant={variant}>생성일</CreatedDate>
-            <Dropdown trigger={<img src={MoreIconSrc} alt="more" width={20} height={20} />} width={80} padding="0">
+            <Dropdown
+              trigger={<img src={MoreIconSrc} alt="more" width={20} height={20} />}
+              width={80}
+              padding="0"
+              isOpen={isDropdownOpen}
+              onToggle={setIsDropdownOpen}
+            >
               <DropdownItem onClick={handleEditClick}>{t('edit')}</DropdownItem>
               <DropdownItem onClick={handleDeleteClick} variant="danger">
                 {t('delete')}
@@ -137,8 +146,8 @@ const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
         isOpen={isEditModalOpen}
         onClose={handleEditCancel}
         onConfirm={handleEditConfirm}
-        initialStartPoint={course?.name?.split(' - ')[0] || ''}
-        initialEndPoint={course?.name?.split(' - ')[1] || ''}
+        initialStartPoint={course?.name?.split('-')[0] || ''}
+        initialEndPoint={course?.name?.split('-')[1] || ''}
       />
 
       <CommonModal
@@ -163,7 +172,7 @@ const CardContainer = styled.div<{ $variant: 'mypage' | 'grid' }>`
   min-height: ${({ $variant }) => ($variant === 'mypage' ? '240px' : 'unset')};
   border-radius: 8px;
   box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.2);
-  overflow: hidden;
+  overflow: visible;
   cursor: pointer;
 
   ${({ $variant }) =>
@@ -179,6 +188,7 @@ const ThumbnailWrapper = styled.div<{ $variant: 'mypage' | 'grid' }>`
   width: 100%;
   height: ${({ $variant }) => ($variant === 'grid' ? '153px' : '135px')};
   overflow: hidden;
+  border-radius: 8px 8px 0 0;
 
   ${({ $variant }) =>
     $variant === 'grid' &&
