@@ -7,6 +7,7 @@ import { theme } from '@/styles/theme';
 import { deleteCourse } from '@/api/create';
 import type { Course } from '@/types/create';
 import { useToast } from '@/hooks/useToast';
+import { authKeys } from '@/constants/queryKeys';
 
 import { Dropdown, DropdownItem } from '@/components/Dropdown';
 import CommonModal from '@/components/CommonModal';
@@ -49,16 +50,11 @@ const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
       await deleteCourse(course.id);
 
       // 캐시 무효화
+      queryClient.invalidateQueries({ queryKey: authKeys.all });
       queryClient.invalidateQueries({
         predicate: query => {
           const [prefix, type] = query.queryKey;
           return prefix === 'courses' && type === 'list';
-        },
-      });
-      queryClient.invalidateQueries({
-        predicate: query => {
-          const [prefix, type] = query.queryKey;
-          return prefix === 'auth' && type === 'my-courses';
         },
       });
 

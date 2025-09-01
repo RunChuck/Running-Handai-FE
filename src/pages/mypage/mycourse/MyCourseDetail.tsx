@@ -6,6 +6,7 @@ import { theme } from '@/styles/theme';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useCourseDetail } from '@/hooks/useCourseDetail';
 import { mapCourseInfo } from '@/utils/format';
+import { authKeys } from '@/constants/queryKeys';
 
 import Header from '@/components/Header';
 import { Dropdown, DropdownItem } from '@/components/Dropdown';
@@ -36,12 +37,6 @@ const MyCourseDetail = () => {
     }
   }, [courseId, navigate]);
 
-  const handleCopyLink = () => {
-    const url = `${window.location.origin}/course/${courseId}`;
-    navigator.clipboard.writeText(url);
-    showSuccessToast('링크가 복사되었습니다.');
-  };
-
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsDeleteModalOpen(true);
@@ -54,16 +49,11 @@ const MyCourseDetail = () => {
       await deleteCourse(courseId);
 
       // 캐시 무효화
+      queryClient.invalidateQueries({ queryKey: authKeys.all });
       queryClient.invalidateQueries({
         predicate: query => {
           const [prefix, type] = query.queryKey;
           return prefix === 'courses' && type === 'list';
-        },
-      });
-      queryClient.invalidateQueries({
-        predicate: query => {
-          const [prefix, type] = query.queryKey;
-          return prefix === 'auth' && type === 'my-courses';
         },
       });
 
@@ -86,12 +76,12 @@ const MyCourseDetail = () => {
 
     try {
       const presignedUrl = await downloadGpx(courseId);
-      
+
       // URL에서 원본 파일명 추출
       const urlObj = new URL(presignedUrl);
       const pathSegments = urlObj.pathname.split('/');
       const fileName = decodeURIComponent(pathSegments[pathSegments.length - 1].split('?')[0]) || 'course.gpx';
-      
+
       // presigned URL로 직접 다운로드
       const a = document.createElement('a');
       a.href = presignedUrl;
@@ -99,7 +89,7 @@ const MyCourseDetail = () => {
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      
+
       showSuccessToast('GPX 파일이 다운로드되었습니다.');
     } catch (error) {
       console.error('GPX download failed:', error);
@@ -142,7 +132,6 @@ const MyCourseDetail = () => {
               <Button>{t('edit')}</Button>
               <Button onClick={handleGpxDownload}>{t('mypage.myCourseDetail.gpxDownload')}</Button>
               <Dropdown trigger={<img src={MoreIconSrc} alt="more" width={24} height={24} />} width={80} padding="0">
-                <DropdownItem onClick={handleCopyLink}>{t('mypage.myCourseDetail.copyLink')}</DropdownItem>
                 <DropdownItem onClick={handleDeleteClick} variant="danger">
                   {t('delete')}
                 </DropdownItem>

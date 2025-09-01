@@ -25,6 +25,10 @@ const MyCourseSection = ({ isAuthenticated }: MyCourseSectionProps) => {
     navigate('/course-creation');
   };
 
+  const handleGoToMyCourse = () => {
+    navigate('/mypage/mycourse');
+  };
+
   return (
     <S.SectionContainer2>
       <S.SectionTitleWrapper>
@@ -34,7 +38,7 @@ const MyCourseSection = ({ isAuthenticated }: MyCourseSectionProps) => {
           {myCourseCount > 0 && <S.CountText>{myCourseCount}</S.CountText>}
         </S.SectionTitle>
         {isAuthenticated && myCourseCount > 0 && (
-          <S.MoreButton onClick={handleGoToCreateCourse}>
+          <S.MoreButton onClick={handleGoToMyCourse}>
             {t('mypage.more')}
             <SVGColor src={ArrowIconSrc} width={16} height={16} color="#BBBBBB" />
           </S.MoreButton>
