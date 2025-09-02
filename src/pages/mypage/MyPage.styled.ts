@@ -94,10 +94,14 @@ export const CardList = styled.div`
   -moz-user-select: none;
   -ms-user-select: none;
 
-  cursor: grab;
+  cursor: auto;
 
-  &:active {
-    cursor: grabbing;
+  &[data-scrollable='true'] {
+    cursor: grab;
+
+    &:active {
+      cursor: grabbing;
+    }
   }
 
   &::-webkit-scrollbar {
