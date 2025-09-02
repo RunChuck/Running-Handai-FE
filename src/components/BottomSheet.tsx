@@ -377,7 +377,7 @@ const PenButton = styled.button<{ showAnimation: boolean }>`
   background: none;
   border: none;
   cursor: pointer;
-  padding: var(--spacing-4);
+  padding: 6px;
   border-radius: 4px;
   transition: background-color 0.2s ease;
   position: relative;
@@ -398,23 +398,25 @@ const PenButton = styled.button<{ showAnimation: boolean }>`
       height: 28px;
       background: rgba(69, 97, 255, 0.3);
       border-radius: 50%;
-      transform: translate(-50%, -50%);
+      transform: translate3d(-50%, -50%, 0);
       animation: Pulse 2s ease-out infinite;
-      pointer-events: none;
-      z-index: 1;
+      pointer-events: none !important;
+      z-index: 0;
+      will-change: transform, opacity;
+      backface-visibility: hidden;
     }
 
     @keyframes Pulse {
       0% {
-        transform: translate(-50%, -50%) scale(1);
+        transform: translate3d(-50%, -50%, 0) scale(1);
         opacity: 0.6;
       }
       70% {
-        transform: translate(-50%, -50%) scale(1.3);
+        transform: translate3d(-50%, -50%, 0) scale(1.3);
         opacity: 0.2;
       }
       100% {
-        transform: translate(-50%, -50%) scale(1.5);
+        transform: translate3d(-50%, -50%, 0) scale(1.5);
         opacity: 0;
       }
     }
