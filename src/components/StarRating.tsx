@@ -37,7 +37,8 @@ const StarRating = ({
     const starWidth = rect.width;
     const isLeftHalf = clickX < starWidth / 2;
 
-    onRatingChange(starIndex + (isLeftHalf ? 0.5 : 1));
+    const newRating = starIndex + (isLeftHalf ? 0.5 : 1);
+    onRatingChange(Math.max(0.5, newRating));
   };
 
   const handleStart = (event: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
