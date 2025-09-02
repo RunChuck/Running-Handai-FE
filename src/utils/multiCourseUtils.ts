@@ -114,21 +114,6 @@ export const createMarkerClusterer = (
     disableClickZoom: true, // 확대 비활성화하여 바로 팝오버 표시
     minClusterSize: 2,
     gridSize: 40, // 반경 40px 내 마커들 클러스터링
-    styles: [
-      {
-        width: '26px',
-        height: '26px',
-        background: '#4561FF',
-        borderRadius: '50%',
-        color: '#FFF',
-        textAlign: 'center',
-        fontWeight: '600',
-        fontSize: '14px',
-        lineHeight: '24px',
-        border: '1px solid #1B37D3',
-        boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
-      },
-    ],
   });
 
   // 클러스터 클릭 이벤트
