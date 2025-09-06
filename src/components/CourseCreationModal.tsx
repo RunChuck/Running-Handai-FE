@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import { useCourseCreation } from '@/contexts/CourseCreationContext';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { useToast } from '@/hooks/useToast';
 
 import MapThumbnailCapture, { type MapThumbnailCaptureRef } from './MapThumbnailCapture';
 import CommonInput from './CommonInput';
@@ -54,6 +55,7 @@ const CourseCreationModal = ({
   } = useCourseCreation();
 
   const isMobile = useIsMobile();
+  const { showErrorToast } = useToast();
 
   // 모달 단계 상태
   const [currentStep, setCurrentStep] = useState<'courseInfo' | 'thumbnail' | 'upload'>('courseInfo');
@@ -71,6 +73,11 @@ const CourseCreationModal = ({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const imageContainerRef = useRef<HTMLDivElement>(null);
+
+  // 핀치 줌 상태
+  const [isPinching, setIsPinching] = useState(false);
+  const [initialDistance, setInitialDistance] = useState(0);
+  const [initialScale, setInitialScale] = useState(1);
 
   // 로딩 상태 (이미지 크롭 등)
   const [isLoading, setIsLoading] = useState(false);
@@ -184,25 +191,62 @@ const CourseCreationModal = ({
 
     const files = Array.from(e.dataTransfer.files);
     const imageFile = files.find(file => file.type.startsWith('image/'));
-    
+
     if (imageFile) {
       processImageFile(imageFile);
     }
   };
 
   // 클립보드 붙여넣기 핸들러
-  const handlePaste = (e: ClipboardEvent) => {
+  const handlePaste = useCallback(
+    (e: ClipboardEvent) => {
+      if (currentStep !== 'upload' || selectedImage) return;
+
+      const items = Array.from(e.clipboardData?.items || []);
+      const imageItem = items.find(item => item.type.startsWith('image/'));
+
+      if (imageItem) {
+        const file = imageItem.getAsFile();
+        if (file) {
+          processImageFile(file);
+        }
+      }
+    },
+    [currentStep, selectedImage, processImageFile]
+  );
+
+  // 클립보드에서 이미지 읽기 (버튼 클릭용)
+  const handleClipboardPaste = async () => {
     if (currentStep !== 'upload' || selectedImage) return;
 
-    const items = Array.from(e.clipboardData?.items || []);
-    const imageItem = items.find(item => item.type.startsWith('image/'));
-    
-    if (imageItem) {
-      const file = imageItem.getAsFile();
-      if (file) {
-        processImageFile(file);
+    try {
+      if (!navigator.clipboard || !navigator.clipboard.read) {
+        console.log('클립보드 API를 지원하지 않는 브라우저입니다.');
+        return;
       }
+
+      const clipboardItems = await navigator.clipboard.read();
+
+      for (const item of clipboardItems) {
+        const imageTypes = item.types.filter(type => type.startsWith('image/'));
+
+        if (imageTypes.length > 0) {
+          const imageBlob = await item.getType(imageTypes[0]);
+          const file = new File([imageBlob], 'clipboard-image.png', { type: imageTypes[0] });
+          processImageFile(file);
+          break;
+        }
+      }
+    } catch {
+      showErrorToast('클립보드에서 이미지를 읽을 수 없습니다.', { position: 'top' });
     }
+  };
+
+  // 두 터치 포인트 간 거리 계산
+  const getDistance = (touch1: React.Touch, touch2: React.Touch) => {
+    const dx = touch1.clientX - touch2.clientX;
+    const dy = touch1.clientY - touch2.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
   };
 
   // 이미지 로드 완료 핸들러
@@ -270,6 +314,9 @@ const CourseCreationModal = ({
     setImageScale(1);
     setImagePosition({ x: 0, y: 0 });
     setIsDragging(false);
+    setIsPinching(false);
+    setInitialDistance(0);
+    setInitialScale(1);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -330,33 +377,76 @@ const CourseCreationModal = ({
 
   // 터치 시작 (모바일)
   const handleTouchStart = (e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    setIsDragging(true);
-    setDragStart({
-      x: touch.clientX - imagePosition.x,
-      y: touch.clientY - imagePosition.y,
-    });
-    e.preventDefault(); // 스크롤 방지
+    e.preventDefault();
+
+    if (e.touches.length === 1) {
+      // 단일 터치 - 드래그 시작
+      const touch = e.touches[0];
+      setIsDragging(true);
+      setIsPinching(false);
+      setDragStart({
+        x: touch.clientX - imagePosition.x,
+        y: touch.clientY - imagePosition.y,
+      });
+    } else if (e.touches.length === 2) {
+      // 두 손가락 터치 - 핀치 줌 시작
+      setIsDragging(false);
+      setIsPinching(true);
+      const distance = getDistance(e.touches[0], e.touches[1]);
+      setInitialDistance(distance);
+      setInitialScale(imageScale);
+    }
   };
 
   // 터치 중 (모바일)
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging) return;
+    e.preventDefault();
 
-    const touch = e.touches[0];
-    setImagePosition({
-      x: touch.clientX - dragStart.x,
-      y: touch.clientY - dragStart.y,
-    });
-    e.preventDefault(); // 스크롤 방지
+    if (e.touches.length === 1 && isDragging && !isPinching) {
+      // 단일 터치 드래그
+      const touch = e.touches[0];
+      setImagePosition({
+        x: touch.clientX - dragStart.x,
+        y: touch.clientY - dragStart.y,
+      });
+    } else if (e.touches.length === 2 && isPinching) {
+      // 핀치 줌
+      const currentDistance = getDistance(e.touches[0], e.touches[1]);
+      const scaleChange = currentDistance / initialDistance;
+      const newScale = initialScale * scaleChange;
+
+      if (!imgRef.current) return;
+
+      const { naturalWidth, naturalHeight } = imgRef.current;
+      const containerSize = 311;
+      const scaleX = containerSize / naturalWidth;
+      const scaleY = containerSize / naturalHeight;
+      const minScale = Math.max(scaleX, scaleY);
+
+      const clampedScale = Math.max(minScale, Math.min(3, newScale));
+      setImageScale(clampedScale);
+    }
   };
 
   // 터치 종료 (모바일)
-  const handleTouchEnd = () => {
-    if (isDragging) {
-      setIsDragging(false);
-      // 드래그 완료 후 크롭 업데이트
-      setTimeout(() => cropCurrentView(), 50);
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (e.touches.length === 0) {
+      // 모든 터치 종료
+      if (isDragging || isPinching) {
+        setIsDragging(false);
+        setIsPinching(false);
+        // 조작 완료 후 크롭 업데이트
+        setTimeout(() => cropCurrentView(), 100);
+      }
+    } else if (e.touches.length === 1 && isPinching) {
+      // 핀치에서 드래그로 전환
+      setIsPinching(false);
+      setIsDragging(true);
+      const touch = e.touches[0];
+      setDragStart({
+        x: touch.clientX - imagePosition.x,
+        y: touch.clientY - imagePosition.y,
+      });
     }
   };
 
@@ -380,6 +470,9 @@ const CourseCreationModal = ({
       setImageScale(1);
       setImagePosition({ x: 0, y: 0 });
       setIsDragging(false);
+      setIsPinching(false);
+      setInitialDistance(0);
+      setInitialScale(1);
       setIsLoading(false);
 
       // 파일 input 초기화
@@ -522,6 +615,7 @@ const CourseCreationModal = ({
                     <img src={UploadIconSrc} alt="upload" />
                     썸네일 업로드
                   </UploadButton>
+                  <ClipboardPasteText onClick={handleClipboardPaste}>클립보드에서 붙여넣기</ClipboardPasteText>
                   <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} style={{ display: 'none' }} />
                 </UploadArea>
               ) : (
@@ -543,6 +637,7 @@ const CourseCreationModal = ({
                       src={selectedImage}
                       onLoad={onImageLoad}
                       alt="Crop preview"
+                      $isInteracting={isDragging || isPinching}
                       style={{
                         transform: `translate(-50%, -50%) scale(${imageScale}) translate(${imagePosition.x / imageScale}px, ${imagePosition.y / imageScale}px)`,
                         cursor: isDragging ? 'grabbing' : 'grab',
@@ -762,8 +857,8 @@ const ButtonRow = styled.div`
 const UploadArea = styled.div<{ isDragOver?: boolean }>`
   width: 311px;
   height: 311px;
-  border: 2px dashed ${props => props.isDragOver ? 'var(--primary-primary, #4261ff)' : 'var(--line-line-001, #eee)'};
-  background: ${props => props.isDragOver ? 'rgba(66, 97, 255, 0.05)' : 'var(--surface-surface-highlight3, #f7f8fa)'};
+  border: 2px dashed ${props => (props.isDragOver ? 'var(--primary-primary, #4261ff)' : 'var(--line-line-001, #eee)')};
+  background: ${props => (props.isDragOver ? 'rgba(66, 97, 255, 0.05)' : 'var(--surface-surface-highlight3, #f7f8fa)')};
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -829,15 +924,16 @@ const ImageContainer = styled.div`
   background: #f9f9f9;
 `;
 
-const CropImage = styled.img`
+const CropImage = styled.img<{ $isInteracting?: boolean }>`
   position: absolute;
   top: 50%;
   left: 50%;
   transform-origin: center center;
-  transition: transform 0.1s ease;
+  transition: ${props => (props.$isInteracting ? 'none' : 'transform 0.1s ease')};
   pointer-events: none;
   max-width: none;
   max-height: none;
+  will-change: transform;
 `;
 
 const ImageControls = styled.div`
@@ -903,4 +999,19 @@ const WarningTitle = styled.div`
   ${theme.typography.caption2}
   color: var(--text-text-title, #1c1c1c);
   margin-bottom: 4px;
+`;
+
+const ClipboardPasteText = styled.button`
+  ${theme.typography.caption2}
+  color: var(--text-text-secondary, #555555);
+  background: none;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 8px 0;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
 `;
