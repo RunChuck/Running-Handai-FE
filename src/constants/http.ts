@@ -86,11 +86,20 @@ client.interceptors.response.use(
     if (response?.status === 401 && !config.url?.includes('oauth/token')) {
       if (!isRefreshing) {
         isRefreshing = true;
-        const refreshToken = localStorage.getItem('refreshToken') || sessionStorage.getItem('refreshToken');
+        const isAutoLogin = localStorage.getItem('autoLogin') === 'true';
+        const refreshToken = isAutoLogin ? localStorage.getItem('refreshToken') : sessionStorage.getItem('refreshToken');
 
         if (refreshToken) {
           try {
-            const expiredAccessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+            const expiredAccessToken = isAutoLogin ? localStorage.getItem('accessToken') : sessionStorage.getItem('accessToken');
+
+            if (envConfig.isDev) {
+              console.log('토큰 재발급 시도:', {
+                isAutoLogin,
+                refreshToken: refreshToken.slice(0, 10) + '...',
+                hasExpiredToken: !!expiredAccessToken,
+              });
+            }
 
             const refreshResponse = await axios.post(`${envConfig.apiRoot}/api/members/oauth/token`, {
               refreshToken,
@@ -105,7 +114,6 @@ client.interceptors.response.use(
             }
 
             // 새 토큰 저장
-            const isAutoLogin = localStorage.getItem('autoLogin') === 'true';
             if (isAutoLogin) {
               localStorage.setItem('accessToken', newAccessToken);
               if (newRefreshToken) {
