@@ -301,8 +301,14 @@ const CourseCreationModal = ({
     }
   };
 
-  const isStartPointValid = startPoint.length > 0 && startPoint.length <= 20;
-  const isEndPointValid = endPoint.length > 0 && endPoint.length <= 20;
+  // 특수문자 및 공백 제거 함수 (한글, 영문, 숫자, ~, - 허용)
+  const handlePointChange = (setter: (value: string) => void) => (value: string) => {
+    const sanitized = value.replace(/[^ㄱ-ㅎㅏ-ㅣ가-힣a-zA-Z0-9~-]/g, '');
+    setter(sanitized);
+  };
+
+  const isStartPointValid = startPoint.length >= 2 && startPoint.length <= 20;
+  const isEndPointValid = endPoint.length >= 2 && endPoint.length <= 20;
   const isButtonDisabled = !isStartPointValid || !isEndPointValid;
 
   // 모달이 열릴 때 상태 초기화 및 썸네일 맵 업데이트
@@ -350,10 +356,16 @@ const CourseCreationModal = ({
                 <CommonInput
                   type="text"
                   value={startPoint}
-                  onChange={setStartPoint}
+                  onChange={handlePointChange(setStartPoint)}
                   placeholder={t('modal.courseCreation.startPointPlaceholder')}
-                  state={startPoint.length > 20 ? 'negative' : 'default'}
-                  validationText={startPoint.length > 20 ? t('modal.courseCreation.PointValidation') : undefined}
+                  state={startPoint.length < 2 && startPoint.length > 0 ? 'negative' : startPoint.length > 20 ? 'negative' : 'default'}
+                  validationText={
+                    startPoint.length < 2 && startPoint.length > 0
+                      ? '2글자 이상 입력해주세요'
+                      : startPoint.length > 20
+                        ? t('modal.courseCreation.PointValidation')
+                        : undefined
+                  }
                 />
               </InputWrapper>
               <InputWrapper>
@@ -361,10 +373,16 @@ const CourseCreationModal = ({
                 <CommonInput
                   type="text"
                   value={endPoint}
-                  onChange={setEndPoint}
+                  onChange={handlePointChange(setEndPoint)}
                   placeholder={t('modal.courseCreation.endPointPlaceholder')}
-                  state={endPoint.length > 20 ? 'negative' : 'default'}
-                  validationText={endPoint.length > 20 ? t('modal.courseCreation.PointValidation') : undefined}
+                  state={endPoint.length < 2 && endPoint.length > 0 ? 'negative' : endPoint.length > 20 ? 'negative' : 'default'}
+                  validationText={
+                    endPoint.length < 2 && endPoint.length > 0
+                      ? '2글자 이상 입력해주세요'
+                      : endPoint.length > 20
+                        ? t('modal.courseCreation.PointValidation')
+                        : undefined
+                  }
                 />
               </InputWrapper>
             </InputContent>
