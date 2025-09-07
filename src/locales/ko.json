@@ -2,7 +2,7 @@
   "menu": "메뉴",
   "seo": {
     "title": "러닝한다이",
-    "description": "부산에서 '러닝한다이'",
+    "description": "부산 러닝 코스를 찾는다면? 러닝한다이!",
     "courseDescription": "{{distance}}km · {{duration}}분 · 최고 {{maxElevation}}m · 최저 {{minElevation}}m · 난이도 {{level}}",
     "units": {
       "km": "km",
