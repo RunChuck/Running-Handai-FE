@@ -2,13 +2,17 @@ import { useTranslation } from 'react-i18next';
 import { useState, useRef, useEffect } from 'react';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
-import { checkIsInBusan } from '@/api/create';
+import { useCourseCreation } from '@/contexts/CourseCreationContext';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 import MapThumbnailCapture, { type MapThumbnailCaptureRef } from './MapThumbnailCapture';
 import CommonInput from './CommonInput';
 import Button from './Button';
 import CloseIconSrc from '@/assets/icons/close-24px.svg';
-import UploadIconSrc from '@/assets/icons/zoomIn-24px.svg';
+import UploadIconSrc from '@/assets/icons/upload.svg';
+import ZoomInIconSrc from '@/assets/icons/zoomIn-24px.svg';
+import ZoomOutIconSrc from '@/assets/icons/zoom-out.svg';
+import ResetIconSrc from '@/assets/icons/reset.svg';
 import InfoIconSrc from '@/assets/icons/info-primary.svg';
 
 interface CourseCreationModalProps {
@@ -29,20 +33,30 @@ const CourseCreationModal = ({
   onClose,
   onConfirm,
   confirmText: _confirmText,
-  initialStartPoint = '',
-  initialEndPoint = '',
   routeCoordinates = [],
   isGpxUploaded = false,
   gpxData = null,
 }: CourseCreationModalProps) => {
   const [t] = useTranslation();
-  const [startPoint, setStartPoint] = useState(initialStartPoint);
-  const [endPoint, setEndPoint] = useState(initialEndPoint);
   const [zoomLevel, setZoomLevel] = useState(5); // 카카오맵 줌 레벨 (1-14)
   const thumbnailMapRef = useRef<MapThumbnailCaptureRef>(null);
 
+  // Context에서 상태 및 함수 가져오기
+  const {
+    isInBusan,
+    hasCheckedLocation,
+    handleCheckLocation,
+    isLoading: contextLoading,
+    startPoint,
+    endPoint,
+    setStartPoint,
+    setEndPoint,
+  } = useCourseCreation();
+
+  const isMobile = useIsMobile();
+
   // 모달 단계 상태
-  const [currentStep, setCurrentStep] = useState<'preview' | 'upload'>('preview');
+  const [currentStep, setCurrentStep] = useState<'courseInfo' | 'thumbnail' | 'upload'>('courseInfo');
 
   // 이미지 업로드 및 크롭 상태
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -58,68 +72,54 @@ const CourseCreationModal = ({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const imageContainerRef = useRef<HTMLDivElement>(null);
 
-  // 부산 지역 체크 상태
+  // 로딩 상태 (이미지 크롭 등)
   const [isLoading, setIsLoading] = useState(false);
-  const [isInBusan, setIsInBusan] = useState<boolean | null>(null);
-  const [hasCheckedLocation, setHasCheckedLocation] = useState(false);
 
   const handleConfirm = async () => {
     if (!croppedImageBlob) return;
 
-    // 좌표 데이터 확인 - GPX 업로드된 경우 gpxData에서, 아니면 routeCoordinates에서
-    const coordinates = isGpxUploaded && gpxData?.coordinates ? gpxData.coordinates : routeCoordinates;
-    if (!coordinates.length) return;
-
-    const startCoordinate = coordinates[0];
-
     try {
       setIsLoading(true);
 
-      // 첫 번째 클릭: 부산 지역 체크
-      if (!hasCheckedLocation) {
-        const locationResult = await checkIsInBusan({
-          lat: startCoordinate.lat,
-          lon: startCoordinate.lng,
-        });
-
-        setIsInBusan(locationResult.data);
-        setHasCheckedLocation(true);
-
-        // 부산이면 바로 등록 진행
-        if (locationResult.data) {
-          onConfirm({
-            startPoint,
-            endPoint,
-            thumbnailBlob: croppedImageBlob,
-            isInBusan: true,
-          });
-        }
-      } else {
-        // 두 번째 클릭: 등록 진행 (비부산 지역)
-        onConfirm({
-          startPoint,
-          endPoint,
-          thumbnailBlob: croppedImageBlob,
-          isInBusan: isInBusan || false,
-        });
-      }
+      // 최종 등록 진행
+      onConfirm({
+        startPoint,
+        endPoint,
+        thumbnailBlob: croppedImageBlob,
+        isInBusan: isInBusan || false,
+      });
     } catch (error) {
-      console.error('부산 지역 체크 실패:', error);
+      console.error('코스 등록 실패:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleNextStep = () => {
-    setCurrentStep('upload');
+  const handleNextStep = async () => {
+    if (currentStep === 'courseInfo') {
+      try {
+        await handleCheckLocation();
+        setCurrentStep('thumbnail');
+      } catch (error) {
+        console.error('부산 지역 체크 실패:', error);
+        // 실패해도 다음 단계로 진행
+        setCurrentStep('thumbnail');
+      }
+    } else if (currentStep === 'thumbnail') {
+      setCurrentStep('upload');
+    }
   };
 
-  const handleBackToPreview = () => {
-    setCurrentStep('preview');
-    setSelectedImage(null);
-    setCroppedImageBlob(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+  const handlePrevStep = () => {
+    if (currentStep === 'upload') {
+      setCurrentStep('thumbnail');
+      setSelectedImage(null);
+      setCroppedImageBlob(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } else if (currentStep === 'thumbnail') {
+      setCurrentStep('courseInfo');
     }
   };
 
@@ -241,7 +241,7 @@ const CourseCreationModal = ({
     handleZoom(delta);
   };
 
-  // 드래그 시작
+  // 드래그 시작 (마우스)
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
     setDragStart({
@@ -250,7 +250,7 @@ const CourseCreationModal = ({
     });
   };
 
-  // 드래그 중
+  // 드래그 중 (마우스)
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return;
 
@@ -260,7 +260,7 @@ const CourseCreationModal = ({
     });
   };
 
-  // 드래그 종료
+  // 드래그 종료 (마우스)
   const handleMouseUp = () => {
     if (isDragging) {
       setIsDragging(false);
@@ -269,20 +269,36 @@ const CourseCreationModal = ({
     }
   };
 
-  // 이미지 위치 초기화
-  const handleResetPosition = () => {
-    if (!imgRef.current) return;
+  // 터치 시작 (모바일)
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    setIsDragging(true);
+    setDragStart({
+      x: touch.clientX - imagePosition.x,
+      y: touch.clientY - imagePosition.y,
+    });
+    e.preventDefault(); // 스크롤 방지
+  };
 
-    const { naturalWidth, naturalHeight } = imgRef.current;
-    const containerSize = 300;
-    const scaleX = containerSize / naturalWidth;
-    const scaleY = containerSize / naturalHeight;
-    const coverScale = Math.max(scaleX, scaleY);
+  // 터치 중 (모바일)
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return;
 
-    setImageScale(coverScale);
-    setImagePosition({ x: 0, y: 0 });
-    // 리셋 후 크롭 업데이트
-    setTimeout(() => cropCurrentView(), 50);
+    const touch = e.touches[0];
+    setImagePosition({
+      x: touch.clientX - dragStart.x,
+      y: touch.clientY - dragStart.y,
+    });
+    e.preventDefault(); // 스크롤 방지
+  };
+
+  // 터치 종료 (모바일)
+  const handleTouchEnd = () => {
+    if (isDragging) {
+      setIsDragging(false);
+      // 드래그 완료 후 크롭 업데이트
+      setTimeout(() => cropCurrentView(), 50);
+    }
   };
 
   const isStartPointValid = startPoint.length > 0 && startPoint.length <= 20;
@@ -293,15 +309,13 @@ const CourseCreationModal = ({
   useEffect(() => {
     if (isOpen) {
       // 모달이 열릴 때마다 1단계로 초기화
-      setCurrentStep('preview');
+      setCurrentStep('courseInfo');
       setSelectedImage(null);
       setCroppedImageBlob(null);
       setImageScale(1);
       setImagePosition({ x: 0, y: 0 });
       setIsDragging(false);
       setIsLoading(false);
-      setIsInBusan(null);
-      setHasCheckedLocation(false);
 
       // 파일 input 초기화
       if (fileInputRef.current) {
@@ -325,19 +339,12 @@ const CourseCreationModal = ({
           <img src={CloseIconSrc} alt="close" />
         </CloseButton>
 
-        {/* 단계 표시 */}
-        <StepIndicator>
-          <StepDot active={currentStep === 'preview'}>1</StepDot>
-          <StepLine active={currentStep === 'upload'} />
-          <StepDot active={currentStep === 'upload'}>2</StepDot>
-        </StepIndicator>
-
-        {currentStep === 'preview' ? (
-          // 1단계: 코스 정보 입력 및 미리보기
+        {currentStep === 'courseInfo' ? (
+          // 1단계: 코스명 입력
           <>
             <Title>코스 정보 입력</Title>
 
-            <InputRow>
+            <InputContent>
               <InputWrapper>
                 <InputLabel>{t('modal.courseCreation.startPoint')}</InputLabel>
                 <CommonInput
@@ -360,54 +367,68 @@ const CourseCreationModal = ({
                   validationText={endPoint.length > 20 ? t('modal.courseCreation.PointValidation') : undefined}
                 />
               </InputWrapper>
-            </InputRow>
+            </InputContent>
 
+            <Button variant="primary" fullWidth disabled={isButtonDisabled || contextLoading} onClick={handleNextStep}>
+              {contextLoading ? '위치 확인 중...' : '다음'}
+            </Button>
+          </>
+        ) : currentStep === 'thumbnail' ? (
+          // 2단계: 썸네일 조정 및 미리보기
+          <>
             <ThumbnailSection>
-              <SectionTitle>썸네일 미리보기</SectionTitle>
-              <StepGuide>
-                <p>📸 지도를 원하는 크기로 조정한 후</p>
-                <p>스크린샷을 찍어서 다음 단계로 진행해주세요</p>
-              </StepGuide>
+              <SectionTitleWrapper>
+                <SectionTitle>썸네일 미리보기</SectionTitle>
+                <StepGuide>지도를 확대 또는 축소하여{isMobile && <br />} 원하는 썸네일 크기로 조정한 후 캡쳐해주세요</StepGuide>
+              </SectionTitleWrapper>
+
+              {/* 부산 지역 체크 후 경고 메시지 */}
+              {hasCheckedLocation && isInBusan === false && (
+                <WarningMessage>
+                  <WarningTitle>
+                    <img src={InfoIconSrc} alt="info" width={16} height={16} />
+                    현재 베타 버전이에요!
+                  </WarningTitle>
+                  부산 외 지역은 5km 반경 내에서만 나타나요
+                </WarningMessage>
+              )}
               <MapPreview>
                 <MapThumbnailCapture ref={thumbnailMapRef} coordinates={routeCoordinates} zoomLevel={zoomLevel} onZoomChange={handleZoomChange} />
               </MapPreview>
               <ZoomControls>
                 <ZoomLabel>
-                  <img src={UploadIconSrc} alt="zoom" />
+                  <img src={ZoomInIconSrc} alt="zoom" />
                   확대
                 </ZoomLabel>
                 <ZoomSlider type="range" min="1" max="14" value={15 - zoomLevel} onChange={handleZoomSliderChange} />
               </ZoomControls>
             </ThumbnailSection>
 
-            <Button variant="primary" fullWidth disabled={isButtonDisabled} onClick={handleNextStep}>
-              다음
-            </Button>
+            <ButtonRow>
+              <Button variant="secondary" onClick={handlePrevStep}>
+                이전
+              </Button>
+              <Button variant="primary" onClick={handleNextStep}>
+                다음
+              </Button>
+            </ButtonRow>
           </>
         ) : (
-          // 2단계: 스크린샷 업로드 및 크롭
+          // 3단계: 스크린샷 업로드 및 크롭
           <>
             <ThumbnailSection>
-              {/* 비부산 지역 경고 메시지 */}
-              {hasCheckedLocation && isInBusan === false && (
-                <WarningMessage>
-                  <WarningTitle>
-                    <img src={InfoIconSrc} alt="info" />
-                    현재 베타 버전이에요!
-                  </WarningTitle>
-                  부산 외 지역은
-                  <br />
-                  <strong>'마이페이지 &gt; 내 코스'</strong>에서만 볼 수 있어요. <br />곧 업데이트 예정이에요.
-                </WarningMessage>
-              )}
-              <SectionTitle>썸네일 등록</SectionTitle>
+              <SectionTitle>{!selectedImage ? '썸네일 업로드' : '썸네일 편집'}</SectionTitle>
 
               {!selectedImage ? (
                 <UploadArea>
                   <UploadGuide>
-                    <p>방금 조정한 스크린샷을 업로드해주세요</p>
+                    <p>전 단계에서 캡쳐한 썸네일을 업로드 해주세요</p>
+                    <strong>*부적절한 이미지 업로드 시 삭제될 수 있습니다.</strong>
                   </UploadGuide>
-                  <UploadButton onClick={handleImageUploadClick}>스크린샷 업로드</UploadButton>
+                  <UploadButton onClick={handleImageUploadClick}>
+                    <img src={UploadIconSrc} alt="upload" />
+                    썸네일 업로드
+                  </UploadButton>
                   <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} style={{ display: 'none' }} />
                 </UploadArea>
               ) : (
@@ -420,6 +441,9 @@ const CourseCreationModal = ({
                     onMouseMove={handleMouseMove}
                     onMouseUp={handleMouseUp}
                     onMouseLeave={handleMouseUp}
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
                   >
                     <CropImage
                       ref={imgRef}
@@ -434,27 +458,29 @@ const CourseCreationModal = ({
                   </ImageContainer>
 
                   <ImageControls>
-                    <ControlButton onClick={() => handleZoom(0.1)}>확대 (+)</ControlButton>
-                    <ControlButton onClick={() => handleZoom(-0.1)}>축소 (-)</ControlButton>
-                    <ControlButton onClick={handleResetPosition}>초기화</ControlButton>
-                    {/* <ControlButton onClick={handleDownloadCroppedImage} disabled={!croppedImageBlob}>
-                      다운로드
-                    </ControlButton> */}
+                    <ControlButton onClick={() => handleZoom(0.1)}>
+                      <img src={ZoomInIconSrc} alt="zoom in" width={16} height={16} />
+                      확대
+                    </ControlButton>
+                    <ControlButton onClick={() => handleZoom(-0.1)}>
+                      <img src={ZoomOutIconSrc} alt="zoom out" width={16} height={16} />
+                      축소
+                    </ControlButton>
+                    <ControlButton onClick={handleImageReset}>
+                      <img src={ResetIconSrc} alt="reset" width={16} height={16} />
+                      다시 선택
+                    </ControlButton>
                   </ImageControls>
-                  <CropControls>
-                    <ResetButton onClick={handleImageReset}>다시 선택</ResetButton>
-                  </CropControls>
                 </CropArea>
               )}
             </ThumbnailSection>
-            <WarningGuide>* 적절하지 않은 이미지 업로드시 코스가 삭제될 수 있습니다.</WarningGuide>
 
             <ButtonRow>
-              <Button variant="secondary" onClick={handleBackToPreview}>
+              <Button variant="secondary" onClick={handlePrevStep}>
                 이전
               </Button>
               <Button variant="primary" disabled={!croppedImageBlob || isLoading} onClick={handleConfirm}>
-                {isLoading ? '처리 중...' : hasCheckedLocation && !isInBusan ? '등록하기' : '완료'}
+                {isLoading ? '처리 중...' : '완료'}
               </Button>
             </ButtonRow>
           </>
@@ -483,7 +509,6 @@ const Overlay = styled.div`
 const ModalContainer = styled.div`
   width: calc(100% - 32px);
   max-width: 568px;
-  // TODO: 추후 UI 나오면 수정 필요
   background: var(--surface-surface-default, #ffffff);
   border-radius: 16px;
   padding: var(--spacing-32) var(--spacing-16) var(--spacing-16);
@@ -523,15 +548,12 @@ const Title = styled.div`
   text-align: center;
 `;
 
-const InputRow = styled.div`
+const InputContent = styled.div`
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  padding: 12px 0;
   width: 100%;
-
-  & > * {
-    flex: 1;
-    min-width: 0;
-  }
+  gap: 8px;
 `;
 
 const InputWrapper = styled.div`
@@ -552,6 +574,13 @@ const ThumbnailSection = styled.div`
   width: 100%;
 `;
 
+const SectionTitleWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+`;
+
 const SectionTitle = styled.div`
   ${theme.typography.subtitle2}
   color: var(--text-text-title, #1c1c1c);
@@ -560,8 +589,8 @@ const SectionTitle = styled.div`
 
 const MapPreview = styled.div`
   width: 100%;
-  height: 300px;
-  width: 300px;
+  height: 311px;
+  width: 311px;
   border: 1px solid var(--line-line-001, #eee);
   background: var(--surface-surface-highlight3, #f7f8fa);
   display: flex;
@@ -611,46 +640,13 @@ const ZoomSlider = styled.input`
   }
 `;
 
-const StepIndicator = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 4px;
-  gap: 8px;
-`;
-
-const StepDot = styled.div<{ active: boolean }>`
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  ${theme.typography.body2}
-  font-weight: 600;
-  background: ${props => (props.active ? 'var(--primary-primary, #4261ff)' : 'var(--surface-surface-highlight, #f4f4f4)')};
-  color: ${props => (props.active ? 'white' : 'var(--text-text-subtitle, #666)')};
-  transition: all 0.3s ease;
-`;
-
-const StepLine = styled.div<{ active: boolean }>`
-  width: 40px;
-  height: 2px;
-  background: ${props => (props.active ? 'var(--primary-primary, #4261ff)' : 'var(--line-line-001, #eee)')};
-  transition: all 0.3s ease;
-`;
-
 const StepGuide = styled.div`
+  ${theme.typography.body2}
+  color: var(--text-text-secondary, #555);
   text-align: center;
-  padding: 8px;
-  background: var(--surface-surface-highlight3, #f7f8fa);
-  border-radius: 8px;
-  border: 1px solid var(--line-line-001, #eee);
 
-  p {
-    ${theme.typography.body2}
-    color: var(--text-text-subtitle, #666);
-    margin: 2px 0;
+  @media (max-width: 600px) {
+    ${theme.typography.label2}
   }
 `;
 
@@ -671,16 +667,15 @@ const ButtonRow = styled.div`
 `;
 
 const UploadArea = styled.div`
-  width: 300px;
-  height: 300px;
+  width: 311px;
+  height: 311px;
   border: 2px dashed var(--line-line-001, #eee);
-  border-radius: 8px;
   background: var(--surface-surface-highlight3, #f7f8fa);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 12px;
 `;
 
 const UploadGuide = styled.div`
@@ -688,23 +683,32 @@ const UploadGuide = styled.div`
 
   p {
     ${theme.typography.body2}
-    color: var(--text-text-subtitle, #666);
-    margin: 4px 0;
+    color: var(--text-text-secondary, #555555);
+  }
+
+  strong {
+    ${theme.typography.caption2}
+    color: var(--text-text-secondary, #555555);
   }
 `;
 
 const UploadButton = styled.button`
-  ${theme.typography.body1}
-  background: var(--primary-primary, #4261ff);
-  color: white;
-  border: none;
+  ${theme.typography.caption2}
+  background: #ffffff;
+  color: var(--GrayScale-gray500, #999);
+  border: 1px solid var(--line-line-001, #eee);
   border-radius: 8px;
   padding: 12px 24px;
   cursor: pointer;
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  height: 40px;
 
   &:hover {
-    background: var(--primary-primary002, #2845e9);
+    background: var(--surface-surface-highlight, #f4f4f4);
   }
 
   &:active {
@@ -717,13 +721,13 @@ const CropArea = styled.div`
   flex-direction: column;
   gap: 8px;
   width: 100%;
+  margin-top: -4px;
 `;
 
 const ImageContainer = styled.div`
-  width: 300px;
-  height: 300px;
+  width: 311px;
+  height: 311px;
   border: 2px solid var(--line-line-001, #eee);
-  border-radius: 8px;
   overflow: hidden;
   position: relative;
   margin: 0 auto;
@@ -745,71 +749,52 @@ const CropImage = styled.img`
 const ImageControls = styled.div`
   display: flex;
   gap: 8px;
+  width: 100%;
+  max-width: 311px;
   justify-content: center;
+  margin: 0 auto;
 `;
 
 const ControlButton = styled.button<{ disabled?: boolean }>`
-  ${theme.typography.caption1}
-  color: ${props => (props.disabled ? 'var(--text-text-disable, #ccc)' : 'var(--primary-primary, #4261ff)')};
-  background: transparent;
-  border: 1px solid ${props => (props.disabled ? 'var(--line-line-001, #eee)' : 'var(--primary-primary, #4261ff)')};
-  border-radius: 6px;
-  padding: 6px 12px;
-  cursor: ${props => (props.disabled ? 'not-allowed' : 'pointer')};
-  transition: all 0.2s ease;
+  ${theme.typography.caption2}
+  background: #ffffff;
+  color: var(--GrayScale-gray500, #999);
+  border: 1px solid var(--line-line-001, #eee);
+  border-radius: 8px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 40px;
+  flex: 1;
+  justify-content: center;
 
-  &:hover:not(:disabled) {
-    background: var(--primary-primary, #4261ff);
-    color: white;
+  &:hover {
+    background: var(--surface-surface-highlight, #f4f4f4);
   }
 
-  &:active:not(:disabled) {
+  &:active {
     transform: translateY(1px);
   }
 
   &:disabled {
     opacity: 0.5;
+    cursor: not-allowed;
   }
-`;
-
-const CropControls = styled.div`
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  margin-top: 8px;
-`;
-
-const ResetButton = styled.button`
-  ${theme.typography.body2}
-  color: var(--text-text-subtitle, #666);
-  background: transparent;
-  border: 1px solid var(--line-line-001, #eee);
-  border-radius: 8px;
-  padding: 8px 16px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:hover {
-    background: var(--surface-surface-highlight, #f4f4f4);
-  }
-`;
-
-const WarningGuide = styled.div`
-  ${theme.typography.body2}
-  color: var(--text-text-subtitle, #666);
-  text-align: center;
 `;
 
 const WarningMessage = styled.div`
-  ${theme.typography.body2}
+  ${theme.typography.caption3}
   color: var(--text-text-secondary, #555555);
   background: var(--surface-surface-highlight3, #f7f8fa);
-  padding: 16px;
+  padding: 8px;
   border-radius: 8px;
   text-align: center;
-  margin-bottom: 4px;
   border: 1px solid var(--line-line-001, #eee);
   width: 100%;
+  max-width: 311px;
 
   strong {
     font-weight: 600;
@@ -821,7 +806,7 @@ const WarningTitle = styled.div`
   display: flex;
   justify-content: center;
   gap: 4px;
-  ${theme.typography.subtitle3}
+  ${theme.typography.caption2}
   color: var(--text-text-title, #1c1c1c);
   margin-bottom: 4px;
 `;
