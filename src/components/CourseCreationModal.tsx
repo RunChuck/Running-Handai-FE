@@ -75,6 +75,9 @@ const CourseCreationModal = ({
   // 로딩 상태 (이미지 크롭 등)
   const [isLoading, setIsLoading] = useState(false);
 
+  // 드래그 앤 드롭 상태
+  const [isDragOver, setIsDragOver] = useState(false);
+
   const handleConfirm = async () => {
     if (!croppedImageBlob) return;
 
@@ -133,9 +136,8 @@ const CourseCreationModal = ({
     thumbnailMapRef.current?.setZoom(newZoomLevel);
   };
 
-  // 이미지 파일 선택 핸들러
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  // 이미지 파일 처리 공통 함수
+  const processImageFile = (file: File) => {
     if (file && file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = () => {
@@ -146,12 +148,69 @@ const CourseCreationModal = ({
     }
   };
 
+  // 이미지 파일 선택 핸들러
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processImageFile(file);
+    }
+  };
+
+  // 드래그 앤 드롭 이벤트 핸들러
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // 실제로 UploadArea를 벗어났을 때만 상태 변경
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsDragOver(false);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    const imageFile = files.find(file => file.type.startsWith('image/'));
+    
+    if (imageFile) {
+      processImageFile(imageFile);
+    }
+  };
+
+  // 클립보드 붙여넣기 핸들러
+  const handlePaste = (e: ClipboardEvent) => {
+    if (currentStep !== 'upload' || selectedImage) return;
+
+    const items = Array.from(e.clipboardData?.items || []);
+    const imageItem = items.find(item => item.type.startsWith('image/'));
+    
+    if (imageItem) {
+      const file = imageItem.getAsFile();
+      if (file) {
+        processImageFile(file);
+      }
+    }
+  };
+
   // 이미지 로드 완료 핸들러
   const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const { naturalWidth, naturalHeight } = e.currentTarget;
 
     // cover 방식: 컨테이너를 완전히 덮도록 스케일 설정
-    const containerSize = 300;
+    const containerSize = 311;
     const scaleX = containerSize / naturalWidth;
     const scaleY = containerSize / naturalHeight;
 
@@ -172,9 +231,9 @@ const CourseCreationModal = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // 600x600 고해상도 캔버스 생성
-    canvas.width = 600;
-    canvas.height = 600;
+    // 622x622 고해상도 캔버스 생성 (311 * 2)
+    canvas.width = 622;
+    canvas.height = 622;
 
     const img = imgRef.current;
     const container = imageContainerRef.current;
@@ -188,8 +247,8 @@ const CourseCreationModal = ({
     const relativeY = imgRect.top - containerRect.top;
 
     // 고해상도 캔버스용 스케일 계산 (2배)
-    const scaleX = 600 / containerRect.width;
-    const scaleY = 600 / containerRect.height;
+    const scaleX = 622 / containerRect.width;
+    const scaleY = 622 / containerRect.height;
 
     // 고해상도 캔버스에 이미지 그리기
     ctx.drawImage(img, relativeX * scaleX, relativeY * scaleY, imgRect.width * scaleX, imgRect.height * scaleY);
@@ -222,7 +281,7 @@ const CourseCreationModal = ({
       if (!imgRef.current) return prev;
 
       const { naturalWidth, naturalHeight } = imgRef.current;
-      const containerSize = 300;
+      const containerSize = 311;
       const scaleX = containerSize / naturalWidth;
       const scaleY = containerSize / naturalHeight;
       const minScale = Math.max(scaleX, scaleY);
@@ -336,6 +395,16 @@ const CourseCreationModal = ({
     }
   }, [isOpen, routeCoordinates, gpxData, isGpxUploaded]);
 
+  // 클립보드 붙여넣기 이벤트 리스너 등록
+  useEffect(() => {
+    if (isOpen && currentStep === 'upload') {
+      document.addEventListener('paste', handlePaste);
+      return () => {
+        document.removeEventListener('paste', handlePaste);
+      };
+    }
+  }, [isOpen, currentStep, selectedImage, handlePaste]);
+
   if (!isOpen) return null;
 
   return (
@@ -438,7 +507,13 @@ const CourseCreationModal = ({
               <SectionTitle>{!selectedImage ? '썸네일 업로드' : '썸네일 편집'}</SectionTitle>
 
               {!selectedImage ? (
-                <UploadArea>
+                <UploadArea
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                  isDragOver={isDragOver}
+                >
                   <UploadGuide>
                     <p>전 단계에서 캡쳐한 썸네일을 업로드 해주세요</p>
                     <strong>*부적절한 이미지 업로드 시 삭제될 수 있습니다.</strong>
@@ -684,16 +759,17 @@ const ButtonRow = styled.div`
   }
 `;
 
-const UploadArea = styled.div`
+const UploadArea = styled.div<{ isDragOver?: boolean }>`
   width: 311px;
   height: 311px;
-  border: 2px dashed var(--line-line-001, #eee);
-  background: var(--surface-surface-highlight3, #f7f8fa);
+  border: 2px dashed ${props => props.isDragOver ? 'var(--primary-primary, #4261ff)' : 'var(--line-line-001, #eee)'};
+  background: ${props => props.isDragOver ? 'rgba(66, 97, 255, 0.05)' : 'var(--surface-surface-highlight3, #f7f8fa)'};
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 12px;
+  transition: all 0.2s ease;
 `;
 
 const UploadGuide = styled.div`
