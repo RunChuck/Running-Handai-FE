@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import * as S from '../MyPage.styled';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
-import { useMyCourses } from '@/hooks/useMyCourses';
+import { useUserInfo } from '@/hooks/useUserInfo';
 
 import MyCourseCard from './MyCourseCard';
 import SVGColor from '@/components/SvgColor';
@@ -18,8 +18,10 @@ const MyCourseSection = ({ isAuthenticated }: MyCourseSectionProps) => {
   const navigate = useNavigate();
   const { scrollContainerRef, handleMouseDown } = useHorizontalScroll();
 
-  const { courses, courseCount, isLoading } = useMyCourses();
-  const myCourseCount = isAuthenticated ? courseCount : 0;
+  const { data: userInfoResponse, isLoading } = useUserInfo();
+  const userInfo = userInfoResponse?.data;
+  const courses = userInfo?.myCourses?.courses || [];
+  const myCourseCount = userInfo?.myCourses?.courseCount || 0;
 
   const handleGoToCreateCourse = () => {
     navigate('/course-creation');
@@ -45,17 +47,24 @@ const MyCourseSection = ({ isAuthenticated }: MyCourseSectionProps) => {
         )}
       </S.SectionTitleWrapper>
       {isAuthenticated ? (
-        myCourseCount > 0 ? (
+        isLoading ? (
+          <S.LoadingContent>
+            <S.ContentDescription>{t('loading')}</S.ContentDescription>
+          </S.LoadingContent>
+        ) : myCourseCount > 0 ? (
           <S.CardList ref={scrollContainerRef} onMouseDown={handleMouseDown}>
-            {isLoading ? (
-              <>
-                <MyCourseCard />
-                <MyCourseCard />
-                <MyCourseCard />
-              </>
-            ) : (
-              courses.slice(0, 3).map(course => <MyCourseCard key={course.id} course={course} />)
-            )}
+            {courses.map(course => {
+              const mappedCourse = {
+                id: course.courseId,
+                name: course.courseName,
+                thumbnailUrl: course.thumbnailUrl,
+                distance: course.distance,
+                duration: course.duration,
+                maxElevation: course.maxElevation,
+                createdAt: course.createdAt,
+              };
+              return <MyCourseCard key={course.courseId} course={mappedCourse} />;
+            })}
           </S.CardList>
         ) : (
           <S.SectionContent>

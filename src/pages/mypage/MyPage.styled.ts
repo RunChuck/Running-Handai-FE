@@ -59,6 +59,14 @@ export const SectionContent = styled.div`
   background: var(--surface-surface-highlight3, #f7f8fa);
 `;
 
+export const LoadingContent = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  min-height: 94px;
+`;
+
 export const ContentDescription = styled.span`
   ${theme.typography.body2};
   color: var(--text-text-secondary, #555555);

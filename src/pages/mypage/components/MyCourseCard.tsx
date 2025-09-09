@@ -131,7 +131,7 @@ const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
         </ThumbnailWrapper>
         <CourseInfoCard $variant={variant}>
           <RowRapper>
-            <CreatedDate $variant={variant}>생성일</CreatedDate>
+            <CreatedDate $variant={variant}>{new Date(course?.createdAt || '').toLocaleDateString('ko-KR')}</CreatedDate>
             <Dropdown
               trigger={<img src={MoreIconSrc} alt="more" width={20} height={20} />}
               width={80}
