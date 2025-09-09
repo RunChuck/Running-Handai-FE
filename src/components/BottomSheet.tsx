@@ -386,41 +386,38 @@ const PenButton = styled.button<{ showAnimation: boolean }>`
     background: var(--surface-surface-highlight);
   }
 
-  ${({ showAnimation }) =>
-    showAnimation &&
-    `
-    &::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 28px;
-      height: 28px;
-      background: rgba(69, 97, 255, 0.3);
-      border-radius: 50%;
-      transform: translate3d(-50%, -50%, 0);
-      animation: Pulse 2s ease-out infinite;
-      pointer-events: none !important;
-      z-index: 0;
-      will-change: transform, opacity;
-      backface-visibility: hidden;
-    }
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 28px;
+    height: 28px;
+    background: rgba(69, 97, 255, 0.3);
+    border-radius: 50%;
+    transform: translate3d(-50%, -50%, 0);
+    pointer-events: none !important;
+    z-index: 0;
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    display: ${({ showAnimation }) => (showAnimation ? 'block' : 'none')};
+    animation: ${({ showAnimation }) => (showAnimation ? 'Pulse 2s ease-out infinite' : 'none')};
+  }
 
-    @keyframes Pulse {
-      0% {
-        transform: translate3d(-50%, -50%, 0) scale(1);
-        opacity: 0.6;
-      }
-      70% {
-        transform: translate3d(-50%, -50%, 0) scale(1.3);
-        opacity: 0.2;
-      }
-      100% {
-        transform: translate3d(-50%, -50%, 0) scale(1.5);
-        opacity: 0;
-      }
+  @keyframes Pulse {
+    0% {
+      transform: translate3d(-50%, -50%, 0) scale(1);
+      opacity: 0.6;
     }
-  `}
+    70% {
+      transform: translate3d(-50%, -50%, 0) scale(1.3);
+      opacity: 0.2;
+    }
+    100% {
+      transform: translate3d(-50%, -50%, 0) scale(1.5);
+      opacity: 0;
+    }
+  }
 `;
 
 const ScrollableContent = styled.div`
