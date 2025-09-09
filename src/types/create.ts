@@ -26,13 +26,14 @@ export interface CourseCreateResponse {
 }
 
 export interface Course {
-  distanceFromUser: number;
+  distanceFromUser?: number;
   thumbnailUrl: string;
   maxElevation: number;
   distance: number;
   name: string;
   id: number;
   duration: number;
+  createdAt?: string;
 }
 
 export interface MyCoursesResponse {

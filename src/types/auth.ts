@@ -15,20 +15,42 @@ export interface RefreshTokenResponse {
   };
 }
 
+export interface BookmarkedCourseData {
+  bookmarkId: number;
+  courseId: number;
+  thumbnailUrl: string;
+  bookmarkCount: number;
+  isBookmarked: boolean;
+}
+
+export interface MyCourseData {
+  courseId: number;
+  courseName: string;
+  thumbnailUrl: string;
+  distance: number;
+  duration: number;
+  maxElevation: number;
+  createdAt: string;
+}
+
 export interface UserInfo {
   nickname: string;
   email: string;
+  bookmarkedCourses: {
+    courseCount: number;
+    courses: BookmarkedCourseData[];
+  };
+  myCourses: {
+    courseCount: number;
+    courses: MyCourseData[];
+  };
 }
 
 export interface UserInfoResponse {
   statusCode: number;
   responseCode: string;
   message: string;
-  totalCount: number;
-  data: {
-    nickname: string;
-    email: string;
-  };
+  data: UserInfo;
 }
 
 export interface CheckNicknameResponse {
@@ -43,9 +65,6 @@ export interface BookmarkedCourse {
   bookmarkId: number;
   courseId: number;
   thumbnailUrl: string;
-  distance: number;
-  duration: number;
-  maxElevation: number;
   isBookmarked: boolean;
   bookmarkCount: number;
 }

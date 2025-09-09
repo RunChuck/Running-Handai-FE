@@ -71,22 +71,30 @@ export const useHorizontalScroll = (options: UseHorizontalScrollOptions = {}) =>
     if (!container) return;
 
     let startX = 0;
+    let startY = 0;
     let scrollLeft = 0;
 
     const handleTouchStart = (e: TouchEvent) => {
       isDragging.current = true;
       startX = e.touches[0].pageX - container.offsetLeft;
+      startY = e.touches[0].pageY;
       scrollLeft = container.scrollLeft;
     };
 
     const handleTouchMove = (e: TouchEvent) => {
       if (!isDragging.current) return;
 
-      // 가로 스크롤 컨테이너에서는 항상 세로 스크롤 차단
-      e.preventDefault();
       const x = e.touches[0].pageX - container.offsetLeft;
-      const walk = (x - startX) * sensitivity;
-      container.scrollLeft = scrollLeft - walk;
+      const y = e.touches[0].pageY;
+      const deltaX = Math.abs(x - startX);
+      const deltaY = Math.abs(y - startY);
+
+      // 가로 스와이프가 더 크고, 스크롤 가능한 경우에만 가로 스크롤 처리
+      if (deltaX > deltaY && container.scrollWidth > container.clientWidth) {
+        e.preventDefault(); // 세로 스크롤 차단
+        const walk = (x - startX) * sensitivity;
+        container.scrollLeft = scrollLeft - walk;
+      }
     };
 
     const handleTouchEnd = () => {

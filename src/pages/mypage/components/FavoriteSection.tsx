@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import * as S from '../MyPage.styled';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
-import { useFavorites } from '@/hooks/useFavorites';
+import { useUserInfo } from '@/hooks/useUserInfo';
 
 import FavoriteCourseCard from './FavoriteCourseCard';
 import SVGColor from '@/components/SvgColor';
@@ -18,10 +18,10 @@ const FavoriteSection = ({ isAuthenticated }: FavoriteSectionProps) => {
   const navigate = useNavigate();
   const { scrollContainerRef, handleMouseDown } = useHorizontalScroll();
 
-  const { data: favoriteCourseData, isLoading } = useFavorites({ area: null });
-  const favoriteCourses = favoriteCourseData?.data || [];
-  const displayedCourses = favoriteCourses.slice(0, 5);
-  const favoriteCourseCount = favoriteCourses.length;
+  const { data: userInfoResponse, isLoading } = useUserInfo();
+  const userInfo = userInfoResponse?.data;
+  const favoriteCourses = userInfo?.bookmarkedCourses?.courses || [];
+  const favoriteCourseCount = userInfo?.bookmarkedCourses?.courseCount || 0;
 
   return (
     <S.SectionContainer>
@@ -40,12 +40,12 @@ const FavoriteSection = ({ isAuthenticated }: FavoriteSectionProps) => {
       </S.SectionTitleWrapper>
       {isAuthenticated ? (
         isLoading ? (
-          <S.SectionContent>
+          <S.LoadingContent>
             <S.ContentDescription>{t('loading')}</S.ContentDescription>
-          </S.SectionContent>
+          </S.LoadingContent>
         ) : favoriteCourseCount > 0 ? (
           <S.CardList ref={scrollContainerRef} onMouseDown={handleMouseDown}>
-            {displayedCourses.map(course => (
+            {favoriteCourses.map(course => (
               <FavoriteCourseCard key={course.courseId} course={course} />
             ))}
           </S.CardList>
@@ -66,4 +66,3 @@ const FavoriteSection = ({ isAuthenticated }: FavoriteSectionProps) => {
 };
 
 export default FavoriteSection;
-

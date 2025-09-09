@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import { useUserStore } from '@/stores/userStore';
+import { useUserInfo } from '@/hooks/useUserInfo';
 import { authAPI } from '@/api/auth';
+import { authKeys } from '@/constants/queryKeys';
 import { useToast } from '@/hooks/useToast';
 
 import Header from '@/components/Header';
@@ -14,10 +17,13 @@ import Button from '@/components/Button';
 const InfoPage = () => {
   const [t] = useTranslation();
   const navigate = useNavigate();
-  const { userInfo, setUserInfo } = useUserStore();
+  const queryClient = useQueryClient();
+  const { userInfo: storeUserInfo, setUserInfo } = useUserStore();
+  const { data: userInfoResponse, error } = useUserInfo();
+  const userInfo = storeUserInfo || userInfoResponse?.data;
   const { showSuccessToast, showErrorToast } = useToast();
 
-  const [nickname, setNickname] = useState(userInfo?.nickname);
+  const [nickname, setNickname] = useState(userInfo?.nickname || '');
   const [nicknameError, setNicknameError] = useState('');
   const [isNicknameAvailable, setIsNicknameAvailable] = useState<boolean | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -94,12 +100,15 @@ const InfoPage = () => {
     if (!isNicknameAvailable || isUpdating) return;
 
     setIsUpdating(true);
+
     try {
       const response = await authAPI.updateUserInfo(nickname);
       setUserInfo({
-        ...userInfo,
         nickname: response.data.nickname,
+        email: userInfo?.email || '',
       });
+
+      queryClient.invalidateQueries({ queryKey: authKeys.userInfo() });
       showSuccessToast(t('mypage.Info.nicknameStatus.updateSuccess'), { position: 'top' });
       navigate(-1);
     } catch (error: unknown) {
@@ -113,11 +122,16 @@ const InfoPage = () => {
     }
   };
 
-  const isCheckButtonDisabled = nickname.length < 2 || nickname === userInfo?.nickname || !!nicknameError;
+  const isCheckButtonDisabled = !nickname || nickname.length < 2 || nickname === userInfo?.nickname || !!nicknameError;
 
-  if (!userInfo) {
+  if (!userInfo && error) {
     showErrorToast(t('mypage.Info.nicknameStatus.notFound'));
     navigate(-1);
+    return null;
+  }
+
+  if (!userInfo) {
+    return null; // 로딩 중일 때
   }
 
   return (

@@ -20,6 +20,8 @@ export const reviewKeys = {
 
 export const authKeys = {
   all: ['auth'] as const,
+  // 사용자 정보 조회
+  userInfo: () => [...authKeys.all, 'user-info'] as const,
   // 북마크된 코스 조회
   bookmarkedCourses: (area?: string) => [...authKeys.all, 'bookmarked-courses', area] as const,
   // 내 리뷰 조회
