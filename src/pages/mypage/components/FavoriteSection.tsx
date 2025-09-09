@@ -20,8 +20,8 @@ const FavoriteSection = ({ isAuthenticated }: FavoriteSectionProps) => {
 
   const { data: userInfoResponse, isLoading } = useUserInfo();
   const userInfo = userInfoResponse?.data;
-  const favoriteCourses = userInfo?.bookmarkedCourses?.courses || [];
-  const favoriteCourseCount = userInfo?.bookmarkedCourses?.courseCount || 0;
+  const favoriteCourses = userInfo?.bookmarkInfo?.courses || [];
+  const favoriteCourseCount = userInfo?.bookmarkInfo?.bookmarkCount || 0;
 
   return (
     <S.SectionContainer>
