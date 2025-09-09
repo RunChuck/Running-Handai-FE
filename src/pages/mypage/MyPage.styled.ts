@@ -94,7 +94,6 @@ export const CardList = styled.div`
   /* 터치 스크롤  */
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  touch-action: pan-x;
 
   /* 드래그 시 선택 방지 */
   user-select: none;

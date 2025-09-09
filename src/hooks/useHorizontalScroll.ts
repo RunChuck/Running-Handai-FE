@@ -75,25 +75,34 @@ export const useHorizontalScroll = (options: UseHorizontalScrollOptions = {}) =>
     let scrollLeft = 0;
 
     const handleTouchStart = (e: TouchEvent) => {
-      isDragging.current = true;
       startX = e.touches[0].pageX - container.offsetLeft;
       startY = e.touches[0].pageY;
       scrollLeft = container.scrollLeft;
+
+      isDragging.current = false;
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (!isDragging.current) return;
+      // 이미 드래그 중이면 계속 처리
+      if (isDragging.current) {
+        const x = e.touches[0].pageX - container.offsetLeft;
+        const walk = (x - startX) * sensitivity;
+        container.scrollLeft = scrollLeft - walk;
+        return;
+      }
 
       const x = e.touches[0].pageX - container.offsetLeft;
       const y = e.touches[0].pageY;
       const deltaX = Math.abs(x - startX);
       const deltaY = Math.abs(y - startY);
 
-      // 가로 스와이프가 더 크고, 스크롤 가능한 경우에만 가로 스크롤 처리
-      if (deltaX > deltaY && container.scrollWidth > container.clientWidth) {
-        e.preventDefault(); // 세로 스크롤 차단
-        const walk = (x - startX) * sensitivity;
-        container.scrollLeft = scrollLeft - walk;
+      if (deltaX > 15 || deltaY > 15) {
+        // 가로 스와이프가 더 크고, 스크롤 가능한 경우에만 드래그 시작
+        if (deltaX > deltaY && container.scrollWidth > container.clientWidth) {
+          isDragging.current = true;
+          const walk = (x - startX) * sensitivity;
+          container.scrollLeft = scrollLeft - walk;
+        }
       }
     };
 
@@ -101,8 +110,8 @@ export const useHorizontalScroll = (options: UseHorizontalScrollOptions = {}) =>
       isDragging.current = false;
     };
 
-    container.addEventListener('touchstart', handleTouchStart, { passive: false });
-    container.addEventListener('touchmove', handleTouchMove, { passive: false });
+    container.addEventListener('touchstart', handleTouchStart, { passive: true });
+    container.addEventListener('touchmove', handleTouchMove, { passive: true });
     container.addEventListener('touchend', handleTouchEnd);
 
     return () => {
