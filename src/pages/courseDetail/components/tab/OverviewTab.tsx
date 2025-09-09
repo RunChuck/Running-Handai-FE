@@ -14,7 +14,7 @@ interface OverviewTabProps {
 }
 
 const OverviewTab = ({ onTabChange, courseDetail, courseId }: OverviewTabProps) => {
-  const { summary, loading, error } = useCourseSummary(courseId);
+  const { summary, spotStatus, loading, error } = useCourseSummary(courseId);
 
   const reviewData: ReviewData | null = summary
     ? {
@@ -31,7 +31,7 @@ const OverviewTab = ({ onTabChange, courseDetail, courseId }: OverviewTabProps) 
       <AttractionSection
         onTabChange={onTabChange}
         spots={summary?.spots || []}
-        spotStatus={summary?.spotStatus || 'COMPLETED'}
+        spotStatus={spotStatus}
         loading={loading}
         error={error}
       />
