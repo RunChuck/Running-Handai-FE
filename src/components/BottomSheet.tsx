@@ -381,6 +381,7 @@ const PenButton = styled.button<{ showAnimation: boolean }>`
   border-radius: 4px;
   transition: background-color 0.2s ease;
   position: relative;
+  z-index: 1;
 
   &:hover {
     background: var(--surface-surface-highlight);
@@ -397,7 +398,7 @@ const PenButton = styled.button<{ showAnimation: boolean }>`
     border-radius: 50%;
     transform: translate3d(-50%, -50%, 0);
     pointer-events: none !important;
-    z-index: 0;
+    z-index: -1;
     will-change: transform, opacity;
     backface-visibility: hidden;
     display: ${({ showAnimation }) => (showAnimation ? 'block' : 'none')};
