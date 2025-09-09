@@ -256,7 +256,7 @@ const Course = () => {
           titleData={getBottomSheetTitle()}
           floatButtons={floatButtons}
           onHeightChange={handleBottomSheetHeightChange}
-          showAnimation={courses.length === 0 && !loading && !error}
+          showAnimation={courses.length === 0 && !loading && !error && !!selectedFilter.location}
           hasScrollableContent={hasScrollableContent}
         >
           <CourseList
