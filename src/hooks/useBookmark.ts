@@ -30,7 +30,7 @@ export const useBookmark = ({ onUpdateCourse, onError, onUnauthenticated }: UseB
     onSuccess: () => {
       // 코스 관련 쿼리 무효화
       queryClient.invalidateQueries({ queryKey: courseKeys.all });
-      // 즐겨찾기 코스 목록 쿼리 무효화
+      // 유저 정보, 즐겨찾기 코스 목록 쿼리 무효화
       queryClient.invalidateQueries({ queryKey: authKeys.all });
     },
     onError: (error, { courseId, shouldBookmark }) => {
