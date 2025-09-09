@@ -1,8 +1,7 @@
-import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as S from './MyPage.styled';
 import { useAuth } from '@/hooks/useAuth';
-import { useUserStore } from '@/stores/userStore';
+import { useUserInfo } from '@/hooks/useUserInfo';
 
 import Header from '@/components/Header';
 import UserInfoSection from './components/UserInfoSection';
@@ -14,13 +13,7 @@ import AccountSection from './components/AccountSection';
 const MyPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const { userInfo, fetchUserInfo } = useUserStore();
-
-  useEffect(() => {
-    if (isAuthenticated && !userInfo) {
-      fetchUserInfo();
-    }
-  }, [isAuthenticated, userInfo, fetchUserInfo]);
+  const { data: userInfoResponse } = useUserInfo();
 
   const handleBack = () => {
     navigate(-1);
@@ -29,7 +22,7 @@ const MyPage = () => {
   return (
     <S.Container>
       <Header onBack={handleBack} />
-      <UserInfoSection isAuthenticated={isAuthenticated} userInfo={userInfo} />
+      <UserInfoSection isAuthenticated={isAuthenticated} userInfo={userInfoResponse?.data} />
       <FavoriteSection isAuthenticated={isAuthenticated} />
       <MyCourseSection isAuthenticated={isAuthenticated} />
       <ServiceInfoSection />
