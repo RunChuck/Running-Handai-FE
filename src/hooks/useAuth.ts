@@ -21,7 +21,8 @@ export const useAuth = () => {
   });
 
   const setToken = (accessToken: string, refreshToken?: string, autoLogin?: boolean) => {
-    const shouldAutoLogin = autoLogin ?? localStorage.getItem('autoLoginPreference') === 'true';
+    const shouldAutoLogin =
+      autoLogin ?? (sessionStorage.getItem('tempAutoLoginPreference') === 'true' || localStorage.getItem('autoLoginPreference') === 'true');
 
     if (shouldAutoLogin) {
       localStorage.setItem('accessToken', accessToken);
@@ -39,6 +40,7 @@ export const useAuth = () => {
 
     // 사용 후 제거
     localStorage.removeItem('autoLoginPreference');
+    sessionStorage.removeItem('tempAutoLoginPreference');
   };
 
   const getToken = () => {

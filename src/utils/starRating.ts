@@ -14,7 +14,7 @@ export const calculateRatingFromPosition = (clientX: number, containerRect: DOMR
   const positionInStar = (relativeX % starWidth) / starWidth;
   const isLeftHalf = positionInStar < 0.5;
 
-  const newRating = Math.max(0, Math.min(maxRating, starIndex + (isLeftHalf ? 0.5 : 1)));
+  const newRating = Math.max(0.5, Math.min(maxRating, starIndex + (isLeftHalf ? 0.5 : 1)));
   return newRating;
 };
 

@@ -1,6 +1,6 @@
 import { createContext, useContext, useRef, useState, type ReactNode } from 'react';
 import type { RouteViewMapInstance } from '@/pages/courseCreation/components/RouteView';
-import { createCourse } from '@/api/create';
+import { createCourse, checkIsInBusan } from '@/api/create';
 import { generateGPXFile } from '@/utils/gpxGenerator';
 import { convertImageToWebP } from '@/utils/imageConverter';
 import { useToast } from '@/hooks/useToast';
@@ -50,6 +50,14 @@ interface CourseCreationContextType {
   mapInstance: RouteViewMapInstance | null;
   buttonStates: ButtonStates;
   isRouteGenerated: boolean;
+  isInBusan: boolean | null;
+  hasCheckedLocation: boolean;
+
+  // 코스명 상태
+  startPoint: string;
+  endPoint: string;
+  setStartPoint: (value: string) => void;
+  setEndPoint: (value: string) => void;
 
   // 액션
   handleMarkersChange: (newMarkers: MarkerPosition[]) => void;
@@ -59,6 +67,7 @@ interface CourseCreationContextType {
   handleSwap: () => void;
   handleDelete: () => void;
   handleCourseCreate: () => Promise<void>;
+  handleCheckLocation: () => Promise<void>;
   submitCourse: (courseData: { startPoint: string; endPoint: string; thumbnailBlob: Blob; isInBusan: boolean }) => Promise<number>;
   setMapInstance: (instance: RouteViewMapInstance) => void;
 
@@ -89,6 +98,12 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
   const [isSavingCourse, setIsSavingCourse] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isRouteGenerated, setIsRouteGenerated] = useState(false);
+  const [isInBusan, setIsInBusan] = useState<boolean | null>(null);
+  const [hasCheckedLocation, setHasCheckedLocation] = useState(false);
+
+  // 코스명 상태
+  const [startPoint, setStartPoint] = useState('');
+  const [endPoint, setEndPoint] = useState('');
 
   const isUndoRedoInProgress = useRef(false);
   const previousMarkersRef = useRef<MarkerPosition[]>([]);
@@ -317,6 +332,10 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
     setIsGpxUploaded(false);
     setGpxData(null);
     setIsRouteGenerated(false); // 경로 생성 상태 리셋
+    setIsInBusan(null); // 부산 지역 체크 상태 리셋
+    setHasCheckedLocation(false);
+    setStartPoint(''); // 출발지 초기화
+    setEndPoint(''); // 도착지 초기화
     mapInstance.clearAllMarkers();
     mapInstance.clearRoute(); // 경로도 함께 제거
   };
@@ -359,6 +378,33 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
     } catch (err) {
       setError('경로 생성 중 오류가 발생했습니다.');
       console.error('Course creation error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCheckLocation = async () => {
+    // 좌표 데이터 확인 - GPX 업로드된 경우 gpxData에서, 아니면 markers에서
+    const coordinates = isGpxUploaded && gpxData?.coordinates ? gpxData.coordinates : gpxData?.coordinates || [];
+    if (!coordinates.length) {
+      throw new Error('경로 데이터가 없습니다.');
+    }
+
+    const startCoordinate = coordinates[0];
+
+    try {
+      setIsLoading(true);
+      const locationResult = await checkIsInBusan({
+        lat: startCoordinate.lat,
+        lon: startCoordinate.lng,
+      });
+
+      setIsInBusan(locationResult.data);
+      setHasCheckedLocation(true);
+    } catch (error) {
+      setError('위치 확인 중 오류가 발생했습니다.');
+      console.error('Location check error:', error);
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -454,6 +500,14 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
     mapInstance,
     buttonStates,
     isRouteGenerated,
+    isInBusan,
+    hasCheckedLocation,
+
+    // 코스명 상태
+    startPoint,
+    endPoint,
+    setStartPoint,
+    setEndPoint,
 
     // 액션
     handleMarkersChange,
@@ -463,6 +517,7 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
     handleSwap,
     handleDelete,
     handleCourseCreate,
+    handleCheckLocation,
     submitCourse,
     setMapInstance,
 

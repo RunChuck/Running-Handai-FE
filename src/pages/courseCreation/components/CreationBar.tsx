@@ -160,6 +160,15 @@ const CreationBarContainer = styled.div`
   @media (max-width: 600px) {
     padding: 8px 24px;
   }
+
+  /* 홈 인디케이터 영역 고려 */
+  @media (display-mode: standalone) {
+    padding-bottom: env(safe-area-inset-bottom);
+
+    @supports (padding: max(0px)) {
+      padding-bottom: max(env(safe-area-inset-bottom), 0px);
+    }
+  }
 `;
 
 const MenuButton = styled.div<{ enabled: boolean }>`

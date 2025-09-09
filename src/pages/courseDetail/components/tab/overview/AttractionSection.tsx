@@ -1,10 +1,12 @@
 import { useTranslation } from 'react-i18next';
+import { useState } from 'react';
 import styled from '@emotion/styled';
 import * as S from './Section.styled';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 import type { CourseTabType, SpotData } from '@/types/course';
 
 import AttractionItem from '@/components/AttractionItem';
+import AttractionDetailModal from '@/components/AttractionDetailModal';
 import Button from '@/components/Button';
 import ArrowIconSrc from '@/assets/icons/arrow-right-16px.svg';
 
@@ -18,9 +20,21 @@ interface AttractionSectionProps {
 const AttractionSection = ({ onTabChange, spots, loading, error }: AttractionSectionProps) => {
   const [t] = useTranslation();
   const { scrollContainerRef, handleMouseDown } = useHorizontalScroll();
+  const [selectedSpot, setSelectedSpot] = useState<SpotData | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleAttractionDetail = () => {
     onTabChange('attractions');
+  };
+
+  const handleSpotDetailClick = (spot: SpotData) => {
+    setSelectedSpot(spot);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedSpot(null);
   };
 
   if (loading) {
@@ -62,7 +76,7 @@ const AttractionSection = ({ onTabChange, spots, loading, error }: AttractionSec
         <S.SectionTitle>{t('attractions')}</S.SectionTitle>
         <AttractionList ref={scrollContainerRef} onMouseDown={handleMouseDown}>
           {spots.map(spot => (
-            <AttractionItem key={spot.spotId} spot={spot} hideMoreButton />
+            <AttractionItem key={spot.spotId} spot={spot} onMoreClick={() => handleSpotDetailClick(spot)} />
           ))}
         </AttractionList>
       </S.ContentContainer>
@@ -80,6 +94,8 @@ const AttractionSection = ({ onTabChange, spots, loading, error }: AttractionSec
           <img src={ArrowIconSrc} alt="arrow" />
         </Button>
       )}
+
+      <AttractionDetailModal isOpen={isModalOpen} onClose={handleModalClose} spot={selectedSpot} />
     </S.SectionContainer>
   );
 };

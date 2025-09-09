@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import Button from './Button';
@@ -24,6 +24,15 @@ const ReviewModal = ({ isOpen, onClose, onConfirm, confirmText, mode = 'create',
   const [t] = useTranslation();
   const [reviewText, setReviewText] = useState(initialReviewText);
   const [rating, setRating] = useState(initialRating);
+
+  useEffect(() => {
+    if (isOpen && mode === 'create') {
+      setReviewText('');
+    } else if (isOpen && mode === 'edit') {
+      setReviewText(initialReviewText);
+      setRating(initialRating);
+    }
+  }, [isOpen, mode, initialReviewText, initialRating]);
 
   const handleConfirm = () => {
     onConfirm(reviewText, mode === 'edit' ? rating : undefined);

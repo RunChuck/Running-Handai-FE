@@ -1,23 +1,22 @@
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useState, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useCourseDetail } from '@/hooks/useCourseDetail';
+import { useToast } from '@/hooks/useToast';
+import { deleteCourse, downloadGpx, updateCourse } from '@/api/create';
 import { mapCourseInfo } from '@/utils/format';
 import { authKeys } from '@/constants/queryKeys';
 
 import Header from '@/components/Header';
-import { Dropdown, DropdownItem } from '@/components/Dropdown';
 import CourseInfoBar from '@/pages/courseCreation/components/CourseInfoBar';
 import CourseRouteMap from '@/components/CourseRouteMap';
 import CommonModal from '@/components/CommonModal';
 import CourseEditModal from '@/components/CourseEditModal';
-import MoreIconSrc from '@/assets/icons/more-24px.svg';
-import { deleteCourse, downloadGpx, updateCourse } from '@/api/create';
-import { useQueryClient } from '@tanstack/react-query';
-import { useToast } from '@/hooks/useToast';
+import DeleteIconSrc from '@/assets/icons/delete-icon.svg';
 
 const MyCourseDetail = () => {
   const [t] = useTranslation();
@@ -167,11 +166,9 @@ const MyCourseDetail = () => {
             <ButtonWrapper>
               <Button onClick={handleEditClick}>{t('edit')}</Button>
               <Button onClick={handleGpxDownload}>{t('mypage.myCourseDetail.gpxDownload')}</Button>
-              <Dropdown trigger={<img src={MoreIconSrc} alt="more" width={24} height={24} />} width={80} padding="0">
-                <DropdownItem onClick={handleDeleteClick} variant="danger">
-                  {t('delete')}
-                </DropdownItem>
-              </Dropdown>
+              <DeleteButton onClick={handleDeleteClick}>
+                <DeleteIcon src={DeleteIconSrc} alt="delete" width={24} height={24} />
+              </DeleteButton>
             </ButtonWrapper>
           </CourseTitleContainer>
           <CourseInfoBar
@@ -283,4 +280,23 @@ const GraphContainer = styled.div`
 const GraphTitle = styled.span`
   ${theme.typography.subtitle3};
   color: var(--text-text-title, #1c1c1c);
+`;
+
+const DeleteButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: var(--spacing-4);
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+`;
+
+const DeleteIcon = styled.img`
+  filter: brightness(0) saturate(100%) invert(60%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(96%) contrast(83%);
+  transition: filter 0.2s ease;
+
+  ${DeleteButton}:hover & {
+    filter: brightness(0) saturate(100%) invert(60%) sepia(58%) saturate(1890%) hue-rotate(325deg) brightness(95%) contrast(85%);
+  }
 `;
