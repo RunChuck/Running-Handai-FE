@@ -13,6 +13,9 @@ export const useCourseSummary = (courseId: number) => {
     enabled: !!courseId && courseId > 0,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
+    refetchInterval: query => {
+      return query.state.data?.spotStatus === 'IN_PROGRESS' ? 3000 : false;
+    },
   });
 
   return {
