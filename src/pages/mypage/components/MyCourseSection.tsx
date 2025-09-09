@@ -20,8 +20,8 @@ const MyCourseSection = ({ isAuthenticated }: MyCourseSectionProps) => {
 
   const { data: userInfoResponse, isLoading } = useUserInfo();
   const userInfo = userInfoResponse?.data;
-  const courses = userInfo?.myCourses?.courses || [];
-  const myCourseCount = userInfo?.myCourses?.courseCount || 0;
+  const courses = userInfo?.myCourseInfo?.courses || [];
+  const myCourseCount = userInfo?.myCourseInfo?.myCourseCount || 0;
 
   const handleGoToCreateCourse = () => {
     navigate('/course-creation');

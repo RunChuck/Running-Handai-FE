@@ -3,21 +3,23 @@ import { useState } from 'react';
 import styled from '@emotion/styled';
 import * as S from './Section.styled';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
-import type { CourseTabType, SpotData } from '@/types/course';
+import type { CourseTabType, SpotData, SpotStatus } from '@/types/course';
 
 import AttractionItem from '@/components/AttractionItem';
 import AttractionDetailModal from '@/components/AttractionDetailModal';
 import Button from '@/components/Button';
 import ArrowIconSrc from '@/assets/icons/arrow-right-16px.svg';
+import { theme } from '@/styles/theme';
 
 interface AttractionSectionProps {
   onTabChange: (tabKey: CourseTabType) => void;
   spots: SpotData[];
+  spotStatus: SpotStatus;
   loading: boolean;
   error: string | null;
 }
 
-const AttractionSection = ({ onTabChange, spots, loading, error }: AttractionSectionProps) => {
+const AttractionSection = ({ onTabChange, spots, spotStatus, loading, error }: AttractionSectionProps) => {
   const [t] = useTranslation();
   const { scrollContainerRef, handleMouseDown } = useHorizontalScroll();
   const [selectedSpot, setSelectedSpot] = useState<SpotData | null>(null);
@@ -37,34 +39,24 @@ const AttractionSection = ({ onTabChange, spots, loading, error }: AttractionSec
     setSelectedSpot(null);
   };
 
-  if (loading) {
-    return (
-      <S.SectionContainer>
-        <S.ContentContainer>
-          <S.SectionTitle>{t('attractions')}</S.SectionTitle>
-          <StateText>{t('courseDetail.attractions.loading')}</StateText>
-        </S.ContentContainer>
-      </S.SectionContainer>
-    );
-  }
+  const getStatusMessage = () => {
+    if (loading) return t('courseDetail.attractions.loading');
+    if (error) return t('courseDetail.attractions.error');
+    if (spotStatus === 'IN_PROGRESS') return t('courseDetail.attractions.inProgress');
+    if (spotStatus === 'FAILED') return t('courseDetail.attractions.failed');
+    if (spotStatus === 'NOT_APPLICABLE') return t('courseDetail.attractions.notApplicable');
+    if (spotStatus === 'COMPLETED' && !spots.length) return t('courseDetail.attractions.empty');
+    return null;
+  };
 
-  if (error) {
-    return (
-      <S.SectionContainer>
-        <S.ContentContainer>
-          <S.SectionTitle>{t('attractions')}</S.SectionTitle>
-          <StateText>{t('courseDetail.attractions.error')}</StateText>
-        </S.ContentContainer>
-      </S.SectionContainer>
-    );
-  }
+  const statusMessage = getStatusMessage();
 
-  if (!spots.length) {
+  if (statusMessage) {
     return (
       <S.SectionContainer>
         <S.ContentContainer>
           <S.SectionTitle>{t('attractions')}</S.SectionTitle>
-          <StateText>{t('courseDetail.attractions.empty')}</StateText>
+          <StateText>{statusMessage}</StateText>
         </S.ContentContainer>
       </S.SectionContainer>
     );
@@ -81,7 +73,7 @@ const AttractionSection = ({ onTabChange, spots, loading, error }: AttractionSec
         </AttractionList>
       </S.ContentContainer>
 
-      {spots.length > 2 && (
+      {spots.length > 0 && (
         <Button
           backgroundColor="var(--bg-background-primary, #fff)"
           border="1px solid var(--line-line-002, #e0e0e0)"
@@ -140,6 +132,7 @@ const AttractionList = styled.div`
 const StateText = styled.div`
   text-align: center;
   padding: var(--spacing-24);
-  color: var(--text-text-secondary);
+  ${theme.typography.body2}
+  color: var(--text-text-secondary, #555555);
   white-space: pre-line;
 `;

@@ -36,12 +36,12 @@ export interface MyCourseData {
 export interface UserInfo {
   nickname: string;
   email: string;
-  bookmarkedCourses: {
-    courseCount: number;
+  bookmarkInfo: {
+    bookmarkCount: number;
     courses: BookmarkedCourseData[];
   };
-  myCourses: {
-    courseCount: number;
+  myCourseInfo: {
+    myCourseCount: number;
     courses: MyCourseData[];
   };
 }

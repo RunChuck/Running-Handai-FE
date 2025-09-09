@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
+import { theme } from '@/styles/theme';
 import { useAttractions } from '@/hooks/useAttractions';
 import AttractionItem from '@/components/AttractionItem';
 import AttractionDetailModal from '@/components/AttractionDetailModal';
@@ -12,7 +13,7 @@ interface AttractionTabProps {
 
 const AttractionTab = ({ courseId }: AttractionTabProps) => {
   const [t] = useTranslation();
-  const { attractions, loading, error } = useAttractions(courseId);
+  const { attractions, spotStatus, loading, error } = useAttractions(courseId);
   const [selectedSpot, setSelectedSpot] = useState<SpotData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -26,26 +27,22 @@ const AttractionTab = ({ courseId }: AttractionTabProps) => {
     setSelectedSpot(null);
   };
 
-  if (loading) {
-    return (
-      <Container>
-        <StateText>{t('courseDetail.attractions.loading')}</StateText>
-      </Container>
-    );
-  }
+  const getStatusMessage = () => {
+    if (loading) return t('courseDetail.attractions.loading');
+    if (error) return t('courseDetail.attractions.error');
+    if (spotStatus === 'IN_PROGRESS') return t('courseDetail.attractions.inProgress');
+    if (spotStatus === 'FAILED') return t('courseDetail.attractions.failed');
+    if (spotStatus === 'NOT_APPLICABLE') return t('courseDetail.attractions.notApplicable');
+    if (spotStatus === 'COMPLETED' && (!attractions.length || attractions[0]?.spotCount === 0)) return t('courseDetail.attractions.empty');
+    return null;
+  };
 
-  if (error) {
-    return (
-      <Container>
-        <StateText>{t('courseDetail.attractions.error')}</StateText>
-      </Container>
-    );
-  }
+  const statusMessage = getStatusMessage();
 
-  if (!attractions.length || attractions[0]?.spotCount === 0) {
+  if (statusMessage) {
     return (
       <Container>
-        <StateText>{t('courseDetail.attractions.empty')}</StateText>
+        <StateText>{statusMessage}</StateText>
       </Container>
     );
   }
@@ -90,6 +87,7 @@ const AttractionItemGrid = styled.div`
 const StateText = styled.div`
   text-align: center;
   padding: var(--spacing-24);
-  color: var(--text-text-secondary);
+  ${theme.typography.body2}
+  color: var(--text-text-secondary, #555555);
   white-space: pre-line;
 `;

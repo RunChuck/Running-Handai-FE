@@ -14,10 +14,15 @@ export const useAttractions = (courseId: number) => {
     enabled: !!courseId && courseId > 0,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
+    refetchInterval: query => {
+      const spotStatus = query.state.data?.[0]?.spotStatus;
+      return spotStatus === 'IN_PROGRESS' ? 3000 : false;
+    },
   });
 
   return {
     attractions: query.data || [],
+    spotStatus: query.data?.[0]?.spotStatus || 'COMPLETED',
     loading: query.isLoading,
     error: query.error?.message || null,
   };
