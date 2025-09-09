@@ -17,6 +17,7 @@ export const useCourseSummary = (courseId: number) => {
 
   return {
     summary: query.data,
+    spotStatus: query.data?.spotStatus || 'COMPLETED',
     loading: query.isLoading,
     error: query.error?.message || null,
   };

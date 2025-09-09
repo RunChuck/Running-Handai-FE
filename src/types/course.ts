@@ -115,6 +115,7 @@ export interface BookmarkResponse {
 export interface AttractionData {
   courseId: number;
   spotCount: number;
+  spotStatus: SpotStatus;
   spots: SpotData[];
 }
 

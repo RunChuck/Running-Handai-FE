@@ -18,6 +18,7 @@ export const useAttractions = (courseId: number) => {
 
   return {
     attractions: query.data || [],
+    spotStatus: query.data?.[0]?.spotStatus || 'COMPLETED',
     loading: query.isLoading,
     error: query.error?.message || null,
   };
