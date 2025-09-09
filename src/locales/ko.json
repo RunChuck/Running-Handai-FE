@@ -158,6 +158,9 @@
     "attractions.loading": "즐길거리를 불러오고 있어요.",
     "attractions.error": "즐길거리를 불러오는데 실패했어요.\n잠시 후 다시 시도해주세요.",
     "attractions.empty": "등록된 즐길거리가 없어요.",
+    "attractions.inProgress": "즐길거리를 불러오고 있어요.",
+    "attractions.failed": "즐길거리 정보를 준비하지 못했어요.",
+    "attractions.notApplicable": "현재 베타 버전이에요!\n부산 외 지역은 즐길거리 정보를 제공하지 않아요.",
     "scrollToTop": "맨 위로",
     "more": "...더보기",
     "collapse": "접기"

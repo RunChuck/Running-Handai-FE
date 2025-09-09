@@ -85,6 +85,8 @@ export interface ReviewData {
   createdAt: string;
 }
 
+export type SpotStatus = 'COMPLETED' | 'IN_PROGRESS' | 'FAILED' | 'NOT_APPLICABLE';
+
 export interface CourseSummaryData {
   distance: number;
   duration: number;
@@ -92,6 +94,7 @@ export interface CourseSummaryData {
   reviewCount: number;
   starAverage: number;
   reviews: ReviewData[];
+  spotStatus: SpotStatus;
   spots: SpotData[];
 }
 

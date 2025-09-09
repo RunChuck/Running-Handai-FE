@@ -28,7 +28,13 @@ const OverviewTab = ({ onTabChange, courseDetail, courseId }: OverviewTabProps) 
     <Container>
       <CourseSection onTabChange={onTabChange} courseDetail={courseDetail} />
       <SectionDivider />
-      <AttractionSection onTabChange={onTabChange} spots={summary?.spots || []} loading={loading} error={error} />
+      <AttractionSection
+        onTabChange={onTabChange}
+        spots={summary?.spots || []}
+        spotStatus={summary?.spotStatus || 'COMPLETED'}
+        loading={loading}
+        error={error}
+      />
       <SectionDivider />
       <ReviewSection onTabChange={onTabChange} reviewData={reviewData} courseId={courseId} />
     </Container>
