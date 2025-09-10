@@ -57,3 +57,27 @@ export interface CourseUpdateRequest {
   endPointName: string;
   thumbnailImage?: File;
 }
+
+export interface TrackPoint {
+  lat: number;
+  lon: number;
+  ele: number;
+}
+
+export interface MyCourseDetail {
+  courseId: number;
+  name: string;
+  distance: number;
+  duration: number;
+  maxElevation: number;
+  minElevation: number;
+  trackPoints: TrackPoint[];
+}
+
+export interface MyCourseDetailResponse {
+  statusCode: number;
+  responseCode: string;
+  message: string;
+  totalCount: number;
+  data: MyCourseDetail;
+}
