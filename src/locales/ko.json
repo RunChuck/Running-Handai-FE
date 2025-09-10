@@ -170,7 +170,8 @@
     "scrollToTop": "맨 위로",
     "more": "...더보기",
     "collapse": "접기",
-    "elevationChart.error": "고도 정보를 불러올 수 없습니다"
+    "elevationChart.error": "고도 정보를 불러올 수 없습니다",
+    "noCourse": "아직 생성한 코스가 없습니다"
   },
   "courseCreation": {
     "title": "코스 생성",
