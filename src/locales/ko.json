@@ -51,7 +51,9 @@
     "courseUpdated": "코스가 수정되었어요!",
     "courseUpdateFailed": "코스 수정 중 문제가 발생했어요. 다시 시도해주세요.",
     "courseDeleted": "코스가 삭제되었어요.",
-    "courseDeleteFailed": "코스 삭제 중 문제가 발생했어요. 다시 시도해주세요."
+    "courseDeleteFailed": "코스 삭제 중 문제가 발생했어요. 다시 시도해주세요.",
+    "gpxDownloaded": "GPX 파일이 다운로드 되었어요.",
+    "gpxDownloadFailed": "GPX 다운로드 중 문제가 발생했어요. 다시 시도해주세요."
   },
   "location": {
     "nearby": "내 위치",
@@ -164,7 +166,7 @@
     "attractions.empty": "등록된 즐길거리가 없어요.",
     "attractions.inProgress": "즐길거리를 불러오고 있어요.",
     "attractions.failed": "즐길거리 정보를 준비하지 못했어요.",
-    "attractions.notApplicable": "현재 베타 버전이에요!\n부산 외 지역은 즐길거리 정보를 제공하지 않아요.",
+    "attractions.notApplicable": "현재 베타 버전이에요!\n부산 외 지역의 즐길거리 정보를 준비중이에요.",
     "scrollToTop": "맨 위로",
     "more": "...더보기",
     "collapse": "접기"

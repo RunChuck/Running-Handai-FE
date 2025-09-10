@@ -4,11 +4,10 @@ import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import { useIsMobile } from '@/hooks/useIsMobile';
-import { useCourseDetail } from '@/hooks/useCourseDetail';
+import { useMyCourseDetail } from '@/hooks/useMyCourseDetail';
 import { useMyCourses } from '@/hooks/useMyCourses';
 import { useToast } from '@/hooks/useToast';
 import { downloadGpx } from '@/api/create';
-import { mapCourseInfo } from '@/utils/format';
 
 import Header from '@/components/Header';
 import CourseInfoBar from '@/pages/courseCreation/components/CourseInfoBar';
@@ -29,7 +28,7 @@ const MyCourseDetail = () => {
   });
 
   const courseId = parseInt(id || '0', 10);
-  const { courseDetail, loading, error } = useCourseDetail(courseId);
+  const { courseDetail, loading, error } = useMyCourseDetail(courseId);
 
   useEffect(() => {
     if (!courseId) {
@@ -76,10 +75,10 @@ const MyCourseDetail = () => {
       a.click();
       document.body.removeChild(a);
 
-      showSuccessToast('GPX 파일이 다운로드되었습니다.');
+      showSuccessToast(t('toast.gpxDownloaded'));
     } catch (error) {
       console.error('GPX download failed:', error);
-      showErrorToast('GPX 다운로드 중 오류가 발생했습니다.');
+      showErrorToast(t('toast.gpxDownloadFailed'));
     }
   };
 
@@ -105,15 +104,13 @@ const MyCourseDetail = () => {
     );
   }
 
-  const mappedCourseInfo = mapCourseInfo(courseDetail);
-
   return (
     <>
       <Container>
         <Header title={t('mypage.myCourseDetail.title')} onBack={() => navigate(-1)} />
         <Content>
           <CourseTitleContainer>
-            <CourseTitle>{courseDetail.courseName}</CourseTitle>
+            <CourseTitle>{courseDetail.name}</CourseTitle>
             <ButtonWrapper>
               <Button onClick={handleEditClick}>{t('edit')}</Button>
               <Button onClick={handleGpxDownload}>{t('mypage.myCourseDetail.gpxDownload')}</Button>
@@ -123,10 +120,10 @@ const MyCourseDetail = () => {
             </ButtonWrapper>
           </CourseTitleContainer>
           <CourseInfoBar
-            distance={mappedCourseInfo.distance}
-            time={mappedCourseInfo.duration}
-            maxAltitude={mappedCourseInfo.maxElevation}
-            minAltitude={mappedCourseInfo.minElevation}
+            distance={courseDetail.distance}
+            time={courseDetail.duration}
+            maxAltitude={courseDetail.maxElevation}
+            minAltitude={courseDetail.minElevation}
             ContainerStyle={{ padding: isMobile ? '16px 0' : '24px 0' }}
           />
           <MapContainer>
@@ -142,8 +139,8 @@ const MyCourseDetail = () => {
         isOpen={editActions.isEditModalOpen}
         onClose={editActions.handleEditCancel}
         onConfirm={handleEditConfirm}
-        initialStartPoint={courseDetail?.courseName?.split('-')[0] || ''}
-        initialEndPoint={courseDetail?.courseName?.split('-')[1] || ''}
+        initialStartPoint={courseDetail?.name?.split('-')[0] || ''}
+        initialEndPoint={courseDetail?.name?.split('-')[1] || ''}
       />
 
       <CommonModal

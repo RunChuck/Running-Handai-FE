@@ -569,7 +569,7 @@ const CourseCreationModal = ({
                     <img src={InfoIconSrc} alt="info" width={16} height={16} />
                     현재 베타 버전이에요!
                   </WarningTitle>
-                  부산 외 지역은 5km 반경 내에서만 나타나요
+                  부산 외 지역은 내 주변 5km 내에서만 추천 코스로 표시됩니다.
                 </WarningMessage>
               )}
               <MapPreview>
