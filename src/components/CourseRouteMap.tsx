@@ -4,11 +4,12 @@ import Lottie from 'lottie-react';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import type { CourseDetailData } from '@/types/course';
+import type { MyCourseDetail } from '@/types/create';
 import { convertTrackPointsToRoute, drawRouteOnMap, fitMapToBounds } from '@/utils/trackPointUtils';
 import LoadingMotion from '@/assets/animations/run-loading.json';
 
 interface CourseRouteMapProps {
-  courseDetail: CourseDetailData;
+  courseDetail: CourseDetailData | MyCourseDetail;
 }
 
 const CourseRouteMap = memo(
@@ -96,18 +97,23 @@ const CourseRouteMap = memo(
           </LoadingOverlay>
         )}
         <MapDiv ref={mapContainer} isLoaded={isMapLoaded} />
-        <BookmarkLabel>
-          {courseDetail.bookmarks}
-          {t('main.bookmark')}
-        </BookmarkLabel>
+        {'bookmarks' in courseDetail && (
+          <BookmarkLabel>
+            {courseDetail.bookmarks}
+            {t('main.bookmark')}
+          </BookmarkLabel>
+        )}
       </MapContainer>
     );
   },
   (prevProps, nextProps) => {
-    return (
-      prevProps.courseDetail.trackPoints === nextProps.courseDetail.trackPoints &&
-      prevProps.courseDetail.bookmarks === nextProps.courseDetail.bookmarks
-    );
+    const trackPointsEqual = prevProps.courseDetail.trackPoints === nextProps.courseDetail.trackPoints;
+
+    if ('bookmarks' in prevProps.courseDetail && 'bookmarks' in nextProps.courseDetail) {
+      return trackPointsEqual && prevProps.courseDetail.bookmarks === nextProps.courseDetail.bookmarks;
+    }
+
+    return trackPointsEqual;
   }
 );
 
