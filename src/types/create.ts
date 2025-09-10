@@ -30,8 +30,8 @@ export interface Course {
   thumbnailUrl: string;
   maxElevation: number;
   distance: number;
-  name: string;
-  id: number;
+  courseName: string;
+  courseId: number;
   duration: number;
   createdAt?: string;
 }
@@ -41,7 +41,7 @@ export interface MyCoursesResponse {
   responseCode: string;
   message: string;
   data: {
-    courseCount: number;
+    myCourseCount: number;
     courses: Course[];
   };
 }

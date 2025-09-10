@@ -13,7 +13,7 @@ export const useMyCourses = (sortBy: SortBy = 'latest') => {
 
   return {
     courses: query.data?.data.courses || [],
-    courseCount: query.data?.data.courseCount || 0,
+    courseCount: query.data?.data.myCourseCount || 0,
     isLoading: query.isLoading,
     error: query.error,
     refetch: query.refetch,

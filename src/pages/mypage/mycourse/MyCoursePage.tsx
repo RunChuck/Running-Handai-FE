@@ -87,7 +87,7 @@ const MyCoursePage = () => {
           {isLoading ? (
             Array.from({ length: 6 }, (_, index) => <MyCourseCard key={index} variant="grid" />)
           ) : courses.length > 0 ? (
-            courses.map(course => <MyCourseCard key={course.id} variant="grid" course={course} />)
+            courses.map(course => <MyCourseCard key={course.courseId} variant="grid" course={course} />)
           ) : (
             <StatusContainer>
               <img src={EmptyIconSrc} alt="empty" />

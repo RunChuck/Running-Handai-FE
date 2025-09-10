@@ -33,7 +33,7 @@ const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleCardClick = () => {
-    navigate(`/mypage/mycourse/${course?.id}`);
+    navigate(`/mypage/mycourse/${course?.courseId}`);
   };
 
   const handleEditClick = (e: React.MouseEvent) => {
@@ -49,10 +49,10 @@ const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
   };
 
   const handleDeleteConfirm = async () => {
-    if (!course?.id) return;
+    if (!course?.courseId) return;
 
     try {
-      await deleteCourse(course.id);
+      await deleteCourse(course.courseId);
 
       // 캐시 무효화
       queryClient.invalidateQueries({ queryKey: authKeys.all });
@@ -77,10 +77,10 @@ const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
   };
 
   const handleEditConfirm = async (startPoint: string, endPoint: string) => {
-    if (!course?.id) return;
+    if (!course?.courseId) return;
 
     try {
-      await updateCourse(course.id, {
+      await updateCourse(course.courseId, {
         startPointName: startPoint,
         endPointName: endPoint,
       });
@@ -145,7 +145,7 @@ const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
               </DropdownItem>
             </Dropdown>
           </RowRapper>
-          <CourseName $variant={variant}>{course?.name || '코스 이름'}</CourseName>
+          <CourseName $variant={variant}>{course?.courseName || '코스 이름'}</CourseName>
           <CourseInfoWrapper $variant={variant}>
             {courseInfoItems.map((item, index) => (
               <CourseInfoItemGroup key={index} $variant={variant}>
@@ -164,8 +164,8 @@ const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
         isOpen={isEditModalOpen}
         onClose={handleEditCancel}
         onConfirm={handleEditConfirm}
-        initialStartPoint={course?.name?.split('-')[0] || ''}
-        initialEndPoint={course?.name?.split('-')[1] || ''}
+        initialStartPoint={course?.courseName?.split('-')[0] || ''}
+        initialEndPoint={course?.courseName?.split('-')[1] || ''}
       />
 
       <CommonModal
