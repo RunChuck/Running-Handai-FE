@@ -12,6 +12,7 @@ import { downloadGpx } from '@/api/create';
 import Header from '@/components/Header';
 import CourseInfoBar from '@/pages/courseCreation/components/CourseInfoBar';
 import CourseRouteMap from '@/components/CourseRouteMap';
+import ElevationChart from '@/pages/mypage/mycourse/ElevationChart';
 import CommonModal from '@/components/CommonModal';
 import CourseEditModal from '@/components/CourseEditModal';
 import DeleteIconSrc from '@/assets/icons/delete-icon.svg';
@@ -131,6 +132,7 @@ const MyCourseDetail = () => {
           </MapContainer>
           <GraphContainer>
             <GraphTitle>{t('mypage.myCourseDetail.altitudeGraph')}</GraphTitle>
+            <ElevationChart trackPoints={courseDetail.trackPoints} />
           </GraphContainer>
         </Content>
       </Container>

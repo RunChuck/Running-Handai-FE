@@ -169,7 +169,8 @@
     "attractions.notApplicable": "현재 베타 버전이에요!\n부산 외 지역의 즐길거리 정보를 준비중이에요.",
     "scrollToTop": "맨 위로",
     "more": "...더보기",
-    "collapse": "접기"
+    "collapse": "접기",
+    "elevationChart.error": "고도 정보를 불러올 수 없습니다"
   },
   "courseCreation": {
     "title": "코스 생성",
