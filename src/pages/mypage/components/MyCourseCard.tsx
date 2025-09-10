@@ -1,13 +1,10 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
-import { deleteCourse, updateCourse } from '@/api/create';
 import type { Course } from '@/types/create';
-import { useToast } from '@/hooks/useToast';
-import { authKeys } from '@/constants/queryKeys';
+import { useMyCourses } from '@/hooks/useMyCourses';
 
 import { Dropdown, DropdownItem } from '@/components/Dropdown';
 import CommonModal from '@/components/CommonModal';
@@ -26,11 +23,9 @@ interface MyCourseCardProps {
 const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
   const [t] = useTranslation();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const { showSuccessToast, showErrorToast } = useToast();
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const { deleteActions, editActions } = useMyCourses();
 
   const handleCardClick = () => {
     navigate(`/mypage/mycourse/${course?.courseId}`);
@@ -39,70 +34,23 @@ const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
   const handleEditClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsDropdownOpen(false);
-    setIsEditModalOpen(true);
+    editActions.handleEditClick();
   };
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsDropdownOpen(false);
-    setIsDeleteModalOpen(true);
+    deleteActions.handleDeleteClick();
   };
 
   const handleDeleteConfirm = async () => {
     if (!course?.courseId) return;
-
-    try {
-      await deleteCourse(course.courseId);
-
-      // 캐시 무효화
-      queryClient.invalidateQueries({ queryKey: authKeys.all });
-      queryClient.invalidateQueries({
-        predicate: query => {
-          const [prefix, type] = query.queryKey;
-          return prefix === 'courses' && type === 'list';
-        },
-      });
-
-      setIsDeleteModalOpen(false);
-      showSuccessToast('코스가 삭제되었습니다.');
-    } catch (error) {
-      console.error('Course deletion failed:', error);
-      showErrorToast('코스 삭제 중 오류가 발생했습니다.');
-      setIsDeleteModalOpen(false);
-    }
-  };
-
-  const handleDeleteCancel = () => {
-    setIsDeleteModalOpen(false);
+    await deleteActions.handleDeleteConfirm(course.courseId);
   };
 
   const handleEditConfirm = async (startPoint: string, endPoint: string) => {
     if (!course?.courseId) return;
-
-    try {
-      await updateCourse(course.courseId, {
-        startPointName: startPoint,
-        endPointName: endPoint,
-      });
-
-      // 캐시 무효화
-      queryClient.invalidateQueries({
-        predicate: query => {
-          const [prefix, type] = query.queryKey;
-          return prefix === 'auth' || (prefix === 'courses' && (type === 'list' || type === 'detail'));
-        },
-      });
-
-      setIsEditModalOpen(false);
-      showSuccessToast('코스가 수정되었습니다.');
-    } catch (error) {
-      console.error('Course update failed:', error);
-      showErrorToast('코스 수정 중 오류가 발생했습니다.');
-    }
-  };
-
-  const handleEditCancel = () => {
-    setIsEditModalOpen(false);
+    await editActions.handleEditConfirm(course.courseId, startPoint, endPoint);
   };
 
   const courseInfoItems = [
@@ -161,16 +109,16 @@ const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
       </CardContainer>
 
       <CourseEditModal
-        isOpen={isEditModalOpen}
-        onClose={handleEditCancel}
+        isOpen={editActions.isEditModalOpen}
+        onClose={editActions.handleEditCancel}
         onConfirm={handleEditConfirm}
         initialStartPoint={course?.courseName?.split('-')[0] || ''}
         initialEndPoint={course?.courseName?.split('-')[1] || ''}
       />
 
       <CommonModal
-        isOpen={isDeleteModalOpen}
-        onClose={handleDeleteCancel}
+        isOpen={deleteActions.isDeleteModalOpen}
+        onClose={deleteActions.handleDeleteCancel}
         onConfirm={handleDeleteConfirm}
         content={t('modal.courseCreation.deleteDesc')}
         cancelText={t('modal.courseCreation.deleteCancel')}

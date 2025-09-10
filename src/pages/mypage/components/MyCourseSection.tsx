@@ -53,18 +53,9 @@ const MyCourseSection = ({ isAuthenticated }: MyCourseSectionProps) => {
           </S.LoadingContent>
         ) : myCourseCount > 0 ? (
           <S.CardList ref={scrollContainerRef} onMouseDown={handleMouseDown}>
-            {courses.map(course => {
-              const mappedCourse = {
-                id: course.courseId,
-                name: course.courseName,
-                thumbnailUrl: course.thumbnailUrl,
-                distance: course.distance,
-                duration: course.duration,
-                maxElevation: course.maxElevation,
-                createdAt: course.createdAt,
-              };
-              return <MyCourseCard key={course.courseId} course={mappedCourse} />;
-            })}
+            {courses.map(course => (
+              <MyCourseCard key={course.courseId} course={course} />
+            ))}
           </S.CardList>
         ) : (
           <S.SectionContent>

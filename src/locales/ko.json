@@ -47,7 +47,11 @@
     "reviewDeleted": "리뷰가 삭제되었어요.",
     "reviewDeleteFailed": "리뷰 삭제 중 문제가 발생했어요. 다시 시도해주세요.",
     "error": "오류가 발생했어요. 다시 시도해주세요.",
-    "preparing": "준비 중인 기능입니다. 조금만 기다려주세요!"
+    "preparing": "준비 중인 기능입니다. 조금만 기다려주세요!",
+    "courseUpdated": "코스가 수정되었어요!",
+    "courseUpdateFailed": "코스 수정 중 문제가 발생했어요. 다시 시도해주세요.",
+    "courseDeleted": "코스가 삭제되었어요.",
+    "courseDeleteFailed": "코스 삭제 중 문제가 발생했어요. 다시 시도해주세요."
   },
   "location": {
     "nearby": "내 위치",
