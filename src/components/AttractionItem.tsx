@@ -106,9 +106,8 @@ const MoreButton = styled.button`
   position: absolute;
   bottom: 0;
   right: 0;
-  background: white;
-  border: none;
-  padding-left: 2px;
+  background: #fff;
+  padding: 2px 0 0 2px;
   cursor: pointer;
 
   &:hover {
