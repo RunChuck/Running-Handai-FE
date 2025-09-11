@@ -2,8 +2,9 @@ import styled from '@emotion/styled';
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import Lottie from 'lottie-react';
 import { theme } from '@/styles/theme';
-import { useMyCourses } from '@/hooks/useMyCourses';
+import { useMyCourses, useMyCourseActions } from '@/hooks/useMyCourses';
 import type { SortBy } from '@/types/create';
 
 import Header from '@/components/Header';
@@ -12,6 +13,7 @@ import { DropdownItem } from '@/components/Dropdown';
 import SVGColor from '@/components/SvgColor';
 import EmptyIconSrc from '@/assets/icons/no-course.svg';
 import ArrowIconSrc from '@/assets/icons/arrow-down-16px.svg';
+import LoadingMotion from '@/assets/animations/run-loading.json';
 
 const MyCoursePage = () => {
   const [t] = useTranslation();
@@ -21,6 +23,7 @@ const MyCoursePage = () => {
   const sortSelectorRef = useRef<HTMLDivElement>(null);
 
   const { courses, isLoading } = useMyCourses(sortBy);
+  const { editActions, deleteActions } = useMyCourseActions();
 
   const sortOptions = [
     { value: 'latest', label: '최신순' },
@@ -85,13 +88,23 @@ const MyCoursePage = () => {
         </HeaderSection>
         <CardGrid>
           {isLoading ? (
-            Array.from({ length: 6 }, (_, index) => <MyCourseCard key={index} variant="grid" />)
+            <StatusContainer>
+              <Lottie animationData={LoadingMotion} style={{ width: 100, height: 100 }} loop={true} />
+            </StatusContainer>
           ) : courses.length > 0 ? (
-            courses.map(course => <MyCourseCard key={course.id} variant="grid" course={course} />)
+            courses.map(course => (
+              <MyCourseCard
+                key={course.courseId}
+                variant="grid"
+                course={course}
+                onEdit={editActions.handleEditConfirm}
+                onDelete={deleteActions.handleDeleteConfirm}
+              />
+            ))
           ) : (
             <StatusContainer>
               <img src={EmptyIconSrc} alt="empty" />
-              <EmptyText>아직 생성한 코스가 없습니다</EmptyText>
+              <EmptyText>{t('courseDetail.noCourse')}</EmptyText>
             </StatusContainer>
           )}
         </CardGrid>

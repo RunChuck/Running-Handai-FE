@@ -1,4 +1,5 @@
 import type { CourseDetailResponse } from '@/types/course';
+import type { MyCourseDetail } from '@/types/create';
 
 export interface MapPoint {
   lat: number;
@@ -24,7 +25,7 @@ export interface CourseRoute {
 /**
  * API에서 받은 trackPoints를 지도용 데이터로 변환
  */
-export const convertTrackPointsToRoute = (courseDetail: CourseDetailResponse['data']): CourseRoute => {
+export const convertTrackPointsToRoute = (courseDetail: CourseDetailResponse['data'] | MyCourseDetail): CourseRoute => {
   const points: MapPoint[] = courseDetail.trackPoints.map(point => ({
     lat: point.lat,
     lng: point.lon,

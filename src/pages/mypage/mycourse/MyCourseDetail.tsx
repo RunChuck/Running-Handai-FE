@@ -1,19 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useQueryClient } from '@tanstack/react-query';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import { useIsMobile } from '@/hooks/useIsMobile';
-import { useCourseDetail } from '@/hooks/useCourseDetail';
+import { useMyCourseDetail } from '@/hooks/useMyCourseDetail';
+import { useMyCourseActions } from '@/hooks/useMyCourses';
 import { useToast } from '@/hooks/useToast';
-import { deleteCourse, downloadGpx, updateCourse } from '@/api/create';
-import { mapCourseInfo } from '@/utils/format';
-import { authKeys } from '@/constants/queryKeys';
+import { downloadGpx } from '@/api/create';
 
 import Header from '@/components/Header';
 import CourseInfoBar from '@/pages/courseCreation/components/CourseInfoBar';
 import CourseRouteMap from '@/components/CourseRouteMap';
+import ElevationChart from '@/pages/mypage/mycourse/ElevationChart';
 import CommonModal from '@/components/CommonModal';
 import CourseEditModal from '@/components/CourseEditModal';
 import DeleteIconSrc from '@/assets/icons/delete-icon.svg';
@@ -23,14 +22,14 @@ const MyCourseDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isMobile = useIsMobile();
-  const queryClient = useQueryClient();
   const { showSuccessToast, showErrorToast } = useToast();
 
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const { deleteActions, editActions } = useMyCourseActions({
+    onDeleteSuccess: () => navigate('/mypage/mycourse'),
+  });
 
   const courseId = parseInt(id || '0', 10);
-  const { courseDetail, loading, error } = useCourseDetail(courseId);
+  const { courseDetail, loading, error } = useMyCourseDetail(courseId);
 
   useEffect(() => {
     if (!courseId) {
@@ -40,70 +39,22 @@ const MyCourseDetail = () => {
 
   const handleEditClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsEditModalOpen(true);
+    editActions.handleEditClick();
   };
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsDeleteModalOpen(true);
+    deleteActions.handleDeleteClick();
   };
 
   const handleDeleteConfirm = async () => {
     if (!courseId) return;
-
-    try {
-      await deleteCourse(courseId);
-
-      // 캐시 무효화
-      queryClient.invalidateQueries({ queryKey: authKeys.all });
-      queryClient.invalidateQueries({
-        predicate: query => {
-          const [prefix, type] = query.queryKey;
-          return prefix === 'courses' && type === 'list';
-        },
-      });
-
-      setIsDeleteModalOpen(false);
-      showSuccessToast('코스가 삭제되었습니다.');
-      navigate('/mypage/mycourse');
-    } catch (error) {
-      console.error('Course deletion failed:', error);
-      showErrorToast('코스 삭제 중 오류가 발생했습니다.');
-      setIsDeleteModalOpen(false);
-    }
-  };
-
-  const handleDeleteCancel = () => {
-    setIsDeleteModalOpen(false);
+    await deleteActions.handleDeleteConfirm(courseId);
   };
 
   const handleEditConfirm = async (startPoint: string, endPoint: string) => {
     if (!courseId) return;
-
-    try {
-      await updateCourse(courseId, {
-        startPointName: startPoint,
-        endPointName: endPoint,
-      });
-
-      // 캐시 무효화
-      queryClient.invalidateQueries({
-        predicate: query => {
-          const [prefix, type] = query.queryKey;
-          return prefix === 'auth' || (prefix === 'courses' && (type === 'list' || type === 'detail'));
-        },
-      });
-
-      setIsEditModalOpen(false);
-      showSuccessToast('코스가 수정되었습니다.');
-    } catch (error) {
-      console.error('Course update failed:', error);
-      showErrorToast('코스 수정 중 오류가 발생했습니다.');
-    }
-  };
-
-  const handleEditCancel = () => {
-    setIsEditModalOpen(false);
+    await editActions.handleEditConfirm(courseId, startPoint, endPoint);
   };
 
   const handleGpxDownload = async () => {
@@ -125,10 +76,10 @@ const MyCourseDetail = () => {
       a.click();
       document.body.removeChild(a);
 
-      showSuccessToast('GPX 파일이 다운로드되었습니다.');
+      showSuccessToast(t('toast.gpxDownloaded'));
     } catch (error) {
       console.error('GPX download failed:', error);
-      showErrorToast('GPX 다운로드 중 오류가 발생했습니다.');
+      showErrorToast(t('toast.gpxDownloadFailed'));
     }
   };
 
@@ -154,15 +105,13 @@ const MyCourseDetail = () => {
     );
   }
 
-  const mappedCourseInfo = mapCourseInfo(courseDetail);
-
   return (
     <>
       <Container>
         <Header title={t('mypage.myCourseDetail.title')} onBack={() => navigate(-1)} />
         <Content>
           <CourseTitleContainer>
-            <CourseTitle>{courseDetail.courseName}</CourseTitle>
+            <CourseTitle>{courseDetail.name}</CourseTitle>
             <ButtonWrapper>
               <Button onClick={handleEditClick}>{t('edit')}</Button>
               <Button onClick={handleGpxDownload}>{t('mypage.myCourseDetail.gpxDownload')}</Button>
@@ -172,10 +121,10 @@ const MyCourseDetail = () => {
             </ButtonWrapper>
           </CourseTitleContainer>
           <CourseInfoBar
-            distance={mappedCourseInfo.distance}
-            time={mappedCourseInfo.duration}
-            maxAltitude={mappedCourseInfo.maxElevation}
-            minAltitude={mappedCourseInfo.minElevation}
+            distance={courseDetail.distance}
+            time={courseDetail.duration}
+            maxAltitude={courseDetail.maxElevation}
+            minAltitude={courseDetail.minElevation}
             ContainerStyle={{ padding: isMobile ? '16px 0' : '24px 0' }}
           />
           <MapContainer>
@@ -183,21 +132,22 @@ const MyCourseDetail = () => {
           </MapContainer>
           <GraphContainer>
             <GraphTitle>{t('mypage.myCourseDetail.altitudeGraph')}</GraphTitle>
+            <ElevationChart trackPoints={courseDetail.trackPoints} />
           </GraphContainer>
         </Content>
       </Container>
 
       <CourseEditModal
-        isOpen={isEditModalOpen}
-        onClose={handleEditCancel}
+        isOpen={editActions.isEditModalOpen}
+        onClose={editActions.handleEditCancel}
         onConfirm={handleEditConfirm}
-        initialStartPoint={courseDetail?.courseName?.split('-')[0] || ''}
-        initialEndPoint={courseDetail?.courseName?.split('-')[1] || ''}
+        initialStartPoint={courseDetail?.name?.split('-')[0] || ''}
+        initialEndPoint={courseDetail?.name?.split('-')[1] || ''}
       />
 
       <CommonModal
-        isOpen={isDeleteModalOpen}
-        onClose={handleDeleteCancel}
+        isOpen={deleteActions.isDeleteModalOpen}
+        onClose={deleteActions.handleDeleteCancel}
         onConfirm={handleDeleteConfirm}
         content={t('modal.courseCreation.deleteDesc')}
         cancelText={t('modal.courseCreation.deleteCancel')}

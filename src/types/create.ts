@@ -30,8 +30,8 @@ export interface Course {
   thumbnailUrl: string;
   maxElevation: number;
   distance: number;
-  name: string;
-  id: number;
+  courseName: string;
+  courseId: number;
   duration: number;
   createdAt?: string;
 }
@@ -41,7 +41,7 @@ export interface MyCoursesResponse {
   responseCode: string;
   message: string;
   data: {
-    courseCount: number;
+    myCourseCount: number;
     courses: Course[];
   };
 }
@@ -56,4 +56,28 @@ export interface CourseUpdateRequest {
   startPointName: string;
   endPointName: string;
   thumbnailImage?: File;
+}
+
+export interface TrackPoint {
+  lat: number;
+  lon: number;
+  ele: number;
+}
+
+export interface MyCourseDetail {
+  courseId: number;
+  name: string;
+  distance: number;
+  duration: number;
+  maxElevation: number;
+  minElevation: number;
+  trackPoints: TrackPoint[];
+}
+
+export interface MyCourseDetailResponse {
+  statusCode: number;
+  responseCode: string;
+  message: string;
+  totalCount: number;
+  data: MyCourseDetail;
 }

@@ -28,4 +28,6 @@ export const authKeys = {
   myReviews: () => [...authKeys.all, 'my-reviews'] as const,
   // 내 코스 조회
   myCourses: (sortBy?: string) => [...authKeys.all, 'my-courses', sortBy] as const,
+  // 내 코스 상세 조회
+  myCourseDetail: (courseId: number) => [...authKeys.all, 'my-course-detail', courseId] as const,
 };

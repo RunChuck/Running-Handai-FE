@@ -7,6 +7,7 @@ import type {
   MyCoursesRequest,
   MyCoursesResponse,
   CourseUpdateRequest,
+  MyCourseDetailResponse,
 } from '@/types/create';
 
 const PREFIX = '/api/members/me/courses';
@@ -61,6 +62,11 @@ export const updateCourse = async (courseId: number, request: CourseUpdateReques
     },
   });
 
+  return response.data;
+};
+
+export const getMyCourseDetail = async (courseId: number): Promise<MyCourseDetailResponse> => {
+  const response = await http.get<MyCourseDetailResponse>(`${PREFIX}/${courseId}`);
   return response.data;
 };
 

@@ -1,14 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
-import { deleteCourse, updateCourse } from '@/api/create';
 import type { Course } from '@/types/create';
-import { useToast } from '@/hooks/useToast';
-import { authKeys } from '@/constants/queryKeys';
-
 import { Dropdown, DropdownItem } from '@/components/Dropdown';
 import CommonModal from '@/components/CommonModal';
 import CourseEditModal from '@/components/CourseEditModal';
@@ -21,19 +16,19 @@ import AltitudeIconSrc from '@/assets/icons/course-max-altitude.svg';
 interface MyCourseCardProps {
   variant?: 'mypage' | 'grid';
   course?: Course;
+  onEdit?: (courseId: number, startPoint: string, endPoint: string) => void;
+  onDelete?: (courseId: number) => void;
 }
 
-const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
+const MyCourseCard = ({ variant = 'mypage', course, onEdit, onDelete }: MyCourseCardProps) => {
   const [t] = useTranslation();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const { showSuccessToast, showErrorToast } = useToast();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleCardClick = () => {
-    navigate(`/mypage/mycourse/${course?.id}`);
+    navigate(`/mypage/mycourse/${course?.courseId}`);
   };
 
   const handleEditClick = (e: React.MouseEvent) => {
@@ -49,59 +44,14 @@ const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
   };
 
   const handleDeleteConfirm = async () => {
-    if (!course?.id) return;
-
-    try {
-      await deleteCourse(course.id);
-
-      // 캐시 무효화
-      queryClient.invalidateQueries({ queryKey: authKeys.all });
-      queryClient.invalidateQueries({
-        predicate: query => {
-          const [prefix, type] = query.queryKey;
-          return prefix === 'courses' && type === 'list';
-        },
-      });
-
-      setIsDeleteModalOpen(false);
-      showSuccessToast('코스가 삭제되었습니다.');
-    } catch (error) {
-      console.error('Course deletion failed:', error);
-      showErrorToast('코스 삭제 중 오류가 발생했습니다.');
-      setIsDeleteModalOpen(false);
-    }
-  };
-
-  const handleDeleteCancel = () => {
+    if (!course?.courseId) return;
+    onDelete?.(course.courseId);
     setIsDeleteModalOpen(false);
   };
 
   const handleEditConfirm = async (startPoint: string, endPoint: string) => {
-    if (!course?.id) return;
-
-    try {
-      await updateCourse(course.id, {
-        startPointName: startPoint,
-        endPointName: endPoint,
-      });
-
-      // 캐시 무효화
-      queryClient.invalidateQueries({
-        predicate: query => {
-          const [prefix, type] = query.queryKey;
-          return prefix === 'auth' || (prefix === 'courses' && (type === 'list' || type === 'detail'));
-        },
-      });
-
-      setIsEditModalOpen(false);
-      showSuccessToast('코스가 수정되었습니다.');
-    } catch (error) {
-      console.error('Course update failed:', error);
-      showErrorToast('코스 수정 중 오류가 발생했습니다.');
-    }
-  };
-
-  const handleEditCancel = () => {
+    if (!course?.courseId) return;
+    onEdit?.(course.courseId, startPoint, endPoint);
     setIsEditModalOpen(false);
   };
 
@@ -145,7 +95,7 @@ const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
               </DropdownItem>
             </Dropdown>
           </RowRapper>
-          <CourseName $variant={variant}>{course?.name || '코스 이름'}</CourseName>
+          <CourseName $variant={variant}>{course?.courseName || '코스 이름'}</CourseName>
           <CourseInfoWrapper $variant={variant}>
             {courseInfoItems.map((item, index) => (
               <CourseInfoItemGroup key={index} $variant={variant}>
@@ -162,15 +112,15 @@ const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
 
       <CourseEditModal
         isOpen={isEditModalOpen}
-        onClose={handleEditCancel}
+        onClose={() => setIsEditModalOpen(false)}
         onConfirm={handleEditConfirm}
-        initialStartPoint={course?.name?.split('-')[0] || ''}
-        initialEndPoint={course?.name?.split('-')[1] || ''}
+        initialStartPoint={course?.courseName?.split('-')[0] || ''}
+        initialEndPoint={course?.courseName?.split('-')[1] || ''}
       />
 
       <CommonModal
         isOpen={isDeleteModalOpen}
-        onClose={handleDeleteCancel}
+        onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleDeleteConfirm}
         content={t('modal.courseCreation.deleteDesc')}
         cancelText={t('modal.courseCreation.deleteCancel')}
