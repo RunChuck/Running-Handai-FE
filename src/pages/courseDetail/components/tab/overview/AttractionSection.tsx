@@ -109,7 +109,6 @@ const AttractionList = styled.div`
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    touch-action: pan-x;
     user-select: none;
     -webkit-user-select: none;
     cursor: grab;
