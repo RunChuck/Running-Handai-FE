@@ -5,7 +5,7 @@ import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useMyCourseDetail } from '@/hooks/useMyCourseDetail';
-import { useMyCourses } from '@/hooks/useMyCourses';
+import { useMyCourseActions } from '@/hooks/useMyCourses';
 import { useToast } from '@/hooks/useToast';
 import { downloadGpx } from '@/api/create';
 
@@ -24,7 +24,7 @@ const MyCourseDetail = () => {
   const isMobile = useIsMobile();
   const { showSuccessToast, showErrorToast } = useToast();
 
-  const { deleteActions, editActions } = useMyCourses(undefined, {
+  const { deleteActions, editActions } = useMyCourseActions({
     onDeleteSuccess: () => navigate('/mypage/mycourse'),
   });
 

@@ -6,24 +6,36 @@ import { authKeys } from '@/constants/queryKeys';
 import { useToast } from '@/hooks/useToast';
 import type { MyCoursesRequest, SortBy } from '@/types/create';
 
-interface UsMyCoursesOptions {
-  onDeleteSuccess?: () => void;
-  onEditSuccess?: () => void;
-}
-
-export const useMyCourses = (sortBy: SortBy = 'latest', options: UsMyCoursesOptions = {}) => {
-  const [t] = useTranslation();
-  const queryClient = useQueryClient();
-  const { showSuccessToast, showErrorToast } = useToast();
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
+// 내 코스 조회
+export const useMyCourses = (sortBy: SortBy = 'latest') => {
   const query = useQuery({
     queryKey: authKeys.myCourses(sortBy),
     queryFn: () => getMyCourses({ sortBy } as MyCoursesRequest),
     staleTime: 5 * 60 * 1000, // 5분
     gcTime: 10 * 60 * 1000, // 10분
   });
+
+  return {
+    courses: query.data?.data.courses || [],
+    courseCount: query.data?.data.myCourseCount || 0,
+    isLoading: query.isLoading,
+    error: query.error,
+    refetch: query.refetch,
+  };
+};
+
+interface UseMyCourseActionsOptions {
+  onDeleteSuccess?: () => void;
+  onEditSuccess?: () => void;
+}
+
+// 내 코스 수정, 삭제
+export const useMyCourseActions = (options: UseMyCourseActionsOptions = {}) => {
+  const [t] = useTranslation();
+  const queryClient = useQueryClient();
+  const { showSuccessToast, showErrorToast } = useToast();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const handleDeleteClick = (e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -92,20 +104,24 @@ export const useMyCourses = (sortBy: SortBy = 'latest', options: UsMyCoursesOpti
     }
   };
 
+  const handleEdit = async (courseId: number, startPoint: string, endPoint: string) => {
+    await handleEditConfirm(courseId, startPoint, endPoint);
+  };
+
+  const handleDelete = async (courseId: number) => {
+    await handleDeleteConfirm(courseId);
+  };
+
   return {
-    courses: query.data?.data.courses || [],
-    courseCount: query.data?.data.myCourseCount || 0,
-    isLoading: query.isLoading,
-    error: query.error,
-    refetch: query.refetch,
-    // 삭제 관련
+    handleEdit,
+    handleDelete,
+
     deleteActions: {
       isDeleteModalOpen,
       handleDeleteClick,
       handleDeleteCancel,
       handleDeleteConfirm,
     },
-    // 수정 관련
     editActions: {
       isEditModalOpen,
       handleEditClick,

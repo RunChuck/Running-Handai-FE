@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import Lottie from 'lottie-react';
 import { theme } from '@/styles/theme';
-import { useMyCourses } from '@/hooks/useMyCourses';
+import { useMyCourses, useMyCourseActions } from '@/hooks/useMyCourses';
 import type { SortBy } from '@/types/create';
 
 import Header from '@/components/Header';
@@ -23,6 +23,7 @@ const MyCoursePage = () => {
   const sortSelectorRef = useRef<HTMLDivElement>(null);
 
   const { courses, isLoading } = useMyCourses(sortBy);
+  const { editActions, deleteActions } = useMyCourseActions();
 
   const sortOptions = [
     { value: 'latest', label: '최신순' },
@@ -91,7 +92,15 @@ const MyCoursePage = () => {
               <Lottie animationData={LoadingMotion} style={{ width: 100, height: 100 }} loop={true} />
             </StatusContainer>
           ) : courses.length > 0 ? (
-            courses.map(course => <MyCourseCard key={course.courseId} variant="grid" course={course} />)
+            courses.map(course => (
+              <MyCourseCard
+                key={course.courseId}
+                variant="grid"
+                course={course}
+                onEdit={editActions.handleEditConfirm}
+                onDelete={deleteActions.handleDeleteConfirm}
+              />
+            ))
           ) : (
             <StatusContainer>
               <img src={EmptyIconSrc} alt="empty" />

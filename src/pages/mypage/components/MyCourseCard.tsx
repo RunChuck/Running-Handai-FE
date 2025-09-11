@@ -4,8 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import type { Course } from '@/types/create';
-import { useMyCourses } from '@/hooks/useMyCourses';
-
 import { Dropdown, DropdownItem } from '@/components/Dropdown';
 import CommonModal from '@/components/CommonModal';
 import CourseEditModal from '@/components/CourseEditModal';
@@ -18,14 +16,16 @@ import AltitudeIconSrc from '@/assets/icons/course-max-altitude.svg';
 interface MyCourseCardProps {
   variant?: 'mypage' | 'grid';
   course?: Course;
+  onEdit?: (courseId: number, startPoint: string, endPoint: string) => void;
+  onDelete?: (courseId: number) => void;
 }
 
-const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
+const MyCourseCard = ({ variant = 'mypage', course, onEdit, onDelete }: MyCourseCardProps) => {
   const [t] = useTranslation();
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  const { deleteActions, editActions } = useMyCourses();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const handleCardClick = () => {
     navigate(`/mypage/mycourse/${course?.courseId}`);
@@ -34,23 +34,25 @@ const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
   const handleEditClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsDropdownOpen(false);
-    editActions.handleEditClick();
+    setIsEditModalOpen(true);
   };
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsDropdownOpen(false);
-    deleteActions.handleDeleteClick();
+    setIsDeleteModalOpen(true);
   };
 
   const handleDeleteConfirm = async () => {
     if (!course?.courseId) return;
-    await deleteActions.handleDeleteConfirm(course.courseId);
+    onDelete?.(course.courseId);
+    setIsDeleteModalOpen(false);
   };
 
   const handleEditConfirm = async (startPoint: string, endPoint: string) => {
     if (!course?.courseId) return;
-    await editActions.handleEditConfirm(course.courseId, startPoint, endPoint);
+    onEdit?.(course.courseId, startPoint, endPoint);
+    setIsEditModalOpen(false);
   };
 
   const courseInfoItems = [
@@ -109,16 +111,16 @@ const MyCourseCard = ({ variant = 'mypage', course }: MyCourseCardProps) => {
       </CardContainer>
 
       <CourseEditModal
-        isOpen={editActions.isEditModalOpen}
-        onClose={editActions.handleEditCancel}
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
         onConfirm={handleEditConfirm}
         initialStartPoint={course?.courseName?.split('-')[0] || ''}
         initialEndPoint={course?.courseName?.split('-')[1] || ''}
       />
 
       <CommonModal
-        isOpen={deleteActions.isDeleteModalOpen}
-        onClose={deleteActions.handleDeleteCancel}
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleDeleteConfirm}
         content={t('modal.courseCreation.deleteDesc')}
         cancelText={t('modal.courseCreation.deleteCancel')}

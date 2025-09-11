@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import * as S from '../MyPage.styled';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 import { useUserInfo } from '@/hooks/useUserInfo';
+import { useMyCourseActions } from '@/hooks/useMyCourses';
 
 import MyCourseCard from './MyCourseCard';
 import SVGColor from '@/components/SvgColor';
@@ -22,6 +23,8 @@ const MyCourseSection = ({ isAuthenticated }: MyCourseSectionProps) => {
   const userInfo = userInfoResponse?.data;
   const courses = userInfo?.myCourseInfo?.courses || [];
   const myCourseCount = userInfo?.myCourseInfo?.myCourseCount || 0;
+
+  const { handleEdit, handleDelete } = useMyCourseActions();
 
   const handleGoToCreateCourse = () => {
     navigate('/course-creation');
@@ -54,7 +57,12 @@ const MyCourseSection = ({ isAuthenticated }: MyCourseSectionProps) => {
         ) : myCourseCount > 0 ? (
           <S.CardList ref={scrollContainerRef} onMouseDown={handleMouseDown}>
             {courses.map(course => (
-              <MyCourseCard key={course.courseId} course={course} />
+              <MyCourseCard 
+                key={course.courseId} 
+                course={course} 
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
             ))}
           </S.CardList>
         ) : (
