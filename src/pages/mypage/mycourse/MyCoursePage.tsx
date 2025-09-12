@@ -1,10 +1,11 @@
 import styled from '@emotion/styled';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import Lottie from 'lottie-react';
 import { theme } from '@/styles/theme';
 import { useMyCourses, useMyCourseActions } from '@/hooks/useMyCourses';
+import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import type { SortBy } from '@/types/create';
 
 import Header from '@/components/Header';
@@ -22,7 +23,7 @@ const MyCoursePage = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const sortSelectorRef = useRef<HTMLDivElement>(null);
 
-  const { courses, isLoading } = useMyCourses(sortBy);
+  const { courses, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } = useMyCourses(sortBy);
   const { editActions, deleteActions } = useMyCourseActions();
 
   const sortOptions = [
@@ -37,6 +38,17 @@ const MyCoursePage = () => {
   const handleSortChange = (value: SortBy) => {
     setSortBy(value);
   };
+
+  const handleLoadMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const { targetRef } = useIntersectionObserver(handleLoadMore, {
+    threshold: 1.0,
+    enabled: hasNextPage && !isFetchingNextPage,
+  });
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -87,20 +99,23 @@ const MyCoursePage = () => {
           </SortSelector>
         </HeaderSection>
         <CardGrid>
-          {isLoading ? (
+          {isLoading && courses.length === 0 ? (
             <StatusContainer>
               <Lottie animationData={LoadingMotion} style={{ width: 100, height: 100 }} loop={true} />
             </StatusContainer>
           ) : courses.length > 0 ? (
-            courses.map(course => (
-              <MyCourseCard
-                key={course.courseId}
-                variant="grid"
-                course={course}
-                onEdit={editActions.handleEditConfirm}
-                onDelete={deleteActions.handleDeleteConfirm}
-              />
-            ))
+            <>
+              {courses.map(course => (
+                <MyCourseCard
+                  key={course.courseId}
+                  variant="grid"
+                  course={course}
+                  onEdit={editActions.handleEditConfirm}
+                  onDelete={deleteActions.handleDeleteConfirm}
+                />
+              ))}
+              {hasNextPage && <LoadMoreTrigger ref={targetRef} />}
+            </>
           ) : (
             <StatusContainer>
               <img src={EmptyIconSrc} alt="empty" />
@@ -197,4 +212,12 @@ const StatusContainer = styled.div`
 const EmptyText = styled.p`
   ${theme.typography.body2}
   color: var(--text-text-secondary, #555555);
+`;
+
+const LoadMoreTrigger = styled.div`
+  grid-column: 1 / -1;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
