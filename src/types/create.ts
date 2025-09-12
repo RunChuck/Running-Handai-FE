@@ -52,6 +52,7 @@ export interface MyCoursesRequest {
   page?: number;
   size?: number;
   sortBy?: SortBy;
+  keyword?: string;
 }
 
 export interface CourseUpdateRequest {
