@@ -24,9 +24,10 @@ const MyCoursePage = () => {
   const [sortBy, setSortBy] = useState<SortBy>('latest');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [actualSearchKeyword, setActualSearchKeyword] = useState('');
   const sortSelectorRef = useRef<HTMLDivElement>(null);
 
-  const { courses, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } = useMyCourses(sortBy);
+  const { courses, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } = useMyCourses(sortBy, actualSearchKeyword);
   const { editActions, deleteActions } = useMyCourseActions();
 
   const sortOptions = [
@@ -47,6 +48,26 @@ const MyCoursePage = () => {
       fetchNextPage();
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const handleSearch = useCallback(() => {
+    setActualSearchKeyword(searchKeyword.trim());
+  }, [searchKeyword]);
+
+  const handleKeyPress = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        handleSearch();
+      }
+    },
+    [handleSearch]
+  );
+
+  // 검색어가 비었을 때 자동으로 전체 목록 불러오기
+  useEffect(() => {
+    if (searchKeyword.trim() === '') {
+      setActualSearchKeyword('');
+    }
+  }, [searchKeyword]);
 
   const { targetRef } = useIntersectionObserver(handleLoadMore, {
     threshold: 1.0,
@@ -73,7 +94,14 @@ const MyCoursePage = () => {
     <Container>
       <Header title={t('mypage.myCourse')} onBack={() => navigate(-1)} />
       <Content>
-        <CommonInput placeholder={t('mypage.searchCourse')} rightIcon={SearchIconSrc} value={searchKeyword} onChange={setSearchKeyword} />
+        <CommonInput
+          placeholder={t('mypage.searchCourse')}
+          rightIcon={SearchIconSrc}
+          value={searchKeyword}
+          onChange={setSearchKeyword}
+          onKeyPress={handleKeyPress}
+          onRightIconClick={handleSearch}
+        />
         <HeaderSection>
           <SortSelector ref={sortSelectorRef}>
             <SortButton onClick={() => setIsDropdownOpen(!isDropdownOpen)}>

@@ -14,6 +14,7 @@ interface CommonInputProps {
   type?: 'text' | 'email' | 'password' | 'tel';
   onFocus?: () => void;
   onBlur?: () => void;
+  onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   rightIcon?: string;
   onRightIconClick?: () => void;
 }
@@ -28,6 +29,7 @@ const CommonInput = ({
   type = 'text',
   onFocus,
   onBlur,
+  onKeyPress,
   rightIcon,
   onRightIconClick,
 }: CommonInputProps) => {
@@ -57,6 +59,7 @@ const CommonInput = ({
           onChange={handleChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
+          onKeyPress={onKeyPress}
           disabled={disabled}
           state={state}
           isFocused={isFocused}

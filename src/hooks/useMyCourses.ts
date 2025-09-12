@@ -7,10 +7,10 @@ import { useToast } from '@/hooks/useToast';
 import type { MyCoursesRequest, SortBy } from '@/types/create';
 
 // 내 코스 조회
-export const useMyCourses = (sortBy: SortBy = 'latest') => {
+export const useMyCourses = (sortBy: SortBy = 'latest', keyword?: string) => {
   const query = useInfiniteQuery({
-    queryKey: authKeys.myCourses(sortBy),
-    queryFn: ({ pageParam = 0 }) => getMyCourses({ sortBy, page: pageParam, size: 10 } as MyCoursesRequest),
+    queryKey: authKeys.myCourses(sortBy, keyword),
+    queryFn: ({ pageParam = 0 }) => getMyCourses({ sortBy, page: pageParam, size: 10, keyword } as MyCoursesRequest),
     getNextPageParam: (lastPage, allPages) => {
       const currentCourses = lastPage.data.courses;
       return currentCourses.length < 10 ? undefined : allPages.length;
