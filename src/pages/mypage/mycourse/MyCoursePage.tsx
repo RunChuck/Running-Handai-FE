@@ -12,8 +12,10 @@ import Header from '@/components/Header';
 import MyCourseCard from '../components/MyCourseCard';
 import { DropdownItem } from '@/components/Dropdown';
 import SVGColor from '@/components/SvgColor';
+import CommonInput from '@/components/CommonInput';
 import EmptyIconSrc from '@/assets/icons/no-course.svg';
 import ArrowIconSrc from '@/assets/icons/arrow-down-16px.svg';
+import SearchIconSrc from '@/assets/icons/search.svg';
 import LoadingMotion from '@/assets/animations/run-loading.json';
 
 const MyCoursePage = () => {
@@ -21,6 +23,7 @@ const MyCoursePage = () => {
   const navigate = useNavigate();
   const [sortBy, setSortBy] = useState<SortBy>('latest');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState('');
   const sortSelectorRef = useRef<HTMLDivElement>(null);
 
   const { courses, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } = useMyCourses(sortBy);
@@ -70,6 +73,7 @@ const MyCoursePage = () => {
     <Container>
       <Header title={t('mypage.myCourse')} onBack={() => navigate(-1)} />
       <Content>
+        <CommonInput placeholder={t('mypage.searchCourse')} rightIcon={SearchIconSrc} value={searchKeyword} onChange={setSearchKeyword} />
         <HeaderSection>
           <SortSelector ref={sortSelectorRef}>
             <SortButton onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
@@ -137,14 +141,14 @@ const Container = styled.div`
 `;
 
 const Content = styled.div`
-  padding: 0 var(--spacing-16);
+  padding: var(--spacing-24) var(--spacing-16);
 `;
 
 const HeaderSection = styled.div`
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  margin: var(--spacing-24) 0 var(--spacing-16) 0;
+  margin: var(--spacing-12) 0;
 `;
 
 const SortSelector = styled.div`
