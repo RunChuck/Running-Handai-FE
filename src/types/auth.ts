@@ -19,6 +19,9 @@ export interface BookmarkedCourseData {
   bookmarkId: number;
   courseId: number;
   thumbnailUrl: string;
+  distance: number;
+  duration: number;
+  maxElevation: number;
   bookmarkCount: number;
   isBookmarked: boolean;
 }
@@ -65,6 +68,9 @@ export interface BookmarkedCourse {
   bookmarkId: number;
   courseId: number;
   thumbnailUrl: string;
+  distance: number;
+  duration: number;
+  maxElevation: number;
   isBookmarked: boolean;
   bookmarkCount: number;
 }
@@ -73,8 +79,12 @@ export interface BookmarkedCoursesResponse {
   statusCode: number;
   responseCode: string;
   message: string;
-  totalCount: number;
-  data: BookmarkedCourse[];
+  data: {
+    totalPages: number;
+    totalElements: number;
+    isLastPage: boolean;
+    courses: BookmarkedCourse[];
+  };
 }
 
 export interface Review {

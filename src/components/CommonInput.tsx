@@ -14,6 +14,9 @@ interface CommonInputProps {
   type?: 'text' | 'email' | 'password' | 'tel';
   onFocus?: () => void;
   onBlur?: () => void;
+  onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  rightIcon?: string;
+  onRightIconClick?: () => void;
 }
 
 const CommonInput = ({
@@ -26,6 +29,9 @@ const CommonInput = ({
   type = 'text',
   onFocus,
   onBlur,
+  onKeyPress,
+  rightIcon,
+  onRightIconClick,
 }: CommonInputProps) => {
   const [isFocused, setIsFocused] = useState(false);
 
@@ -45,18 +51,27 @@ const CommonInput = ({
 
   return (
     <InputContainer>
-      <StyledInput
-        type={type}
-        placeholder={placeholder}
-        value={value}
-        onChange={handleChange}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        disabled={disabled}
-        state={state}
-        isFocused={isFocused}
-        hasValue={!!value}
-      />
+      <InputWrapper>
+        <StyledInput
+          type={type}
+          placeholder={placeholder}
+          value={value}
+          onChange={handleChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          onKeyPress={onKeyPress}
+          disabled={disabled}
+          state={state}
+          isFocused={isFocused}
+          hasValue={!!value}
+          hasRightIcon={!!rightIcon}
+        />
+        {rightIcon && (
+          <RightIconButton onClick={onRightIconClick} disabled={disabled || !value}>
+            <img src={rightIcon} alt="icon" />
+          </RightIconButton>
+        )}
+      </InputWrapper>
       {(state === 'positive' || state === 'negative') && validationText && <ValidationText state={state}>{validationText}</ValidationText>}
     </InputContainer>
   );
@@ -70,14 +85,23 @@ const InputContainer = styled.div`
   gap: var(--spacing-8);
 `;
 
+const InputWrapper = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+`;
+
 const StyledInput = styled.input<{
   state: InputState;
   isFocused: boolean;
   hasValue: boolean;
+  hasRightIcon: boolean;
 }>`
   ${theme.typography.body1};
+  width: 100%;
   height: 44px;
   padding: 10px 16px;
+  padding-right: ${({ hasRightIcon }) => (hasRightIcon ? '48px' : '16px')};
   border-radius: 4px;
   border: 1px solid;
   background-color: var(--surface-surface-default);
@@ -123,6 +147,27 @@ const StyledInput = styled.input<{
   /* Focus */
   &:focus {
     outline: none;
+  }
+`;
+
+const RightIconButton = styled.button`
+  position: absolute;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+
+  img {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.5;
   }
 `;
 

@@ -36,8 +36,19 @@ export const createCourse = async (request: CourseCreateRequest): Promise<Course
 };
 
 export const getMyCourses = async (request: MyCoursesRequest = {}): Promise<MyCoursesResponse> => {
-  const { sortBy = 'latest' } = request;
-  const response = await http.get<MyCoursesResponse>(`${PREFIX}?sortBy=${sortBy}`);
+  const { sortBy = 'latest', page = 0, size = 10, keyword } = request;
+
+  const params = new URLSearchParams({
+    sortBy,
+    page: page.toString(),
+    size: size.toString(),
+  });
+
+  if (keyword && keyword.trim() !== '') {
+    params.append('keyword', keyword.trim());
+  }
+
+  const response = await http.get<MyCoursesResponse>(`${PREFIX}?${params.toString()}`);
   return response.data;
 };
 

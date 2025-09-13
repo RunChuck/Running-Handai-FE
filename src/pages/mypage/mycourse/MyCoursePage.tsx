@@ -1,18 +1,21 @@
 import styled from '@emotion/styled';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import Lottie from 'lottie-react';
 import { theme } from '@/styles/theme';
 import { useMyCourses, useMyCourseActions } from '@/hooks/useMyCourses';
+import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import type { SortBy } from '@/types/create';
 
 import Header from '@/components/Header';
 import MyCourseCard from '../components/MyCourseCard';
 import { DropdownItem } from '@/components/Dropdown';
 import SVGColor from '@/components/SvgColor';
+import CommonInput from '@/components/CommonInput';
 import EmptyIconSrc from '@/assets/icons/no-course.svg';
 import ArrowIconSrc from '@/assets/icons/arrow-down-16px.svg';
+import SearchIconSrc from '@/assets/icons/search.svg';
 import LoadingMotion from '@/assets/animations/run-loading.json';
 
 const MyCoursePage = () => {
@@ -20,9 +23,11 @@ const MyCoursePage = () => {
   const navigate = useNavigate();
   const [sortBy, setSortBy] = useState<SortBy>('latest');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [actualSearchKeyword, setActualSearchKeyword] = useState('');
   const sortSelectorRef = useRef<HTMLDivElement>(null);
 
-  const { courses, isLoading } = useMyCourses(sortBy);
+  const { courses, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } = useMyCourses(sortBy, actualSearchKeyword);
   const { editActions, deleteActions } = useMyCourseActions();
 
   const sortOptions = [
@@ -37,6 +42,37 @@ const MyCoursePage = () => {
   const handleSortChange = (value: SortBy) => {
     setSortBy(value);
   };
+
+  const handleLoadMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const handleSearch = useCallback(() => {
+    setActualSearchKeyword(searchKeyword.trim());
+  }, [searchKeyword]);
+
+  const handleKeyPress = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        handleSearch();
+      }
+    },
+    [handleSearch]
+  );
+
+  // 검색어가 비었을 때 자동으로 전체 목록 불러오기
+  useEffect(() => {
+    if (searchKeyword.trim() === '') {
+      setActualSearchKeyword('');
+    }
+  }, [searchKeyword]);
+
+  const { targetRef } = useIntersectionObserver(handleLoadMore, {
+    threshold: 1.0,
+    enabled: hasNextPage && !isFetchingNextPage,
+  });
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -58,6 +94,14 @@ const MyCoursePage = () => {
     <Container>
       <Header title={t('mypage.myCourse')} onBack={() => navigate(-1)} />
       <Content>
+        <CommonInput
+          placeholder={t('mypage.searchCourse')}
+          rightIcon={SearchIconSrc}
+          value={searchKeyword}
+          onChange={setSearchKeyword}
+          onKeyPress={handleKeyPress}
+          onRightIconClick={handleSearch}
+        />
         <HeaderSection>
           <SortSelector ref={sortSelectorRef}>
             <SortButton onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
@@ -87,20 +131,23 @@ const MyCoursePage = () => {
           </SortSelector>
         </HeaderSection>
         <CardGrid>
-          {isLoading ? (
+          {isLoading && courses.length === 0 ? (
             <StatusContainer>
               <Lottie animationData={LoadingMotion} style={{ width: 100, height: 100 }} loop={true} />
             </StatusContainer>
           ) : courses.length > 0 ? (
-            courses.map(course => (
-              <MyCourseCard
-                key={course.courseId}
-                variant="grid"
-                course={course}
-                onEdit={editActions.handleEditConfirm}
-                onDelete={deleteActions.handleDeleteConfirm}
-              />
-            ))
+            <>
+              {courses.map(course => (
+                <MyCourseCard
+                  key={course.courseId}
+                  variant="grid"
+                  course={course}
+                  onEdit={editActions.handleEditConfirm}
+                  onDelete={deleteActions.handleDeleteConfirm}
+                />
+              ))}
+              {hasNextPage && <LoadMoreTrigger ref={targetRef} />}
+            </>
           ) : (
             <StatusContainer>
               <img src={EmptyIconSrc} alt="empty" />
@@ -122,14 +169,14 @@ const Container = styled.div`
 `;
 
 const Content = styled.div`
-  padding: 0 var(--spacing-16);
+  padding: var(--spacing-24) var(--spacing-16);
 `;
 
 const HeaderSection = styled.div`
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  margin: var(--spacing-24) 0 var(--spacing-16) 0;
+  margin: var(--spacing-12) 0;
 `;
 
 const SortSelector = styled.div`
@@ -197,4 +244,12 @@ const StatusContainer = styled.div`
 const EmptyText = styled.p`
   ${theme.typography.body2}
   color: var(--text-text-secondary, #555555);
+`;
+
+const LoadMoreTrigger = styled.div`
+  grid-column: 1 / -1;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;

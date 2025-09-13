@@ -28,6 +28,19 @@ const CourseFilter = ({ selectedArea, onAreaChange }: CourseFilterProps) => {
     } else {
       onAreaChange(location as AreaCode);
     }
+
+    setTimeout(() => {
+      const selectedElement = document.querySelector(`[data-location="${location}"]`) as HTMLElement;
+      if (selectedElement && scrollContainerRef.current) {
+        const container = scrollContainerRef.current;
+        const containerWidth = container.offsetWidth;
+        const elementLeft = selectedElement.offsetLeft;
+        const elementWidth = selectedElement.offsetWidth;
+
+        const scrollLeft = elementLeft - containerWidth / 2 + elementWidth / 2;
+        container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+      }
+    }, 100);
   };
 
   return (
@@ -47,6 +60,7 @@ const CourseFilter = ({ selectedArea, onAreaChange }: CourseFilterProps) => {
         {locationOptions.map(location => (
           <FilterOption
             key={location}
+            data-location={location}
             isSelected={location === 'all' ? selectedArea === null : selectedArea === location}
             onClick={() => handleLocationSelect(location)}
           >

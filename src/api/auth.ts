@@ -33,8 +33,12 @@ export const authAPI = {
     return response.data;
   },
 
-  getBookmarkedCourses: async (area: AreaCode): Promise<BookmarkedCoursesResponse> => {
-    const response = await http.get<BookmarkedCoursesResponse>(`${PREFIX}/me/courses/bookmarks`, { params: { area } });
+  getBookmarkedCourses: async (area: AreaCode | null, page: number = 0, size: number = 10): Promise<BookmarkedCoursesResponse> => {
+    const params: { page: number; size: number; area?: AreaCode } = { page, size };
+    if (area) {
+      params.area = area;
+    }
+    const response = await http.get<BookmarkedCoursesResponse>(`${PREFIX}/me/courses/bookmarks`, { params });
     return response.data;
   },
 

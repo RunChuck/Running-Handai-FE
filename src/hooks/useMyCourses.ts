@@ -1,24 +1,35 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { getMyCourses, deleteCourse, updateCourse } from '@/api/create';
 import { authKeys } from '@/constants/queryKeys';
 import { useToast } from '@/hooks/useToast';
 import type { MyCoursesRequest, SortBy } from '@/types/create';
 
 // 내 코스 조회
-export const useMyCourses = (sortBy: SortBy = 'latest') => {
-  const query = useQuery({
-    queryKey: authKeys.myCourses(sortBy),
-    queryFn: () => getMyCourses({ sortBy } as MyCoursesRequest),
+export const useMyCourses = (sortBy: SortBy = 'latest', keyword?: string) => {
+  const query = useInfiniteQuery({
+    queryKey: authKeys.myCourses(sortBy, keyword),
+    queryFn: ({ pageParam = 0 }) => getMyCourses({ sortBy, page: pageParam, size: 10, keyword } as MyCoursesRequest),
+    getNextPageParam: (lastPage, allPages) => {
+      const currentCourses = lastPage.data.courses;
+      return currentCourses.length < 10 ? undefined : allPages.length;
+    },
+    initialPageParam: 0,
     staleTime: 5 * 60 * 1000, // 5분
     gcTime: 10 * 60 * 1000, // 10분
   });
 
+  const allCourses = query.data?.pages.flatMap(page => page.data.courses) || [];
+  const courseCount = query.data?.pages[0]?.data.myCourseCount || 0;
+
   return {
-    courses: query.data?.data.courses || [],
-    courseCount: query.data?.data.myCourseCount || 0,
+    courses: allCourses,
+    courseCount,
     isLoading: query.isLoading,
+    isFetchingNextPage: query.isFetchingNextPage,
+    hasNextPage: query.hasNextPage,
+    fetchNextPage: query.fetchNextPage,
     error: query.error,
     refetch: query.refetch,
   };
