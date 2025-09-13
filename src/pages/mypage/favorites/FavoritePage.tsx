@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Lottie from 'lottie-react';
@@ -7,6 +7,7 @@ import { theme } from '@/styles/theme';
 import { css } from '@emotion/react';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useFavorites } from '@/hooks/useFavorites';
+import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import type { AreaCode } from '@/types/course';
 
 import Header from '@/components/Header';
@@ -21,23 +22,33 @@ const FavoritePage = () => {
   const isMobile = useIsMobile();
   const [selectedArea, setSelectedArea] = useState<AreaCode | null>(null);
 
-  const { data: favoritesData, isLoading } = useFavorites({ area: selectedArea });
-  const favorites = favoritesData?.data || [];
-  const favoriteCourseCount = favorites.length;
+  const { courses, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } = useFavorites({ area: selectedArea });
+
+  const handleLoadMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const { targetRef } = useIntersectionObserver(handleLoadMore, {
+    threshold: 1.0,
+    enabled: hasNextPage && !isFetchingNextPage,
+  });
 
   return (
     <Container>
       <Header title={t('mypage.favorites.title')} onBack={() => navigate(-1)} />
       <CourseFilter selectedArea={selectedArea} onAreaChange={setSelectedArea} />
-      {isLoading ? (
+      {isLoading && courses.length === 0 ? (
         <StatusContainer>
           <Lottie animationData={LoadingMotion} style={{ width: 100, height: 100 }} loop={true} />
         </StatusContainer>
-      ) : favoriteCourseCount > 0 ? (
+      ) : courses.length > 0 ? (
         <CourseGrid isMobile={isMobile}>
-          {favorites.map(course => (
+          {courses.map(course => (
             <FavoriteCourseItem key={course.courseId} course={course} />
           ))}
+          {hasNextPage && <LoadMoreTrigger ref={targetRef} />}
         </CourseGrid>
       ) : (
         <StatusContainer>
@@ -84,4 +95,12 @@ const StatusContainer = styled.div`
 const EmptyText = styled.p`
   ${theme.typography.body2}
   color: var(--text-text-secondary, #555555);
+`;
+
+const LoadMoreTrigger = styled.div`
+  grid-column: 1 / -1;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
