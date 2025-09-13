@@ -22,10 +22,9 @@ export const calculateDistanceBetweenPoints = (point1: Coordinate, point2: Coord
   const deltaLat = ((point2.lat - point1.lat) * Math.PI) / 180;
   const deltaLng = ((point2.lng - point1.lng) * Math.PI) / 180;
 
-  const a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) + 
-            Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLng / 2) * Math.sin(deltaLng / 2);
+  const a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) + Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLng / 2) * Math.sin(deltaLng / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  
+
   return R * c;
 };
 
@@ -39,7 +38,7 @@ export const calculateTotalDistance = (coordinates: Coordinate[]): number => {
   for (let i = 1; i < coordinates.length; i++) {
     totalDistance += calculateDistanceBetweenPoints(coordinates[i - 1], coordinates[i]);
   }
-  
+
   return totalDistance;
 };
 
@@ -60,19 +59,15 @@ export const calculateEstimatedTime = (distanceInKm: number, speedInKmh: number 
 /**
  * 고도 데이터에서 최고/최저 고도를 계산
  */
-export const calculateElevationStats = <T extends ElevationData>(
-  coordinates: T[]
-): ElevationStats => {
-  const elevations = coordinates
-    .map(coord => coord.ele)
-    .filter(ele => ele !== undefined && !isNaN(ele)) as number[];
+export const calculateElevationStats = <T extends ElevationData>(coordinates: T[]): ElevationStats => {
+  const elevations = coordinates.map(coord => coord.ele).filter(ele => ele !== undefined && !isNaN(ele)) as number[];
 
   if (elevations.length === 0) {
     return { maxAltitude: 0, minAltitude: 0 };
   }
 
   return {
-    maxAltitude: Math.floor(Math.max(...elevations)),
-    minAltitude: Math.floor(Math.min(...elevations)),
+    maxAltitude: Math.round(Math.max(...elevations)),
+    minAltitude: Math.round(Math.min(...elevations)),
   };
 };

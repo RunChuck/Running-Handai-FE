@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/useToast';
 export interface MarkerPosition {
   lat: number;
   lng: number;
+  ele?: number;
 }
 
 export interface CourseAction {
@@ -354,7 +355,8 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
 
     try {
       // OpenRoute API를 사용해서 경로 계산
-      const { planRouteFromCoordinates, calculateElevationStats } = await import('@/utils/routeUtils');
+      const { planRouteFromCoordinates } = await import('@/utils/routeUtils');
+      const { calculateElevationStats } = await import('@/utils/distanceCalculator');
 
       const routeResult = await planRouteFromCoordinates(markers, 'foot-walking');
 

@@ -138,17 +138,3 @@ export const formatDistance = (kilometers: number): string => {
   }
   return `${kilometers.toFixed(2)}km`;
 };
-
-// 최대/최소 고도 계산 함수
-export const calculateElevationStats = (coordinates: Coordinate[]) => {
-  const elevations = coordinates.filter(coord => coord.ele !== undefined).map(coord => coord.ele!);
-
-  if (elevations.length === 0) {
-    return { maxAltitude: 0, minAltitude: 0 };
-  }
-
-  return {
-    maxAltitude: Math.max(...elevations),
-    minAltitude: Math.min(...elevations),
-  };
-};
