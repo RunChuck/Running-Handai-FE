@@ -59,17 +59,17 @@ const MyCourseCard = ({ variant = 'mypage', course, onEdit, onDelete }: MyCourse
     {
       icon: DistanceIconSrc,
       alt: 'distance',
-      label: `${course?.distance?.toFixed(1) || '0.0'}km`,
+      label: `${course?.distance || '-'}km`,
     },
     {
       icon: TimeIconSrc,
       alt: 'time',
-      label: `${course?.duration || 0}분`,
+      label: `${course?.duration || '-'}분`,
     },
     {
       icon: AltitudeIconSrc,
       alt: 'altitude',
-      label: `${course?.maxElevation?.toFixed(0) || 0}m`,
+      label: `${course?.maxElevation || '-'}m`,
     },
   ];
 
