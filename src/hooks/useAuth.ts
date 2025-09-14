@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/useToast';
 import { useUserStore } from '@/stores/userStore';
 import { authAPI } from '@/api/auth';
+import { authKeys } from '@/constants/queryKeys';
 
 interface AuthState {
   isLoading: boolean;
@@ -14,6 +16,7 @@ export const useAuth = () => {
   const [t] = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const queryClient = useQueryClient();
   const { showSuccessToast, showErrorToast } = useToast();
   const { setUserInfo, clearUserInfo } = useUserStore();
   const [state, setState] = useState<AuthState>({
@@ -115,6 +118,7 @@ export const useAuth = () => {
     removeToken();
     clearUserInfo();
     sessionStorage.clear();
+    queryClient.removeQueries({ queryKey: authKeys.all });
     showSuccessToast(t('toast.logoutSuccess'), { position: 'top' });
     navigate('/', { replace: true });
   };
