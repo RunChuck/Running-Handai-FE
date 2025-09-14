@@ -92,7 +92,7 @@ const MyCoursePage = () => {
 
   return (
     <Container>
-      <Header title={t('mypage.myCourse')} onBack={() => navigate(-1)} />
+      <Header title={t('mypage.myCourse')} onBack={() => navigate('/mypage', { replace: true })} />
       <Content>
         <CommonInput
           placeholder={t('mypage.searchCourse')}

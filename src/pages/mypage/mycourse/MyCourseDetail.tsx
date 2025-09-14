@@ -25,7 +25,7 @@ const MyCourseDetail = () => {
   const { showSuccessToast, showErrorToast } = useToast();
 
   const { deleteActions, editActions } = useMyCourseActions({
-    onDeleteSuccess: () => navigate('/mypage/mycourse'),
+    onDeleteSuccess: () => navigate('/mypage/mycourse', { replace: true }),
   });
 
   const courseId = parseInt(id || '0', 10);
