@@ -144,5 +144,6 @@ export const useHorizontalScroll = (options: UseHorizontalScrollOptions = {}) =>
   return {
     scrollContainerRef,
     handleMouseDown,
+    updateScrollableState,
   };
 };

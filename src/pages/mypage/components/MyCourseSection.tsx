@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import * as S from '../MyPage.styled';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 import { useUserInfo } from '@/hooks/useUserInfo';
@@ -17,7 +18,7 @@ interface MyCourseSectionProps {
 const MyCourseSection = ({ isAuthenticated }: MyCourseSectionProps) => {
   const [t] = useTranslation();
   const navigate = useNavigate();
-  const { scrollContainerRef, handleMouseDown } = useHorizontalScroll();
+  const { scrollContainerRef, handleMouseDown, updateScrollableState } = useHorizontalScroll();
 
   const { data: userInfoResponse, isLoading } = useUserInfo();
   const userInfo = userInfoResponse?.data;
@@ -25,6 +26,13 @@ const MyCourseSection = ({ isAuthenticated }: MyCourseSectionProps) => {
   const myCourseCount = userInfo?.myCourseInfo?.myCourseCount || 0;
 
   const { handleEdit, handleDelete } = useMyCourseActions();
+
+  // 데이터 변경 시 스크롤 상태 업데이트
+  useEffect(() => {
+    if (!isLoading) {
+      setTimeout(updateScrollableState, 0);
+    }
+  }, [courses.length, isLoading, updateScrollableState]);
 
   const handleGoToCreateCourse = () => {
     navigate('/course-creation');

@@ -76,7 +76,7 @@ const CourseCreation = () => {
       queryClient.invalidateQueries({
         predicate: query => {
           const [prefix, type] = query.queryKey;
-          return prefix === 'auth' && type === 'my-courses';
+          return prefix === 'auth' && (type === 'my-courses' || type === 'user-info');
         },
       });
 
