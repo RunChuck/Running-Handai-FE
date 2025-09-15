@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import { useCourseCreation } from '@/contexts/CourseCreationContext';
@@ -57,8 +57,8 @@ const CourseCreationModal = ({
   const isMobile = useIsMobile();
   const { showErrorToast } = useToast();
 
-  // 모달 단계 상태
-  const [currentStep, setCurrentStep] = useState<'courseInfo' | 'thumbnail' | 'upload'>('courseInfo');
+  // 모달 단계 상태 (upload 단계 제거)
+  const [currentStep, setCurrentStep] = useState<'courseInfo' | 'thumbnail'>('courseInfo');
 
   // 이미지 업로드 및 크롭 상태
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -86,20 +86,31 @@ const CourseCreationModal = ({
   const [isDragOver, setIsDragOver] = useState(false);
 
   const handleConfirm = async () => {
-    if (!croppedImageBlob) return;
+    if (!thumbnailMapRef.current) {
+      showErrorToast('지도 썸네일을 생성할 수 없습니다.');
+      return;
+    }
 
     try {
       setIsLoading(true);
+
+      // StaticMap 이미지 생성
+      const thumbnailBlob = await thumbnailMapRef.current.generateStaticMap();
+      if (!thumbnailBlob) {
+        showErrorToast('썸네일 생성에 실패했습니다.');
+        return;
+      }
 
       // 최종 등록 진행
       onConfirm({
         startPoint,
         endPoint,
-        thumbnailBlob: croppedImageBlob,
+        thumbnailBlob,
         isInBusan: isInBusan || false,
       });
     } catch (error) {
       console.error('코스 등록 실패:', error);
+      showErrorToast('코스 등록 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -115,20 +126,12 @@ const CourseCreationModal = ({
         // 실패해도 다음 단계로 진행
         setCurrentStep('thumbnail');
       }
-    } else if (currentStep === 'thumbnail') {
-      setCurrentStep('upload');
     }
+    // thumbnail 단계에서는 바로 코스 등록 (upload 단계 제거)
   };
 
   const handlePrevStep = () => {
-    if (currentStep === 'upload') {
-      setCurrentStep('thumbnail');
-      setSelectedImage(null);
-      setCroppedImageBlob(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    } else if (currentStep === 'thumbnail') {
+    if (currentStep === 'thumbnail') {
       setCurrentStep('courseInfo');
     }
   };
@@ -196,24 +199,6 @@ const CourseCreationModal = ({
       processImageFile(imageFile);
     }
   };
-
-  // 클립보드 붙여넣기 핸들러
-  const handlePaste = useCallback(
-    (e: ClipboardEvent) => {
-      if (currentStep !== 'upload' || selectedImage) return;
-
-      const items = Array.from(e.clipboardData?.items || []);
-      const imageItem = items.find(item => item.type.startsWith('image/'));
-
-      if (imageItem) {
-        const file = imageItem.getAsFile();
-        if (file) {
-          processImageFile(file);
-        }
-      }
-    },
-    [currentStep, selectedImage, processImageFile]
-  );
 
   // 클립보드에서 이미지 읽기 (버튼 클릭용)
   const handleClipboardPaste = async () => {
@@ -488,16 +473,6 @@ const CourseCreationModal = ({
     }
   }, [isOpen, routeCoordinates, gpxData, isGpxUploaded]);
 
-  // 클립보드 붙여넣기 이벤트 리스너 등록
-  useEffect(() => {
-    if (isOpen && currentStep === 'upload') {
-      document.addEventListener('paste', handlePaste);
-      return () => {
-        document.removeEventListener('paste', handlePaste);
-      };
-    }
-  }, [isOpen, currentStep, selectedImage, handlePaste]);
-
   if (!isOpen) return null;
 
   return (
@@ -588,8 +563,8 @@ const CourseCreationModal = ({
               <Button variant="secondary" onClick={handlePrevStep}>
                 이전
               </Button>
-              <Button variant="primary" onClick={handleNextStep}>
-                다음
+              <Button variant="primary" disabled={isLoading} onClick={handleConfirm}>
+                {isLoading ? '등록 중...' : '코스 등록'}
               </Button>
             </ButtonRow>
           </>

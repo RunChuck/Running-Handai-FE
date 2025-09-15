@@ -85,3 +85,10 @@ export const downloadGpx = async (courseId: number): Promise<string> => {
   const response = await http.get<{ data: { courseId: number; gpxPath: string } }>(`${PREFIX}/${courseId}/gpx`);
   return response.data.data.gpxPath;
 };
+
+export const fetchImageProxy = async (imageUrl: string): Promise<Blob> => {
+  const response = await http.get(`/api/proxy/images?url=${encodeURIComponent(imageUrl)}`, {
+    responseType: 'blob',
+  });
+  return response.data;
+};
