@@ -100,7 +100,6 @@ const CourseCreation = () => {
 
   const handleCourseCreateWrapper = async () => {
     await handleCourseCreate();
-    setIsCourseCreationModalOpen(true);
   };
 
   return (
