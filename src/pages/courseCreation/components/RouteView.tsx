@@ -304,7 +304,26 @@ const RouteView = forwardRef<HTMLDivElement, RouteViewProps>(({ onMapLoad, onMar
     // 경로가 모두 보이도록 지도 영역 조정
     const bounds = new window.kakao.maps.LatLngBounds();
     path.forEach(latlng => bounds.extend(latlng));
-    mapInstance.current.setBounds(bounds);
+
+    // 모바일에서 경로 렌더링 문제 해결
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      // 지연 후 setBounds와 relayout 실행
+      setTimeout(() => {
+        if (mapInstance.current) {
+          mapInstance.current.setBounds(bounds);
+          setTimeout(() => {
+            if (mapInstance.current) {
+              mapInstance.current.relayout();
+            }
+          }, 100);
+        }
+      }, 100);
+    } else {
+      // 데스크톱에서는 즉시 실행
+      mapInstance.current.setBounds(bounds);
+    }
   };
 
   const clearRoute = () => {
