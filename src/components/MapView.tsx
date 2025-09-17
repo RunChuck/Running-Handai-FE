@@ -39,6 +39,7 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
   const resizeObserver = useRef<ResizeObserver | null>(null);
   const clusterer = useRef<kakao.maps.MarkerClusterer | null>(null);
   const currentLocationMarker = useRef<kakao.maps.CustomOverlay | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [popover, setPopover] = useState<{
     visible: boolean;
@@ -285,13 +286,13 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
   useEffect(() => {
     if (!mapContainer.current || isMapInitialized.current) return;
 
-    console.log('지도 초기화 시작...');
+    if (import.meta.env.DEV) {
+      console.log('지도 초기화 시작...');
+    }
 
     const mapScript = document.createElement('script');
     mapScript.async = true;
     mapScript.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_MAP_API_KEY}&autoload=false&libraries=clusterer,drawing`;
-
-    console.log('Loading script:', mapScript.src);
 
     const onLoadKakaoMap = async () => {
       console.log('Kakao map script 로드 완료');
@@ -316,13 +317,14 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
             addLocationMarker(map, initialLocation, isCurrentUserLocation);
           }
 
+          // 로딩 완료
+          setIsLoading(false);
+
           if (import.meta.env.DEV) {
             console.log('지도 초기화 완료. 중심 좌표:', initialLocation);
             console.log('사용자 위치 여부:', isCurrentUserLocation);
+            console.log('Kakao maps loaded. MarkerClusterer available:', !!window.kakao?.maps?.MarkerClusterer);
           }
-
-          // 클러스터러 라이브러리 로드 확인
-          console.log('Kakao maps loaded. MarkerClusterer available:', !!window.kakao?.maps?.MarkerClusterer);
 
           // 부모 컴포넌트에 map 인스턴스 전달
           onMapLoadCallback(map);
@@ -363,6 +365,13 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
   return (
     <MapWrapper>
       <MapContainer ref={mapContainer} containerHeight={containerHeight} />
+
+      {isLoading && (
+        <LoadingContainer>
+          <Spinner />
+        </LoadingContainer>
+      )}
+
       {popover.visible && (
         <CoursePopover
           courses={popover.courses}
@@ -388,4 +397,33 @@ const MapWrapper = styled.div`
 const MapContainer = styled.div<{ containerHeight?: number }>`
   width: 100%;
   height: ${({ containerHeight }) => (containerHeight ? `${containerHeight + 12}px` : '100%')};
+`;
+
+const LoadingContainer = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+`;
+
+const Spinner = styled.div`
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4561ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
 `;
