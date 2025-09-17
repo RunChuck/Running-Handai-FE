@@ -53,7 +53,8 @@
     "courseDeleted": "코스가 삭제되었어요.",
     "courseDeleteFailed": "코스 삭제 중 문제가 발생했어요. 다시 시도해주세요.",
     "gpxDownloaded": "GPX 파일이 다운로드 되었어요.",
-    "gpxDownloadFailed": "GPX 다운로드 중 문제가 발생했어요. 다시 시도해주세요."
+    "gpxDownloadFailed": "GPX 다운로드 중 문제가 발생했어요. 다시 시도해주세요.",
+    "sessionExpired": "세션이 만료되었어요. 다시 로그인해주세요."
   },
   "location": {
     "nearby": "내 위치",
