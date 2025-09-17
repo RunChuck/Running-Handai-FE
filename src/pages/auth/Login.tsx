@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import * as S from './Login.styled';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/useToast';
 
 import Button from '@/components/Button';
 import MetaTags from '@/components/MetaTags';
@@ -19,9 +21,11 @@ import WhiteLogoSrc from '@/assets/images/logo-white.png';
 const Login = () => {
   const [t] = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isAutoLoginChecked, setIsAutoLoginChecked] = useState(false);
   const isMobile = useIsMobile();
   const { isAuthenticated } = useAuth();
+  const { showInfoToast } = useToast();
   const handleAutoLoginToggle = () => {
     setIsAutoLoginChecked(!isAutoLoginChecked);
   };
@@ -85,6 +89,14 @@ const Login = () => {
       navigate('/course');
     }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    const sessionParam = searchParams.get('session');
+    if (sessionParam === 'expired') {
+      showInfoToast(t('toast.sessionExpired'), { position: 'top' });
+      navigate('/', { replace: true });
+    }
+  }, []);
 
   return (
     <S.Container>

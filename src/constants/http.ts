@@ -34,7 +34,7 @@ client.interceptors.request.use(
     }
 
     // 토큰이 있으면 Authorization 헤더에 추가
-    const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+    const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken') || sessionStorage.getItem('tempAccessToken');
     if (accessToken && config.headers) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
@@ -142,7 +142,8 @@ client.interceptors.response.use(
             localStorage.removeItem('autoLogin');
             sessionStorage.removeItem('accessToken');
             sessionStorage.removeItem('refreshToken');
-            window.location.href = '/';
+
+            window.location.href = '/?session=expired';
 
             return Promise.reject(refreshError);
           }
@@ -153,7 +154,8 @@ client.interceptors.response.use(
           localStorage.removeItem('autoLogin');
           sessionStorage.removeItem('accessToken');
           sessionStorage.removeItem('refreshToken');
-          window.location.href = '/';
+
+          window.location.href = '/?session=expired';
         }
       } else {
         // 이미 토큰 재발급 중인 경우 큐에 추가

@@ -1,12 +1,12 @@
 import { useRef, useEffect } from 'react';
 
 interface UseHorizontalScrollOptions {
-  sensitivity?: number; // 드래그 민감도 (기본값: 2)
+  sensitivity?: number; // 드래그 민감도 (기본값: 1)
   wheelMultiplier?: number; // 휠 스크롤 배수 (기본값: 3)
 }
 
 export const useHorizontalScroll = (options: UseHorizontalScrollOptions = {}) => {
-  const { sensitivity = 2, wheelMultiplier = 3 } = options;
+  const { sensitivity = 1, wheelMultiplier = 3 } = options;
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
 
