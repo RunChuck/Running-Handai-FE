@@ -63,13 +63,9 @@ export const calculateRoute = async (coordinates: Coordinate[], profile: RoutePr
     });
 
     if (!response.ok) {
-      if (response.status === 401) {
-        throw new Error('API 키가 유효하지 않습니다.');
-      } else if (response.status === 429) {
-        throw new Error('API 요청 한도를 초과했습니다.');
-      } else {
-        throw new Error(`경로 계산 실패: ${response.status}`);
-      }
+      const error = new Error(`Route calculation failed with status ${response.status}`) as Error & { status: number };
+      error.status = response.status;
+      throw error;
     }
 
     const data: ORSRouteResponse = await response.json();

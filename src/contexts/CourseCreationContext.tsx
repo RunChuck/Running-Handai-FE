@@ -1,4 +1,5 @@
 import { createContext, useContext, useRef, useState, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { RouteViewMapInstance } from '@/pages/courseCreation/components/RouteView';
 import { createCourse, checkIsInBusan } from '@/api/create';
 import { generateGPXFile } from '@/utils/gpxGenerator';
@@ -85,6 +86,7 @@ interface CourseCreationProviderProps {
 }
 
 export const CourseCreationProvider = ({ children }: CourseCreationProviderProps) => {
+  const [t] = useTranslation();
   const { showErrorToast } = useToast();
 
   // 상태
@@ -378,7 +380,17 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
       // 지도에 경로 표시
       mapInstance.displayRoute(routeResult.coordinates);
     } catch (err) {
-      setError('경로 생성 중 오류가 발생했습니다.');
+      let toastMessage = t('toast.courseCreation.ServerError');
+
+      if (err instanceof Error && 'status' in err) {
+        const status = (err as Error & { status: number }).status;
+        if (status === 400 || status === 404) {
+          toastMessage = t('toast.courseCreation.InvalidLocation');
+        }
+      }
+
+      showErrorToast(toastMessage, { position: 'top' });
+      handleDelete();
       console.error('Course creation error:', err);
     } finally {
       setIsLoading(false);
