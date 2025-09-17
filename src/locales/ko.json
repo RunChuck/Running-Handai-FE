@@ -142,7 +142,9 @@
       "complete": "코스 그리기 완료",
       "deleteDesc": "코스를 삭제하면 되돌릴 수 없어요.\n정말 삭제할까요?",
       "deleteConfirm": "네, 삭제할게요",
-      "deleteCancel": "아니요, 둘게요"
+      "deleteCancel": "아니요, 둘게요",
+      "saving": "코스를 저장하고 있어요",
+      "saved": "저장 완료!"
     }
   },
   "courseDetail": {

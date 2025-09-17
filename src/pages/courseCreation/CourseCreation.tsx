@@ -27,6 +27,7 @@ const CourseCreation = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isCourseCreationModalOpen, setIsCourseCreationModalOpen] = useState(false);
   const [isLoadingModalOpen, setIsLoadingModalOpen] = useState(false);
+  const [isCourseSaveCompleted, setIsCourseSaveCompleted] = useState(false);
 
   const routeViewRef = useRef<HTMLDivElement>(null);
 
@@ -80,12 +81,17 @@ const CourseCreation = () => {
         },
       });
 
+      setIsCourseSaveCompleted(true);
+
+      // 0.5초 후 모달 닫기 및 페이지 이동
       setTimeout(() => {
         setIsLoadingModalOpen(false);
+        setIsCourseSaveCompleted(false);
         navigate(`/mypage/mycourse`);
-      }, 1000);
+      }, 500);
     } catch (error) {
       setIsLoadingModalOpen(false);
+      setIsCourseSaveCompleted(false);
       console.error('Course submission failed:', error);
 
       // 중복 코스명 에러인 경우: 생성 모달을 다시 열고 토스트 표시
@@ -141,7 +147,7 @@ const CourseCreation = () => {
         gpxData={gpxData}
       />
 
-      <CourseLoadingModal isOpen={isLoadingModalOpen} />
+      <CourseLoadingModal isOpen={isLoadingModalOpen} isCompleted={isCourseSaveCompleted} />
     </S.Container>
   );
 };
