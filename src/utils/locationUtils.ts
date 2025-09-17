@@ -4,6 +4,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 
 export interface MapInstance {
   moveToLocation: (lat: number, lng: number, level?: number) => void;
+  updateCurrentLocationMarker?: () => Promise<void>;
 }
 
 export const moveToCurrentLocation = async (mapInstance: MapInstance | null) => {
@@ -15,6 +16,10 @@ export const moveToCurrentLocation = async (mapInstance: MapInstance | null) => 
   try {
     const location = await getUserLocation();
     mapInstance.moveToLocation(location.lat, location.lng);
+
+    if (mapInstance.updateCurrentLocationMarker) {
+      await mapInstance.updateCurrentLocationMarker();
+    }
 
     if (import.meta.env.DEV) {
       console.log('현재 위치로 이동:', location);

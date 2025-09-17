@@ -19,6 +19,7 @@ export interface MapViewRef {
   displayCourses: (courses: CourseData[], selectedCourseId?: number) => void;
   updateSelectedCourse: (courseId: number) => void;
   clearAllCourses: () => void;
+  updateCurrentLocationMarker: () => Promise<void>;
 }
 
 interface MapViewProps {
@@ -37,6 +38,7 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
   const isMapInitialized = useRef(false);
   const resizeObserver = useRef<ResizeObserver | null>(null);
   const clusterer = useRef<kakao.maps.MarkerClusterer | null>(null);
+  const currentLocationMarker = useRef<kakao.maps.CustomOverlay | null>(null);
 
   const [popover, setPopover] = useState<{
     visible: boolean;
@@ -66,7 +68,6 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
   const getInitialLocation = async () => {
     // props로 전달받은 초기 위치가 있으면 우선 사용 (복원된 위치)
     if (initialCenter) {
-      console.log('복원된 지도 위치 사용:', initialCenter);
       return { location: initialCenter, isUserLocation: false, isRestored: true };
     }
 
@@ -74,13 +75,18 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
       const location = await getUserLocation();
       return { location, isUserLocation: true, isRestored: false };
     } catch {
-      console.log('부산 시청 좌표 사용:', BUSAN_CITY_HALL);
       return { location: BUSAN_CITY_HALL, isUserLocation: false, isRestored: false };
     }
   };
 
   // 현재 위치에 마커 표시
   const addLocationMarker = (map: kakao.maps.Map, location: LocationCoords, isUserLocation: boolean) => {
+    // 기존 현재 위치 마커 제거
+    if (currentLocationMarker.current) {
+      currentLocationMarker.current.setMap(null);
+      currentLocationMarker.current = null;
+    }
+
     const position = new window.kakao.maps.LatLng(location.lat, location.lng);
 
     if (isUserLocation) {
@@ -114,6 +120,7 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
       });
 
       accuracyOverlay.setMap(map);
+      currentLocationMarker.current = accuracyOverlay;
     }
   };
 
@@ -237,6 +244,17 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
       setPopover({ visible: false, courses: [], position: { x: 0, y: 0 } });
     },
 
+    updateCurrentLocationMarker: async () => {
+      if (!mapInstance.current) return;
+
+      try {
+        const location = await getUserLocation();
+        addLocationMarker(mapInstance.current, location, true);
+      } catch (error) {
+        console.warn('현재 위치를 가져올 수 없습니다:', error);
+      }
+    },
+
     // 지도 크기 재조정 함수
     recenterMap: () => {
       if (mapInstance.current) {
@@ -282,7 +300,7 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
           const container = mapContainer.current;
           if (!container || isMapInitialized.current) return;
 
-          const { location: initialLocation, isUserLocation: isCurrentUserLocation, isRestored } = await getInitialLocation();
+          const { location: initialLocation, isUserLocation: isCurrentUserLocation } = await getInitialLocation();
 
           const options = {
             center: new window.kakao.maps.LatLng(initialLocation.lat, initialLocation.lng),
@@ -293,13 +311,15 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
           mapInstance.current = map;
           isMapInitialized.current = true; // 초기화 완료 표시
 
-          // 복원된 위치가 아닌 경우에만 현재 위치 마커 표시
-          if (!isRestored) {
+          // 사용자 위치 권한이 있는 경우 항상 현재 위치 마커 표시
+          if (isCurrentUserLocation) {
             addLocationMarker(map, initialLocation, isCurrentUserLocation);
           }
 
-          console.log('지도 초기화 완료. 중심 좌표:', initialLocation);
-          console.log('사용자 위치 여부:', isCurrentUserLocation);
+          if (import.meta.env.DEV) {
+            console.log('지도 초기화 완료. 중심 좌표:', initialLocation);
+            console.log('사용자 위치 여부:', isCurrentUserLocation);
+          }
 
           // 클러스터러 라이브러리 로드 확인
           console.log('Kakao maps loaded. MarkerClusterer available:', !!window.kakao?.maps?.MarkerClusterer);
