@@ -20,7 +20,7 @@ export interface GeolocationOptions {
  */
 export const getUserLocation = (
   options: GeolocationOptions = {
-    enableHighAccuracy: true,
+    enableHighAccuracy: false,
     timeout: 15000,
     maximumAge: 300000, // 5분
   }
@@ -38,20 +38,24 @@ export const getUserLocation = (
     navigator.geolocation.getCurrentPosition(
       position => {
         const { latitude, longitude } = position.coords;
-        console.log('사용자 위치 조회 성공:', { lat: latitude, lng: longitude });
+
+        if (import.meta.env.DEV) {
+          console.log('사용자 위치 조회 성공:', { lat: latitude, lng: longitude });
+        }
+
         hasSucceeded = true;
-        
+
         // 에러 타이머가 있다면 클리어
         if (errorTimeout) {
           clearTimeout(errorTimeout);
           errorTimeout = null;
         }
-        
+
         resolve({ lat: latitude, lng: longitude });
       },
       error => {
         console.warn('위치 조회 실패:', error.message);
-        
+
         // 에러 발생 후 1초 기다려서 성공했는지 확인
         errorTimeout = setTimeout(() => {
           if (!hasSucceeded) {

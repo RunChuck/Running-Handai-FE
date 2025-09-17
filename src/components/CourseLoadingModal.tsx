@@ -1,22 +1,31 @@
+import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import Lottie from 'lottie-react';
 import LoadingMotion from '@/assets/animations/run-loading.json';
+import CourseSavedIcon from '@/assets/icons/course-saved.svg';
 
 interface CourseLoadingModalProps {
   isOpen: boolean;
+  isCompleted?: boolean;
 }
 
-const CourseLoadingModal = ({ isOpen }: CourseLoadingModalProps) => {
+const CourseLoadingModal = ({ isOpen, isCompleted = false }: CourseLoadingModalProps) => {
+  const [t] = useTranslation();
+
   if (!isOpen) return null;
 
   return (
     <Overlay>
-      <ModalContainer>
+      <ModalContainer $isCompleted={isCompleted}>
         <AnimationContainer>
-          <Lottie animationData={LoadingMotion} style={{ width: 100, height: 100 }} loop={true} />
+          {isCompleted ? (
+            <img src={CourseSavedIcon} alt="course saved" />
+          ) : (
+            <Lottie animationData={LoadingMotion} style={{ width: 100, height: 100 }} loop={true} />
+          )}
         </AnimationContainer>
-        <Message>코스를 저장하고 있어요</Message>
+        <Message>{isCompleted ? t('modal.courseCreation.saved') : t('modal.courseCreation.saving')}</Message>
       </ModalContainer>
     </Overlay>
   );
@@ -38,13 +47,14 @@ const Overlay = styled.div`
   z-index: 200;
 `;
 
-const ModalContainer = styled.div`
+const ModalContainer = styled.div<{ $isCompleted: boolean }>`
   background: var(--surface-surface-default, #ffffff);
   border-radius: 16px;
-  padding: var(--spacing-24) var(--spacing-16);
+  padding: ${({ $isCompleted }) => ($isCompleted ? 'var(--spacing-36) var(--spacing-16) var(--spacing-24)' : 'var(--spacing-24) var(--spacing-16)')};
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: var(--spacing-4);
   width: 164px;
   height: 164px;

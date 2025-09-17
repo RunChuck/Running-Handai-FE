@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import BackIconSrc from '@/assets/icons/arrow-left-24px.svg';
@@ -11,6 +12,8 @@ interface HeaderProps {
 }
 
 const Header = ({ onBack, title, rightIcon, onRightIconClick }: HeaderProps) => {
+  const navigate = useNavigate();
+
   return (
     <Container>
       <IconButton onClick={onBack}>
@@ -19,7 +22,7 @@ const Header = ({ onBack, title, rightIcon, onRightIconClick }: HeaderProps) => 
       {title ? (
         <Title>{title}</Title>
       ) : (
-        <LogoWrapper>
+        <LogoWrapper onClick={() => navigate('/course')}>
           <LogoIcon src={LogoIconSrc} alt="logo" />
         </LogoWrapper>
       )}
@@ -54,6 +57,7 @@ const LogoWrapper = styled.div`
   flex: 1;
   display: flex;
   justify-content: center;
+  cursor: pointer;
 `;
 
 const LogoIcon = styled.img`

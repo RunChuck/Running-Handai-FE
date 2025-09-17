@@ -1,6 +1,7 @@
 import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import styled from '@emotion/styled';
 import { BUSAN_CITY_HALL } from '@/constants/locations';
+import { fetchImageProxy } from '@/api/create';
 
 interface MapThumbnailCaptureProps {
   coordinates?: { lat: number; lng: number }[];
@@ -11,6 +12,7 @@ interface MapThumbnailCaptureProps {
 export interface MapThumbnailCaptureRef {
   updateRoute: (coordinates: { lat: number; lng: number }[]) => void;
   setZoom: (level: number) => void;
+  generateStaticMap: () => Promise<Blob | null>;
 }
 
 const MapThumbnailCapture = forwardRef<MapThumbnailCaptureRef, MapThumbnailCaptureProps>(({ coordinates = [], zoomLevel = 5, onZoomChange }, ref) => {
@@ -28,7 +30,189 @@ const MapThumbnailCapture = forwardRef<MapThumbnailCaptureRef, MapThumbnailCaptu
         mapInstance.current.setLevel(level);
       }
     },
+    generateStaticMap: () => generateStaticMapImage(),
   }));
+
+  // 좌표를 픽셀 좌표로 변환하는 함수 (카카오맵 API 사용)
+  const convertCoordToPixel = (coord: { lat: number; lng: number }, canvasSize: number) => {
+    if (!mapInstance.current) return { x: 0, y: 0 };
+
+    // 카카오맵의 좌표 변환 API 사용
+    const projection = mapInstance.current.getProjection();
+    const point = projection.containerPointFromCoords(new window.kakao.maps.LatLng(coord.lat, coord.lng));
+
+    // 311px 지도에서의 픽셀 좌표를 622px 캔버스로 스케일링
+    const scale = canvasSize / 311;
+
+    console.log('좌표 변환:', coord, '→ 지도 픽셀:', { x: point.x, y: point.y }, '→ 캔버스 픽셀:', { x: point.x * scale, y: point.y * scale });
+
+    return {
+      x: point.x * scale,
+      y: point.y * scale,
+    };
+  };
+
+  // 캔버스에 폴리라인 그리기
+  const drawPolylineOnCanvas = (ctx: CanvasRenderingContext2D, coordinates: { lat: number; lng: number }[], canvasSize: number) => {
+    if (coordinates.length < 2) return;
+
+    console.log('=== 폴리라인 그리기 시작 ===');
+    console.log('캔버스 크기:', canvasSize);
+    console.log('좌표 개수:', coordinates.length);
+
+    ctx.strokeStyle = '#4561FF';
+    ctx.lineWidth = 8; // 고해상도용 굵은 선
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.globalAlpha = 0.9; // 조금 더 진하게
+
+    ctx.beginPath();
+
+    // 첫 번째 좌표로 이동
+    const firstPixel = convertCoordToPixel(coordinates[0], canvasSize);
+    console.log('첫 번째 좌표:', coordinates[0], '→ 픽셀:', firstPixel);
+    ctx.moveTo(firstPixel.x, firstPixel.y);
+
+    // 나머지 좌표들로 선 그리기
+    for (let i = 1; i < coordinates.length; i++) {
+      const pixel = convertCoordToPixel(coordinates[i], canvasSize);
+      if (i === 1 || i === coordinates.length - 1 || i % 50 === 0) {
+        console.log(`좌표 ${i}:`, coordinates[i], '→ 픽셀:', pixel);
+      }
+      ctx.lineTo(pixel.x, pixel.y);
+    }
+
+    ctx.stroke();
+    ctx.globalAlpha = 1.0; // 투명도 원복
+    console.log('=== 폴리라인 그리기 완료 ===');
+  };
+
+  const generateStaticMapImage = async (): Promise<Blob | null> => {
+    return new Promise(resolve => {
+      if (!mapInstance.current) {
+        console.error('맵 인스턴스가 없음');
+        resolve(null);
+        return;
+      }
+
+      try {
+        const center = mapInstance.current.getCenter();
+        const level = mapInstance.current.getLevel();
+
+        console.log('=== StaticMap 생성 시작 ===');
+        console.log('지도 설정:', { lat: center.getLat(), lng: center.getLng(), level });
+        console.log('경로 개수:', coordinates.length);
+
+        // StaticMap을 위한 임시 컨테이너 생성
+        const staticMapContainer = document.createElement('div');
+        staticMapContainer.style.width = '311px';
+        staticMapContainer.style.height = '311px';
+        staticMapContainer.style.position = 'absolute';
+        staticMapContainer.style.top = '-9999px';
+        staticMapContainer.style.left = '-9999px';
+        document.body.appendChild(staticMapContainer);
+
+        // StaticMap 생성 옵션
+        const staticMapOption = {
+          center: new window.kakao.maps.LatLng(center.getLat(), center.getLng()),
+          level: level,
+          marker: false,
+        };
+
+        // StaticMap 생성 (사용은 안하는데 인스턴스 생성해야해서 있어야함)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const _staticMap = new window.kakao.maps.StaticMap(staticMapContainer, staticMapOption);
+
+        console.log('StaticMap 객체 생성 완료');
+
+        // StaticMap 렌더링 완료를 위해 잠시 대기
+        setTimeout(async () => {
+          try {
+            // StaticMap에서 생성된 이미지 찾기
+            const imgElements = staticMapContainer.querySelectorAll('img');
+            console.log('=== StaticMap 이미지 분석 ===');
+            console.log('이미지 개수:', imgElements.length);
+
+            imgElements.forEach((img, index) => {
+              console.log(`이미지 ${index + 1}:`, img.src);
+              console.log('크기:', img.width, 'x', img.height);
+            });
+
+            if (imgElements.length > 0) {
+              // 첫 번째 이미지의 URL을 사용해서 Blob으로 변환
+              const firstImg = imgElements[0];
+              console.log('사용할 이미지 URL:', firstImg.src);
+
+              // 프록시 API를 통해 이미지 URL을 Blob으로 변환
+              console.log('프록시 API를 통해 이미지 가져오는 중:', firstImg.src);
+              const mapImageBlob = await fetchImageProxy(firstImg.src);
+
+              // 이미지를 Canvas에 로드하여 폴리라인과 합성
+              const img = new Image();
+              img.crossOrigin = 'anonymous';
+
+              img.onload = () => {
+                // 622x622 고해상도 캔버스 생성 (311 * 2)
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                if (!ctx) {
+                  resolve(null);
+                  return;
+                }
+
+                canvas.width = 622;
+                canvas.height = 622;
+
+                // 지도 이미지 그리기 (2배 크기로 확대)
+                ctx.drawImage(img, 0, 0, 622, 622);
+
+                // 폴리라인 그리기 (경로가 있는 경우에만)
+                if (coordinates.length > 1) {
+                  drawPolylineOnCanvas(ctx, coordinates, 622);
+                }
+
+                // 합성된 이미지를 Blob으로 변환
+                canvas.toBlob(blob => {
+                  // 임시 컨테이너 정리
+                  document.body.removeChild(staticMapContainer);
+
+                  if (blob) {
+                    console.log('지도 + 폴리라인 합성 완료');
+                    console.log('최종 이미지 크기:', blob.size, 'bytes');
+                    console.log('최종 이미지 타입:', blob.type);
+                    resolve(blob);
+                  } else {
+                    console.error('Canvas to Blob 변환 실패');
+                    resolve(null);
+                  }
+                }, 'image/png');
+              };
+
+              img.onerror = () => {
+                console.error('이미지 로드 실패');
+                document.body.removeChild(staticMapContainer);
+                resolve(null);
+              };
+
+              // Blob을 이미지로 로드
+              img.src = URL.createObjectURL(mapImageBlob);
+            } else {
+              console.error('StaticMap에서 이미지를 찾을 수 없음');
+              document.body.removeChild(staticMapContainer);
+              resolve(null);
+            }
+          } catch (error) {
+            console.error('StaticMap 이미지 추출 실패:', error);
+            document.body.removeChild(staticMapContainer);
+            resolve(null);
+          }
+        }, 1000); // 1초 대기
+      } catch (error) {
+        console.error('StaticMap 생성 실패:', error);
+        resolve(null);
+      }
+    });
+  };
 
   const displayRoute = (routeCoordinates: { lat: number; lng: number }[]) => {
     if (!mapInstance.current || routeCoordinates.length < 2) return;

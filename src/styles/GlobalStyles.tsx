@@ -22,6 +22,7 @@ export const GlobalStyles = () => (
         --spacing-16: 1rem; /* 16px */
         --spacing-24: 1.5rem; /* 24px */
         --spacing-32: 2rem; /* 32px */
+        --spacing-36: 2.25rem; /* 36px */
         --spacing-40: 2.5rem; /* 40px */
         --spacing-64: 4rem; /* 64px */
         --spacing-96: 6rem; /* 96px */
