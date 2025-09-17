@@ -1,5 +1,5 @@
-const CACHE_NAME = 'running-handai-v1757860415874';
-const STATIC_CACHE_NAME = 'static-v1757860415874';
+const CACHE_NAME = 'running-handai-v1758081935073';
+const STATIC_CACHE_NAME = 'static-v1758081935073';
 
 // 정적 리소스만 캐시 (이미지, 아이콘 등)
 const urlsToCache = ['/manifest.json', '/AppImages/ios/180.png', '/favicon.ico'];

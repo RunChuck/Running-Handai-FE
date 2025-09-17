@@ -142,7 +142,8 @@ client.interceptors.response.use(
             localStorage.removeItem('autoLogin');
             sessionStorage.removeItem('accessToken');
             sessionStorage.removeItem('refreshToken');
-            window.location.href = '/';
+
+            window.location.href = '/?session=expired';
 
             return Promise.reject(refreshError);
           }
@@ -153,7 +154,8 @@ client.interceptors.response.use(
           localStorage.removeItem('autoLogin');
           sessionStorage.removeItem('accessToken');
           sessionStorage.removeItem('refreshToken');
-          window.location.href = '/';
+
+          window.location.href = '/?session=expired';
         }
       } else {
         // 이미 토큰 재발급 중인 경우 큐에 추가
