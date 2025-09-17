@@ -24,9 +24,13 @@ export const useAuth = () => {
     error: null,
   });
 
-  const setToken = (accessToken: string, refreshToken?: string, autoLogin?: boolean) => {
+  const setToken = (accessToken: string, refreshToken?: string, autoLogin?: boolean, userEmail?: string) => {
+    const isTestAccount = userEmail === import.meta.env.VITE_TEST_ACCOUNT;
     const shouldAutoLogin =
-      autoLogin ?? (sessionStorage.getItem('tempAutoLoginPreference') === 'true' || localStorage.getItem('autoLoginPreference') === 'true');
+      isTestAccount ||
+      autoLogin ||
+      sessionStorage.getItem('tempAutoLoginPreference') === 'true' ||
+      localStorage.getItem('autoLoginPreference') === 'true';
 
     if (shouldAutoLogin) {
       localStorage.setItem('accessToken', accessToken);
@@ -84,17 +88,29 @@ export const useAuth = () => {
       }
 
       if (accessToken) {
-        setToken(accessToken, refreshToken || undefined);
+        // 먼저 임시로 토큰 저장하여 사용자 정보 조회
+        sessionStorage.setItem('tempAccessToken', accessToken);
 
         //  userStore에 저장
         try {
           const userInfoResponse = await authAPI.getUserInfo();
+          const userEmail = userInfoResponse.data.email;
+
+          // 사용자 이메일과 함께 토큰 설정
+          setToken(accessToken, refreshToken || undefined, undefined, userEmail);
+
           setUserInfo({
             nickname: userInfoResponse.data.nickname,
-            email: userInfoResponse.data.email,
+            email: userEmail,
           });
+
+          // 임시 토큰 제거
+          sessionStorage.removeItem('tempAccessToken');
         } catch (error) {
           console.error('Failed to fetch user info after login:', error);
+          // 실패 시 기본 동작
+          setToken(accessToken, refreshToken || undefined);
+          sessionStorage.removeItem('tempAccessToken');
         }
 
         showSuccessToast(t('toast.loginSuccess'), { position: 'top' });

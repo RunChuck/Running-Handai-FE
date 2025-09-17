@@ -34,7 +34,7 @@ client.interceptors.request.use(
     }
 
     // 토큰이 있으면 Authorization 헤더에 추가
-    const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+    const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken') || sessionStorage.getItem('tempAccessToken');
     if (accessToken && config.headers) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
