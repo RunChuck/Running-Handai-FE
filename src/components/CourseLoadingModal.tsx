@@ -3,7 +3,7 @@ import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import Lottie from 'lottie-react';
 import LoadingMotion from '@/assets/animations/run-loading.json';
-import CourseSavedIcon from '@/assets/icons/course-saved.svg';
+import CourseSavedIcon from '@/assets/icons/course-saved-check.svg';
 
 interface CourseLoadingModalProps {
   isOpen: boolean;
@@ -20,7 +20,9 @@ const CourseLoadingModal = ({ isOpen, isCompleted = false }: CourseLoadingModalP
       <ModalContainer $isCompleted={isCompleted}>
         <AnimationContainer>
           {isCompleted ? (
-            <img src={CourseSavedIcon} alt="course saved" />
+            <SavedCircleIcon>
+              <img src={CourseSavedIcon} alt="course saved" />
+            </SavedCircleIcon>
           ) : (
             <Lottie animationData={LoadingMotion} style={{ width: 100, height: 100 }} loop={true} />
           )}
@@ -76,6 +78,18 @@ const AnimationContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+`;
+
+const SavedCircleIcon = styled.div`
+  display: flex;
+  width: 60px;
+  height: 60px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 500px;
+  background: linear-gradient(135deg, #4561ff -0.21%, #6078ff 99.79%);
+  box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.2);
+  margin-bottom: 4px;
 `;
 
 const Message = styled.div`

@@ -189,29 +189,20 @@ const Course = () => {
   useEffect(() => {
     if (!mapRef.current || !isMapInitialized) return;
 
-    if (selectedFilter.type === 'area' || selectedFilter.type === 'theme') {
-      if (courses.length > 0) {
-        try {
-          mapRef.current.displayCourses(courses, selectedCourseId);
+    if (courses.length > 0) {
+      try {
+        mapRef.current.displayCourses(courses, selectedCourseId);
 
-          // 선택된 코스가 있으면 해당 위치로, 없으면 첫 번째 코스로 이동
-          if (selectedCourseId) {
-            moveToCourseStart(selectedCourseId);
-          } else {
-            moveToFirstCourseStart(courses);
-          }
-        } catch (error) {
-          console.warn('Failed to display courses:', error);
+        // 선택된 코스가 있으면 해당 위치로, 없으면 첫 번째 코스로 이동
+        if (selectedCourseId) {
+          moveToCourseStart(selectedCourseId);
+        } else {
+          moveToFirstCourseStart(courses);
         }
-      } else {
-        try {
-          mapRef.current.clearAllCourses();
-        } catch (error) {
-          console.warn('Failed to clear courses:', error);
-        }
+      } catch (error) {
+        console.warn('Failed to display courses:', error);
       }
     } else {
-      // nearby인 경우 코스 제거
       try {
         mapRef.current.clearAllCourses();
       } catch (error) {
