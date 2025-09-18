@@ -193,10 +193,11 @@ const Course = () => {
       try {
         mapRef.current.displayCourses(courses, selectedCourseId);
 
-        // 선택된 코스가 있으면 해당 위치로, 없으면 첫 번째 코스로 이동
+        // 선택된 코스가 있으면 해당 위치로 이동
         if (selectedCourseId) {
           moveToCourseStart(selectedCourseId);
-        } else {
+        } else if (selectedFilter.type !== 'nearby') {
+          // 현재 위치 필터가 아닌 경우에만 첫 번째 코스로 이동
           moveToFirstCourseStart(courses);
         }
       } catch (error) {

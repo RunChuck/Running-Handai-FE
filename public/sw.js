@@ -1,5 +1,5 @@
-const CACHE_NAME = 'running-handai-v1758218232339';
-const STATIC_CACHE_NAME = 'static-v1758218232339';
+const CACHE_NAME = 'running-handai-v1758219703339';
+const STATIC_CACHE_NAME = 'static-v1758219703339';
 
 
 // 정적 리소스만 캐시 (이미지, 아이콘 등)
