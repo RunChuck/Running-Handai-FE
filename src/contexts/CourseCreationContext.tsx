@@ -356,7 +356,16 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
     setError(null);
 
     try {
-      // OpenRoute API를 사용해서 경로 계산
+      // 1. 모든 마커가 한국 내에 있는지 확인
+      const { validateMarkersInKorea } = await import('@/api/openroute');
+      const isInKorea = await validateMarkersInKorea(markers);
+
+      if (!isInKorea) {
+        showErrorToast(t('toast.courseCreation.NotKorea'), { position: 'top' });
+        return;
+      }
+
+      // 2. OpenRoute API로 경로 계산
       const { planRouteFromCoordinates } = await import('@/utils/routeUtils');
       const { calculateElevationStats } = await import('@/utils/distanceCalculator');
 
