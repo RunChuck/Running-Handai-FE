@@ -41,8 +41,8 @@ const CourseCreationModal = ({
   const {
     isInBusan,
     hasCheckedLocation,
-    handleCheckLocation,
-    isLoading: contextLoading,
+    handleCourseValidation,
+    isLoading: validationLoading,
     startPoint,
     endPoint,
     setStartPoint,
@@ -87,16 +87,15 @@ const CourseCreationModal = ({
 
   const handleNextStep = async () => {
     if (currentStep === 'courseInfo') {
-      try {
-        await handleCheckLocation();
-        setCurrentStep('thumbnail');
-      } catch (error) {
-        console.error('부산 지역 체크 실패:', error);
-        // 실패해도 다음 단계로 진행
-        setCurrentStep('thumbnail');
+      const result = await handleCourseValidation();
+
+      if (result.isDuplicate) {
+        showErrorToast('이미 등록된 코스명이에요.', { position: 'top' });
+        return;
       }
+
+      setCurrentStep('thumbnail');
     }
-    // thumbnail 단계에서는 바로 코스 등록
   };
 
   const handlePrevStep = () => {
@@ -191,8 +190,8 @@ const CourseCreationModal = ({
               </InputWrapper>
             </InputContent>
 
-            <Button variant="primary" fullWidth disabled={isButtonDisabled || contextLoading} onClick={handleNextStep}>
-              {contextLoading ? '위치 확인 중...' : '다음'}
+            <Button variant="primary" fullWidth disabled={isButtonDisabled || validationLoading} onClick={handleNextStep}>
+              {validationLoading ? <Spinner /> : '다음'}
             </Button>
           </>
         ) : (
@@ -235,7 +234,7 @@ const CourseCreationModal = ({
                 이전
               </Button>
               <Button variant="primary" disabled={isLoading} onClick={handleConfirm}>
-                {isLoading ? '등록 중...' : '완료'}
+                {isLoading ? <Spinner /> : '완료'}
               </Button>
             </ButtonRow>
           </>
@@ -421,5 +420,23 @@ const WarningMessage = styled.div`
   strong {
     font-weight: 600;
     display: inline;
+  }
+`;
+
+const Spinner = styled.div`
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
 `;
