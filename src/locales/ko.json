@@ -181,7 +181,6 @@
   "courseCreation": {
     "title": "코스 생성",
     "create": "코스 생성",
-    "creating": "생성 중..",
     "register": "코스 등록",
     "save": "코스 저장",
     "marker": {

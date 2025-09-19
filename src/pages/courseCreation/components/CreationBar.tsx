@@ -79,14 +79,14 @@ const CreationBar = ({ onCreateCourse }: CreationBarProps) => {
     },
   ];
 
-  // 버튼 텍스트 결정
-  const getButtonText = () => {
+  // 버튼 콘텐츠 결정
+  const getButtonContent = () => {
     if (isLoading) {
-      return t('courseCreation.creating'); // "생성 중"
+      return <Spinner />;
     } else if (isRouteGenerated) {
-      return t('courseCreation.register'); // "코스 등록"
+      return t('courseCreation.register');
     } else {
-      return t('courseCreation.create'); // "코스 생성"
+      return t('courseCreation.create');
     }
   };
 
@@ -97,7 +97,7 @@ const CreationBar = ({ onCreateCourse }: CreationBarProps) => {
         onClick={buttonStates.create || isRouteGenerated ? onCreateCourse : undefined}
         isLoading={isLoading}
       >
-        {getButtonText()}
+        {getButtonContent()}
       </CreateButton>
       <FloatButton position={{ top: -56, right: 16 }} onClick={moveToCurrentLocation}>
         <img src={LocationIconSrc} alt={t('currentLocation')} width={20} height={20} />
@@ -129,6 +129,11 @@ const CreateButton = styled.button<{ enabled: boolean; isLoading?: boolean }>`
   top: -56px;
   left: 50%;
   transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 108px;
+  height: 40px;
   padding: 8px 24px;
   border-radius: 100px;
   background: ${({ enabled }) => (enabled ? 'var(--primary-primary, #4561ff)' : '#BBBBBB')};
@@ -136,9 +141,11 @@ const CreateButton = styled.button<{ enabled: boolean; isLoading?: boolean }>`
   cursor: ${({ enabled }) => (enabled ? 'pointer' : 'not-allowed')};
   z-index: 1;
   transition: all 0.3s ease;
+  
 
   @media (max-width: 600px) {
     ${theme.typography.caption1}
+    width: 100px;
   }
 
   &:hover {
@@ -210,4 +217,22 @@ const MenuLabel = styled.span<{ enabled: boolean }>`
   ${theme.typography.label3}
   color: ${({ enabled }) => (enabled ? '#333' : '#BBBBBB')};
   transition: color 0.3s ease;
+`;
+
+const Spinner = styled.div`
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
 `;
