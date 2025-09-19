@@ -54,8 +54,10 @@
     "courseDeleteFailed": "코스 삭제 중 문제가 발생했어요. 다시 시도해주세요.",
     "gpxDownloaded": "GPX 파일이 다운로드 되었어요.",
     "gpxDownloadFailed": "GPX 다운로드 중 문제가 발생했어요. 다시 시도해주세요.",
-    "courseCreation.InvalidLocation": "선택한 위치에서는 코스를 생성할 수 없습니다.",
+    "courseCreation.NotKorea": "코스 생성이 가능한 지역을 벗어났어요.",
+    "courseCreation.InvalidLocation": "선택한 위치에서는 코스를 생성할 수 없어요.",
     "courseCreation.ServerError": "코스 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+    "courseCreation.DuplicateCourseName": "이미 등록된 코스명이에요.",
     "sessionExpired": "세션이 만료되었어요. 다시 로그인해주세요."
   },
   "location": {
@@ -181,7 +183,6 @@
   "courseCreation": {
     "title": "코스 생성",
     "create": "코스 생성",
-    "creating": "생성 중..",
     "register": "코스 등록",
     "save": "코스 저장",
     "marker": {

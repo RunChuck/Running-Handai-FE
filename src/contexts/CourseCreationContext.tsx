@@ -1,7 +1,7 @@
 import { createContext, useContext, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { RouteViewMapInstance } from '@/pages/courseCreation/components/RouteView';
-import { createCourse, checkIsInBusan } from '@/api/create';
+import { createCourse, checkIsInBusan, checkCourseName } from '@/api/create';
 import { generateGPXFile } from '@/utils/gpxGenerator';
 import { convertImageToWebP } from '@/utils/imageConverter';
 import { useToast } from '@/hooks/useToast';
@@ -69,7 +69,7 @@ interface CourseCreationContextType {
   handleSwap: () => void;
   handleDelete: () => void;
   handleCourseCreate: () => Promise<void>;
-  handleCheckLocation: () => Promise<void>;
+  handleCourseValidation: () => Promise<{ isDuplicate: boolean; message?: string }>;
   submitCourse: (courseData: { startPoint: string; endPoint: string; thumbnailBlob: Blob; isInBusan: boolean }) => Promise<number>;
   setMapInstance: (instance: RouteViewMapInstance) => void;
 
@@ -356,7 +356,16 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
     setError(null);
 
     try {
-      // OpenRoute API를 사용해서 경로 계산
+      // 1. 모든 마커가 한국 내에 있는지 확인
+      const { validateMarkersInKorea } = await import('@/api/openroute');
+      const isInKorea = await validateMarkersInKorea(markers);
+
+      if (!isInKorea) {
+        showErrorToast(t('toast.courseCreation.NotKorea'), { position: 'top' });
+        return;
+      }
+
+      // 2. OpenRoute API로 경로 계산
       const { planRouteFromCoordinates } = await import('@/utils/routeUtils');
       const { calculateElevationStats } = await import('@/utils/distanceCalculator');
 
@@ -397,32 +406,42 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
     }
   };
 
-  const handleCheckLocation = async () => {
-    // 좌표 데이터 확인 - GPX 업로드된 경우 gpxData에서, 아니면 markers에서
-    const coordinates = isGpxUploaded && gpxData?.coordinates ? gpxData.coordinates : gpxData?.coordinates || [];
-    if (!coordinates.length) {
-      throw new Error('경로 데이터가 없습니다.');
-    }
 
-    const startCoordinate = coordinates[0];
+  const handleCourseValidation = async () => {
+    const courseName = `${startPoint}-${endPoint}`;
 
     try {
       setIsLoading(true);
-      const locationResult = await checkIsInBusan({
-        lat: startCoordinate.lat,
-        lon: startCoordinate.lng,
-      });
 
-      setIsInBusan(locationResult.data);
-      setHasCheckedLocation(true);
+      // 1. 코스명 중복 검사
+      const nameCheckResponse = await checkCourseName(courseName);
+      if (nameCheckResponse.data === true) {
+        return { isDuplicate: true };
+      }
+
+      // 2. 부산 지역 체크
+      const coordinates = isGpxUploaded && gpxData?.coordinates ? gpxData.coordinates : gpxData?.coordinates || [];
+      if (coordinates.length > 0) {
+        const startCoordinate = coordinates[0];
+        const locationResult = await checkIsInBusan({
+          lat: startCoordinate.lat,
+          lon: startCoordinate.lng,
+        });
+
+        setIsInBusan(locationResult.data);
+        setHasCheckedLocation(true);
+      }
+
+      return { isDuplicate: false };
     } catch (error) {
-      setError('위치 확인 중 오류가 발생했습니다.');
-      console.error('Location check error:', error);
-      throw error;
+      console.error('Course validation error:', error);
+      // 에러가 발생해도 진행 허용
+      return { isDuplicate: false };
     } finally {
       setIsLoading(false);
     }
   };
+
 
   const submitCourse = async (courseData: { startPoint: string; endPoint: string; thumbnailBlob: Blob; isInBusan: boolean }): Promise<number> => {
     setIsSavingCourse(true);
@@ -531,7 +550,7 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
     handleSwap,
     handleDelete,
     handleCourseCreate,
-    handleCheckLocation,
+    handleCourseValidation,
     submitCourse,
     setMapInstance,
 

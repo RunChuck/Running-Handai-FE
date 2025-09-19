@@ -60,7 +60,7 @@ export const drawMultipleCoursesOnMap = (map: kakao.maps.Map, coursesData: Multi
       strokeColor: courseData.color,
       strokeOpacity: courseData.isSelected ? 0.9 : 0.7,
       strokeStyle: 'solid',
-      zIndex: courseData.isSelected ? 100 : 1,
+      zIndex: courseData.isSelected ? 100 : 11,
     });
 
     polyline.setMap(map);
@@ -80,7 +80,7 @@ export const drawMultipleCoursesOnMap = (map: kakao.maps.Map, coursesData: Multi
       position: markerPosition,
       image: markerImage,
       title: `${courseData.label}코스`,
-      zIndex: courseData.isSelected ? 100 : 1,
+      zIndex: courseData.isSelected ? 100 : 11,
     });
 
     // 마커에 코스 데이터 저장 (클러스터 클릭시 사용)

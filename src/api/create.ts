@@ -1,5 +1,6 @@
 import { http } from '@/constants/http';
 import type {
+  CourseNameCheckResponse,
   LocationCheckRequest,
   LocationCheckResponse,
   CourseCreateRequest,
@@ -11,6 +12,11 @@ import type {
 } from '@/types/create';
 
 const PREFIX = '/api/members/me/courses';
+
+export const checkCourseName = async (name: string): Promise<CourseNameCheckResponse> => {
+  const response = await http.get<CourseNameCheckResponse>(`/api/courses/name/exists`, { params: { name } });
+  return response.data;
+};
 
 export const checkIsInBusan = async (request: LocationCheckRequest): Promise<LocationCheckResponse> => {
   const response = await http.get<LocationCheckResponse>(`/api/locations/is-in-busan?lon=${request.lon}&lat=${request.lat}`);

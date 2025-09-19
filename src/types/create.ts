@@ -1,3 +1,10 @@
+export interface CourseNameCheckResponse {
+  statusCode: number;
+  responseCode: string;
+  message: string;
+  data: boolean;
+}
+
 export interface LocationCheckRequest {
   lat: number;
   lon: number;
