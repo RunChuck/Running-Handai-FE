@@ -16,6 +16,7 @@ import CoursePopover from './CoursePopover';
 
 export interface MapViewRef {
   moveToLocation: (lat: number, lng: number, level?: number) => void;
+  getCurrentLevel: () => number;
   displayCourses: (courses: CourseData[], selectedCourseId?: number) => void;
   updateSelectedCourse: (courseId: number) => void;
   clearAllCourses: () => void;
@@ -144,6 +145,10 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
       } else {
         console.error('MapView: mapInstance.current가 null입니다');
       }
+    },
+
+    getCurrentLevel: () => {
+      return mapInstance.current ? mapInstance.current.getLevel() : 7;
     },
 
     displayCourses: (courses: CourseData[], selectedCourseId?: number) => {
