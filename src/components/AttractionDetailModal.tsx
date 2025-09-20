@@ -2,7 +2,6 @@ import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import type { SpotData } from '@/types/course';
 import { formatDescription } from '@/utils/format';
-import AttractionTumbnailSrc from '@/assets/images/thumbnail-default.png';
 import CloseIconSrc from '@/assets/icons/close-24px.svg';
 
 interface AttractionDetailModalProps {
@@ -23,19 +22,22 @@ const AttractionDetailModal = ({ isOpen, onClose, spot }: AttractionDetailModalP
 
         <Content>
           <Title>{spot.name}</Title>
-          <ThumbnailWrapper>
-            <Thumbnail
-              src={spot.imageUrl || AttractionTumbnailSrc}
-              alt={spot.name}
-              className={!spot.imageUrl ? 'default-image' : ''}
-              onError={e => {
-                e.currentTarget.src = AttractionTumbnailSrc;
-                e.currentTarget.classList.add('default-image');
-              }}
-            />
-          </ThumbnailWrapper>
+          {spot.imageUrl && (
+            <ThumbnailWrapper>
+              <Thumbnail
+                src={spot.imageUrl}
+                alt={spot.name}
+                onError={e => {
+                  const wrapper = e.currentTarget.parentElement;
+                  if (wrapper) {
+                    wrapper.style.display = 'none';
+                  }
+                }}
+              />
+            </ThumbnailWrapper>
+          )}
 
-          <Description>{formatDescription(spot.description)}</Description>
+          <Description hasImage={!!spot.imageUrl}>{formatDescription(spot.description)}</Description>
         </Content>
       </ModalContainer>
     </Overlay>
@@ -120,12 +122,6 @@ const Thumbnail = styled.img`
   height: 100%;
   object-fit: cover;
   display: block;
-
-  &.default-image {
-    height: 200px;
-    object-fit: contain;
-    background-color: var(--surface-surface-secondary, #f8f8f8);
-  }
 `;
 
 const Title = styled.h3`
@@ -134,12 +130,12 @@ const Title = styled.h3`
   text-align: center;
 `;
 
-const Description = styled.p`
+const Description = styled.p<{ hasImage: boolean }>`
   ${theme.typography.body2};
   color: var(--text-text-secondary, #555555);
   word-break: keep-all;
   text-align: left;
-  max-height: 126px;
+  max-height: ${({ hasImage }) => (hasImage ? '126px' : '400px')};
   overflow-y: auto;
   padding-right: 10px;
   scrollbar-width: thin;
