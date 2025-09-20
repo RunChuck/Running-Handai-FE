@@ -19,6 +19,7 @@ interface MarkerData {
 
 export interface RouteViewMapInstance {
   moveToLocation: (lat: number, lng: number, level?: number) => void;
+  getCurrentLevel: () => number;
   clearAllMarkers: () => void;
   removeLastMarker: () => void;
   addMarkerAt: (lat: number, lng: number) => void;
@@ -390,6 +391,9 @@ const RouteView = forwardRef<HTMLDivElement, RouteViewProps>(({ onMapLoad, onMar
                   }
                   map.panTo(position);
                 }
+              },
+              getCurrentLevel: () => {
+                return map ? map.getLevel() : 7;
               },
               clearAllMarkers,
               removeLastMarker,

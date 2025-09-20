@@ -4,6 +4,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 
 export interface MapInstance {
   moveToLocation: (lat: number, lng: number, level?: number) => void;
+  getCurrentLevel?: () => number;
   updateCurrentLocationMarker?: () => Promise<void>;
 }
 
@@ -15,7 +16,12 @@ export const moveToCurrentLocation = async (mapInstance: MapInstance | null) => 
 
   try {
     const location = await getUserLocation();
-    mapInstance.moveToLocation(location.lat, location.lng);
+
+    // 현재 줌 레벨 확인 후 조건부 레벨 설정
+    const currentLevel = mapInstance.getCurrentLevel?.() ?? 7;
+    const targetLevel = currentLevel > 7 ? 7 : undefined;
+
+    mapInstance.moveToLocation(location.lat, location.lng, targetLevel);
 
     if (mapInstance.updateCurrentLocationMarker) {
       await mapInstance.updateCurrentLocationMarker();
@@ -31,7 +37,10 @@ export const moveToCurrentLocation = async (mapInstance: MapInstance | null) => 
       console.warn('현재 위치를 가져올 수 없습니다:', error);
     }
 
-    mapInstance.moveToLocation(BUSAN_CITY_HALL.lat, BUSAN_CITY_HALL.lng);
+    const currentLevel = mapInstance.getCurrentLevel?.() ?? 7;
+    const targetLevel = currentLevel > 7 ? 7 : undefined;
+
+    mapInstance.moveToLocation(BUSAN_CITY_HALL.lat, BUSAN_CITY_HALL.lng, targetLevel);
     return BUSAN_CITY_HALL;
   }
 };
