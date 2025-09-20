@@ -11,79 +11,141 @@ permissions:
 jobs:
   create-github-issue:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Extract Jira Data
-      id: extract-data
-      run: |
-        echo "=== Jira Webhook Data ==="
-        echo "Issue Key: ${{ github.event.client_payload.issue_key }}"
-        echo "Summary: ${{ github.event.client_payload.summary }}"
-        echo "Assignee: ${{ github.event.client_payload.assignee }}"
-        echo "Parent Key: ${{ github.event.client_payload.parent_key }}"
-        echo "Description: ${{ github.event.client_payload.description }}"
-        echo "=========================="
-        
-        # 데이터 정리
-        JIRA_KEY="${{ github.event.client_payload.issue_key }}"
-        TITLE="${{ github.event.client_payload.summary }}"
-        ASSIGNEE="${{ github.event.client_payload.assignee }}"
-        PARENT="${{ github.event.client_payload.parent_key }}"
-        DESC="${{ github.event.client_payload.description }}"
-        
-        echo "JIRA_KEY=$JIRA_KEY" >> $GITHUB_OUTPUT
-        echo "TITLE=$TITLE" >> $GITHUB_OUTPUT
-        echo "ASSIGNEE=$ASSIGNEE" >> $GITHUB_OUTPUT
-        echo "PARENT=$PARENT" >> $GITHUB_OUTPUT
-        echo "DESC=$DESC" >> $GITHUB_OUTPUT
+      - name: Extract Jira Data
+        id: extract-data
+        run: |
+          echo "=== Jira Webhook Data ==="
+          echo "Issue Key: ${{ github.event.client_payload.issue_key }}"
+          echo "Summary: ${{ github.event.client_payload.summary }}"
+          echo "Assignee: ${{ github.event.client_payload.assignee }}"
+          echo "Parent Key: ${{ github.event.client_payload.parent_key }}"
+          echo "Description: (처리 중...)"
+          echo "=========================="
 
-    - name: Check if assigned to me
-      id: check-assignee
-      run: |
-        ASSIGNEE="${{ steps.extract-data.outputs.ASSIGNEE }}"
-        MY_JIRA_EMAIL="${{ secrets.JIRA_USER_EMAIL }}"
-        
-        if [[ "$ASSIGNEE" == "$MY_JIRA_EMAIL" ]]; then
-          echo "✅ 나에게 할당된 작업입니다"
-          echo "CREATE_ISSUE=true" >> $GITHUB_OUTPUT
-        else
-          echo "❌ 다른 사람에게 할당된 작업입니다: $ASSIGNEE"
-          echo "CREATE_ISSUE=false" >> $GITHUB_OUTPUT
-        fi
+          # 데이터 정리 - base64 인코딩으로 안전하게 처리
+          JIRA_KEY="${{ github.event.client_payload.issue_key }}"
+          TITLE="${{ github.event.client_payload.summary }}"
+          ASSIGNEE="${{ github.event.client_payload.assignee }}"
+          PARENT="${{ github.event.client_payload.parent_key }}"
 
-    - name: Create GitHub Issue
-      if: steps.check-assignee.outputs.CREATE_ISSUE == 'true'
-      id: create-issue
-      uses: actions-cool/issues-helper@v3
-      with:
-        actions: 'create-issue'
-        token: ${{ secrets.GITHUB_TOKEN }}
-        title: '[${{ steps.extract-data.outputs.JIRA_KEY }}] ${{ steps.extract-data.outputs.TITLE }}'
-        body: |
-          ## 🎯 Jira Sub-task에서 자동 생성
-          
-          **🎟️ Jira 티켓 링크**: [${{ steps.extract-data.outputs.JIRA_KEY }}](${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.extract-data.outputs.JIRA_KEY }})
-          **📊 상위 티켓**: [${{ steps.extract-data.outputs.PARENT }}](${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.extract-data.outputs.PARENT }})
-          **👤 담당자**: ${{ steps.extract-data.outputs.ASSIGNEE }}
-          
+          # Description을 base64로 인코딩하여 안전하게 처리
+          DESC_RAW="${{ github.event.client_payload.description }}"
+          if [ -n "$DESC_RAW" ]; then
+            DESC_B64=$(echo -n "$DESC_RAW" | base64 -w 0)
+          else
+            DESC_B64=""
+          fi
+
+          echo "JIRA_KEY=$JIRA_KEY" >> $GITHUB_OUTPUT
+          echo "TITLE=$TITLE" >> $GITHUB_OUTPUT
+          echo "ASSIGNEE=$ASSIGNEE" >> $GITHUB_OUTPUT
+          echo "PARENT=$PARENT" >> $GITHUB_OUTPUT
+          echo "DESC_B64=$DESC_B64" >> $GITHUB_OUTPUT
+
+      - name: Check if assigned to me
+        id: check-assignee
+        run: |
+          ASSIGNEE="${{ steps.extract-data.outputs.ASSIGNEE }}"
+          MY_JIRA_EMAIL="${{ secrets.JIRA_USER_EMAIL }}"
+
+          if [[ "$ASSIGNEE" == "$MY_JIRA_EMAIL" ]]; then
+            echo "✅ 나에게 할당된 작업입니다"
+            echo "CREATE_ISSUE=true" >> $GITHUB_OUTPUT
+          else
+            echo "❌ 다른 사람에게 할당된 작업입니다: $ASSIGNEE"
+            echo "CREATE_ISSUE=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create GitHub Issue
+        if: steps.check-assignee.outputs.CREATE_ISSUE == 'true'
+        id: create-issue
+        run: |
+          # base64 디코딩하여 description 복원
+          if [ -n "${{ steps.extract-data.outputs.DESC_B64 }}" ]; then
+            DESC_RAW=$(echo "${{ steps.extract-data.outputs.DESC_B64 }}" | base64 -d)
+            # Jira 이미지 마크업 제거 (!image.ext|...! 형태)
+            DESC_DECODED=$(echo "$DESC_RAW" | sed 's/!image-[^!]*\.png[^!]*!//g' | sed 's/!image-[^!]*\.jpg[^!]*!//g' | sed 's/!image-[^!]*\.jpeg[^!]*!//g' | sed 's/!image-[^!]*\.gif[^!]*!//g')
+          else
+            DESC_DECODED="(설명 없음)"
+          fi
+
+          # GitHub 이슈 생성을 위한 JSON 페이로드 준비
+          ISSUE_TITLE="[${{ steps.extract-data.outputs.JIRA_KEY }}] ${{ steps.extract-data.outputs.TITLE }}"
+
+          ISSUE_BODY=$(cat <<EOF
+          ## 📌 Jira 정보
+
+          **🎟️ 이슈 티켓**: [${{ steps.extract-data.outputs.JIRA_KEY }}](${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.extract-data.outputs.JIRA_KEY }})
+          **📁 상위 티켓**: [${{ steps.extract-data.outputs.PARENT }}](${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.extract-data.outputs.PARENT }})
+
           ## 📝 작업 설명
-          ${{ steps.extract-data.outputs.DESC }}
-          
-          ---
-          > 💡 이 이슈는 Jira에서 하위 작업을 할당하여 자동으로 생성되었습니다.
+          ${DESC_DECODED}
 
-    - name: Add Development Checklist
-      if: steps.check-assignee.outputs.CREATE_ISSUE == 'true'
-      uses: actions-cool/issues-helper@v3
-      with:
-        actions: 'create-comment'
-        token: ${{ secrets.GITHUB_TOKEN }}
-        issue-number: ${{ steps.create-issue.outputs.issue-number }}
-        body: |
-          🚀 ** 체크리스트**
-          
-          - [ ] 요구사항 분석 완료
-          - [ ] 기술 스택 및 구현 방법 검토
-          - [ ] 브랜치 생성 및 환경 설정
-          
-          **관련 Jira**: [${{ steps.extract-data.outputs.JIRA_KEY }}](${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.extract-data.outputs.JIRA_KEY }})
+          ---
+          > 💡 이 이슈는 Jira 작업과 연동되어 자동 생성되었습니다.
+          EOF
+          )
+
+          # GitHub API를 사용하여 이슈 생성 (할당자 포함)
+          RESPONSE=$(curl -s -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/issues" \
+            -d "{
+              \"title\": $(echo "$ISSUE_TITLE" | jq -R .),
+              \"body\": $(echo "$ISSUE_BODY" | jq -Rs .),
+              \"assignees\": [\"InKyungWoo\"]
+            }")
+
+          ISSUE_NUMBER=$(echo "$RESPONSE" | jq -r '.number')
+          ISSUE_ID=$(echo "$RESPONSE" | jq -r '.id')
+
+          echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
+          echo "ISSUE_ID=$ISSUE_ID" >> $GITHUB_OUTPUT
+          echo "✅ GitHub 이슈 #$ISSUE_NUMBER 생성 완료"
+
+      - name: Add to Organization Project
+        if: steps.check-assignee.outputs.CREATE_ISSUE == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+        run: |
+          ISSUE_NUMBER="${{ steps.create-issue.outputs.ISSUE_NUMBER }}"
+
+          # GitHub CLI를 사용하여 프로젝트에 추가
+          gh project item-add 2 --owner RunChuck --url "https://github.com/${{ github.repository }}/issues/${ISSUE_NUMBER}"
+          echo "✅ 이슈 #${ISSUE_NUMBER}를 프로젝트에 추가 완료"
+
+      - name: Set Active Milestone
+        if: steps.check-assignee.outputs.CREATE_ISSUE == 'true'
+        run: |
+          ISSUE_NUMBER="${{ steps.create-issue.outputs.ISSUE_NUMBER }}"
+
+          # 활성 milestone 찾기 (open 상태인 것들)
+          MILESTONES=$(curl -s \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/milestones?state=open")
+
+          MILESTONE_COUNT=$(echo "$MILESTONES" | jq 'length')
+
+          if [ "$MILESTONE_COUNT" -eq 1 ]; then
+            # 활성 milestone이 정확히 하나일 때만 설정
+            MILESTONE_NUMBER=$(echo "$MILESTONES" | jq -r '.[0].number')
+
+            # 이슈에 milestone 설정
+            curl -s -X PATCH \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/repos/${{ github.repository }}/issues/${ISSUE_NUMBER}" \
+              -d "{
+                \"milestone\": $MILESTONE_NUMBER
+              }"
+
+            echo "✅ 이슈 #${ISSUE_NUMBER}에 milestone #${MILESTONE_NUMBER} 설정 완료"
+          elif [ "$MILESTONE_COUNT" -eq 0 ]; then
+            echo "ℹ️ 활성 milestone이 없어 설정하지 않았습니다"
+          else
+            echo "ℹ️ 활성 milestone이 ${MILESTONE_COUNT}개 있어 설정하지 않았습니다"
+          fi
