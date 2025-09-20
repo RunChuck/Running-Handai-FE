@@ -59,7 +59,9 @@ const CourseRouteMap = memo(
               setIsMapLoaded(true);
             }
 
-            console.log('코스 경로 지도 초기화 완료:', route);
+            if (import.meta.env.DEV) {
+              console.log('코스 경로 지도 초기화 완료:', route);
+            }
           });
         }
       };

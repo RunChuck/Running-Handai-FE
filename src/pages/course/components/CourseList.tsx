@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import Lottie from 'lottie-react';
 import styled from '@emotion/styled';
@@ -42,6 +42,7 @@ const CourseList = ({
   const [t] = useTranslation();
   const isMobile = useIsMobile();
   const { scrollContainerRef, handleMouseDown } = useHorizontalScroll();
+  const courseGridRef = useRef<HTMLDivElement>(null);
 
   const handleThemeCardClick = (themeKey: ThemeCode) => {
     onThemeSelect(themeKey);
@@ -59,6 +60,35 @@ const CourseList = ({
       }
     }
   }, [loading, error, courses.length, onScrollableChange]);
+
+  // 선택된 코스로 자동스크롤
+  useEffect(() => {
+    if (!selectedCourseId || !courseGridRef.current || courses.length === 0) return;
+
+    const selectedIndex = courses.findIndex(course => course.courseId === selectedCourseId);
+    if (selectedIndex === -1) return;
+
+    const timeoutId = setTimeout(() => {
+      const courseGrid = courseGridRef.current;
+      if (!courseGrid?.children.length) return;
+
+      const gridStyle = window.getComputedStyle(courseGrid);
+      const columnCount = gridStyle.gridTemplateColumns.split(' ').length;
+      const rowIndex = Math.floor(selectedIndex / columnCount);
+
+      const firstItem = courseGrid.children[0] as HTMLElement;
+      const scrollPosition = rowIndex * (firstItem.offsetHeight + (parseInt(gridStyle.gap) || 16));
+
+      let scrollContainer = courseGrid.parentElement;
+      while (scrollContainer && scrollContainer.scrollHeight <= scrollContainer.clientHeight) {
+        scrollContainer = scrollContainer.parentElement;
+      }
+
+      scrollContainer?.scrollTo({ top: scrollPosition, behavior: 'smooth' });
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
+  }, [selectedCourseId, courses]);
 
   if (loading) {
     return (
@@ -100,7 +130,7 @@ const CourseList = ({
   }
 
   return (
-    <S.CourseGrid>
+    <S.CourseGrid ref={courseGridRef}>
       {courses.map((course, index) => (
         <CourseItem
           key={course.courseId}

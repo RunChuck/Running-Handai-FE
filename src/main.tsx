@@ -9,14 +9,7 @@ initKakao();
 // 프로덕션 환경에서만 서비스 워커 등록
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .register('/sw.js')
-      .then(registration => {
-        console.log('SW registered: ', registration);
-      })
-      .catch(registrationError => {
-        console.log('SW registration failed: ', registrationError);
-      });
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
   });
 }
 
