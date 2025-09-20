@@ -18,8 +18,6 @@ const ElevationChart = ({ trackPoints }: ElevationChartProps) => {
   const [t] = useTranslation();
   const chartRef = useRef(null);
 
-  console.log('ElevationChart trackPoints:', trackPoints);
-
   // trackPoints에서 고도 데이터 추출 및 거리 계산
   const processElevationData = (points: TrackPoint[]) => {
     if (!points || points.length === 0) return { labels: [], elevations: [] };

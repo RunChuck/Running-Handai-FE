@@ -44,8 +44,6 @@ const MapThumbnailCapture = forwardRef<MapThumbnailCaptureRef, MapThumbnailCaptu
     // 311px 지도에서의 픽셀 좌표를 622px 캔버스로 스케일링
     const scale = canvasSize / 311;
 
-    console.log('좌표 변환:', coord, '→ 지도 픽셀:', { x: point.x, y: point.y }, '→ 캔버스 픽셀:', { x: point.x * scale, y: point.y * scale });
-
     return {
       x: point.x * scale,
       y: point.y * scale,
@@ -55,10 +53,6 @@ const MapThumbnailCapture = forwardRef<MapThumbnailCaptureRef, MapThumbnailCaptu
   // 캔버스에 폴리라인 그리기
   const drawPolylineOnCanvas = (ctx: CanvasRenderingContext2D, coordinates: { lat: number; lng: number }[], canvasSize: number) => {
     if (coordinates.length < 2) return;
-
-    console.log('=== 폴리라인 그리기 시작 ===');
-    console.log('캔버스 크기:', canvasSize);
-    console.log('좌표 개수:', coordinates.length);
 
     ctx.strokeStyle = '#4561FF';
     ctx.lineWidth = 8; // 고해상도용 굵은 선
@@ -70,21 +64,17 @@ const MapThumbnailCapture = forwardRef<MapThumbnailCaptureRef, MapThumbnailCaptu
 
     // 첫 번째 좌표로 이동
     const firstPixel = convertCoordToPixel(coordinates[0], canvasSize);
-    console.log('첫 번째 좌표:', coordinates[0], '→ 픽셀:', firstPixel);
     ctx.moveTo(firstPixel.x, firstPixel.y);
 
     // 나머지 좌표들로 선 그리기
     for (let i = 1; i < coordinates.length; i++) {
       const pixel = convertCoordToPixel(coordinates[i], canvasSize);
-      if (i === 1 || i === coordinates.length - 1 || i % 50 === 0) {
-        console.log(`좌표 ${i}:`, coordinates[i], '→ 픽셀:', pixel);
-      }
+
       ctx.lineTo(pixel.x, pixel.y);
     }
 
     ctx.stroke();
     ctx.globalAlpha = 1.0; // 투명도 원복
-    console.log('=== 폴리라인 그리기 완료 ===');
   };
 
   const generateStaticMapImage = async (): Promise<Blob | null> => {
@@ -98,10 +88,6 @@ const MapThumbnailCapture = forwardRef<MapThumbnailCaptureRef, MapThumbnailCaptu
       try {
         const center = mapInstance.current.getCenter();
         const level = mapInstance.current.getLevel();
-
-        console.log('=== StaticMap 생성 시작 ===');
-        console.log('지도 설정:', { lat: center.getLat(), lng: center.getLng(), level });
-        console.log('경로 개수:', coordinates.length);
 
         // StaticMap을 위한 임시 컨테이너 생성
         const staticMapContainer = document.createElement('div');
@@ -123,28 +109,21 @@ const MapThumbnailCapture = forwardRef<MapThumbnailCaptureRef, MapThumbnailCaptu
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const _staticMap = new window.kakao.maps.StaticMap(staticMapContainer, staticMapOption);
 
-        console.log('StaticMap 객체 생성 완료');
-
         // StaticMap 렌더링 완료를 위해 잠시 대기
         setTimeout(async () => {
           try {
             // StaticMap에서 생성된 이미지 찾기
             const imgElements = staticMapContainer.querySelectorAll('img');
-            console.log('=== StaticMap 이미지 분석 ===');
-            console.log('이미지 개수:', imgElements.length);
-
-            imgElements.forEach((img, index) => {
-              console.log(`이미지 ${index + 1}:`, img.src);
-              console.log('크기:', img.width, 'x', img.height);
-            });
 
             if (imgElements.length > 0) {
               // 첫 번째 이미지의 URL을 사용해서 Blob으로 변환
               const firstImg = imgElements[0];
-              console.log('사용할 이미지 URL:', firstImg.src);
+
+              if (import.meta.env.DEV) {
+                console.log('사용할 이미지 URL:', firstImg.src);
+              }
 
               // 프록시 API를 통해 이미지 URL을 Blob으로 변환
-              console.log('프록시 API를 통해 이미지 가져오는 중:', firstImg.src);
               const mapImageBlob = await fetchImageProxy(firstImg.src);
 
               // 이미지를 Canvas에 로드하여 폴리라인과 합성
@@ -177,9 +156,6 @@ const MapThumbnailCapture = forwardRef<MapThumbnailCaptureRef, MapThumbnailCaptu
                   document.body.removeChild(staticMapContainer);
 
                   if (blob) {
-                    console.log('지도 + 폴리라인 합성 완료');
-                    console.log('최종 이미지 크기:', blob.size, 'bytes');
-                    console.log('최종 이미지 타입:', blob.type);
                     resolve(blob);
                   } else {
                     console.error('Canvas to Blob 변환 실패');

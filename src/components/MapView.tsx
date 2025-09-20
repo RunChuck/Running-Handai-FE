@@ -295,7 +295,10 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
     mapScript.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_MAP_API_KEY}&autoload=false&libraries=clusterer,drawing`;
 
     const onLoadKakaoMap = async () => {
-      console.log('Kakao map script 로드 완료');
+      if (import.meta.env.DEV) {
+        console.log('Kakao map script 로드 완료');
+      }
+
       if (window.kakao && window.kakao.maps) {
         window.kakao.maps.load(async () => {
           const container = mapContainer.current;
