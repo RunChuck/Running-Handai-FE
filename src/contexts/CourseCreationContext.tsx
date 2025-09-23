@@ -343,6 +343,23 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
     mapInstance.clearRoute(); // 경로도 함께 제거
   };
 
+  // 에러 발생 시 마커 초기화 & 현재 위치로 이동
+  const handleErrorAndReset = async (toastMessage: string) => {
+    showErrorToast(toastMessage, { position: 'top' });
+    handleDelete();
+
+    // 현재 위치로 이동
+    if (mapInstance) {
+      try {
+        const { getUserLocation } = await import('@/utils/geolocation');
+        const location = await getUserLocation({ maximumAge: 0 });
+        mapInstance.moveToLocation(location.lat, location.lng, 7);
+      } catch (error) {
+        console.warn('현재 위치로 이동 실패:', error);
+      }
+    }
+  };
+
   const handleCourseCreate = async () => {
     if ((!isGpxUploaded && markers.length < 2) || !mapInstance) return;
 
@@ -368,7 +385,7 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
       const isInKorea = result.data;
 
       if (!isInKorea) {
-        showErrorToast(t('toast.courseCreation.NotKorea'), { position: 'top' });
+        await handleErrorAndReset(t('toast.courseCreation.NotKorea'));
         return;
       }
 
@@ -405,14 +422,12 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
         }
       }
 
-      showErrorToast(toastMessage, { position: 'top' });
-      handleDelete();
+      await handleErrorAndReset(toastMessage);
       console.error('Course creation error:', err);
     } finally {
       setIsLoading(false);
     }
   };
-
 
   const handleCourseValidation = async () => {
     const courseName = `${startPoint}-${endPoint}`;
@@ -448,7 +463,6 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
       setIsLoading(false);
     }
   };
-
 
   const submitCourse = async (courseData: { startPoint: string; endPoint: string; thumbnailBlob: Blob; isInBusan: boolean }): Promise<number> => {
     setIsSavingCourse(true);
