@@ -121,49 +121,6 @@ export const calculateRoute = async (coordinates: Coordinate[], profile: RoutePr
   }
 };
 
-// 마커 좌표가 한국 내에 있는지 확인
-export const isLocationInKorea = async (lat: number, lng: number): Promise<boolean> => {
-  try {
-    const url = `${ORS_BASE_URL}/geocode/reverse?api_key=${ORS_API_KEY}&point.lon=${lng}&point.lat=${lat}&size=1`;
-
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`Reverse geocoding API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    if (data.features && data.features.length > 0) {
-      const properties = data.features[0].properties;
-
-      // country_a가 "KOR"이거나 country가 "한국"인 경우
-      return properties.country_a === 'KOR' || properties.country === '한국';
-    }
-
-    // 국가 정보 없으면 false
-    return false;
-  } catch (error) {
-    console.error('Location validation error:', error);
-    return false;
-  }
-};
-
-// 마커들이 모두 대한민국 내에 있는지 확인
-export const validateMarkersInKorea = async (coordinates: Coordinate[]): Promise<boolean> => {
-  try {
-    for (const coord of coordinates) {
-      const isInKorea = await isLocationInKorea(coord.lat, coord.lng);
-      if (!isInKorea) {
-        return false;
-      }
-    }
-    return true;
-  } catch (error) {
-    console.error('Marker validation error:', error);
-    return false;
-  }
-};
-
 // Polyline 디코딩 함수
 const decodePolyline = (encoded: string, is3D: boolean = false): Array<[number, number] | [number, number, number]> => {
   const coordinates: Array<[number, number] | [number, number, number]> = [];
