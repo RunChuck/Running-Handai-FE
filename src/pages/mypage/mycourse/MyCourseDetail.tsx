@@ -25,17 +25,17 @@ const MyCourseDetail = () => {
   const { showSuccessToast, showErrorToast } = useToast();
 
   const { deleteActions, editActions } = useMyCourseActions({
-    onDeleteSuccess: () => navigate('/mypage/mycourse', { replace: true }),
+    onDeleteSuccess: () => navigate(-1),
   });
 
   const courseId = parseInt(id || '0', 10);
   const { courseDetail, loading, error } = useMyCourseDetail(courseId);
 
   useEffect(() => {
-    if (!courseId) {
+    if (!courseId || error || (!loading && !courseDetail)) {
       navigate('/mypage/mycourse', { replace: true });
     }
-  }, [courseId, navigate]);
+  }, [courseId, error, loading, courseDetail, navigate]);
 
   const handleEditClick = (e: React.MouseEvent) => {
     e.stopPropagation();
