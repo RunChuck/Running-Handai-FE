@@ -14,6 +14,7 @@ interface FloatButtonProps {
   };
   size?: 'small' | 'medium' | 'large';
   variant?: 'circular' | 'rounded' | 'pill';
+  isDark?: boolean;
   className?: string;
 }
 
@@ -23,10 +24,11 @@ const FloatButton = ({
   position,
   size = 'medium',
   variant = 'circular',
+  isDark = false,
   className,
 }: FloatButtonProps) => {
   return (
-    <StyledFloatButton onClick={onClick} position={position} size={size} variant={variant} className={className}>
+    <StyledFloatButton onClick={onClick} position={position} size={size} variant={variant} isDark={isDark} className={className}>
       {children}
     </StyledFloatButton>
   );
@@ -36,6 +38,7 @@ const StyledFloatButton = styled.div<{
   position: FloatButtonProps['position'];
   size: FloatButtonProps['size'];
   variant: FloatButtonProps['variant'];
+  isDark: FloatButtonProps['isDark'];
 }>`
   position: absolute;
   z-index: 100;
@@ -55,14 +58,14 @@ const StyledFloatButton = styled.div<{
   `}
   
   /* 크기 설정 */
-  ${({ size, variant }) => {
+  ${({ size, variant, isDark }) => {
     if (variant === 'pill') {
       return `
         height: 40px;
         padding: var(--spacing-8) var(--spacing-16);
         gap: var(--spacing-4);
         ${theme.typography.caption1}
-        color: var(--text-text-title, #1c1c1c);
+        color: ${isDark ? 'var(--text-text-inverse, #ffffff)' : 'var(--text-text-title, #1c1c1c)'};
         white-space: nowrap;
       `;
     }
@@ -110,9 +113,22 @@ const StyledFloatButton = styled.div<{
   align-items: center;
   justify-content: center;
 
-  background: var(--surface-surface-default, #fff);
-  border: 1px solid var(--line-line-002, #e0e0e0);
-  box-shadow: 1px 1px 4px 0px rgba(0, 0, 0, 0.2);
+  background: ${({ isDark }) =>
+    isDark
+      ? 'rgba(0, 0, 0, 0.70)'
+      : 'var(--surface-surface-default, #fff)'
+  };
+  border: 1px solid ${({ isDark }) =>
+    isDark
+      ? 'transparent'
+      : 'var(--line-line-002, #e0e0e0)'
+  };
+  box-shadow: 1px 1px 4px 0 rgba(0, 0, 0, 0.20);
+  color: ${({ isDark }) =>
+    isDark
+      ? 'var(--text-text-inverse, #ffffff)'
+      : 'var(--text-text-title, #1c1c1c)'
+  };
 
   cursor: pointer;
   transition: all 0.2s ease;

@@ -214,7 +214,7 @@ const Course = () => {
 
   const floatButtons = (
     <>
-      <FloatButton onClick={handleRecommendCourseClick} position={{ bottom: 0, center: true }} variant="pill">
+      <FloatButton isDark onClick={handleRecommendCourseClick} position={{ bottom: 0, center: true }} variant="pill">
         🏃‍♂️ {t('main.exploreCourses')}
         <img src={ArrowUprightIconSrc} alt={t('main.exploreCourses')} />
       </FloatButton>
