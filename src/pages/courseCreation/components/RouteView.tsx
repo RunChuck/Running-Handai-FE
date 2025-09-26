@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, forwardRef } from 'react';
 import ReactDOMServer from 'react-dom/server';
 import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
+import { useToast } from '@/hooks/useToast';
 import { theme } from '@/styles/theme';
 import Lottie from 'lottie-react';
 import { BUSAN_CITY_HALL, DEFAULT_MAP_LEVEL } from '@/constants/locations';
@@ -34,10 +35,12 @@ interface RouteViewProps {
   onMapLoad?: (map: RouteViewMapInstance) => void;
   onMarkersChange?: (markers: { lat: number; lng: number }[]) => void;
   isRouteGenerated?: boolean;
+  maxMarkers?: number;
 }
 
-const RouteView = forwardRef<HTMLDivElement, RouteViewProps>(({ onMapLoad, onMarkersChange, isRouteGenerated = false }, ref) => {
+const RouteView = forwardRef<HTMLDivElement, RouteViewProps>(({ onMapLoad, onMarkersChange, isRouteGenerated = false, maxMarkers = 30 }, ref) => {
   const [t] = useTranslation();
+  const { showWarningToast } = useToast();
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<kakao.maps.Map | null>(null);
   const markersRef = useRef<MarkerData[]>([]);
@@ -134,8 +137,13 @@ const RouteView = forwardRef<HTMLDivElement, RouteViewProps>(({ onMapLoad, onMar
   };
 
   const addMarker = (position: kakao.maps.LatLng) => {
-    console.log('🔍 addMarker 호출:', { isRouteGenerated: isRouteGeneratedRef.current, hasMapInstance: !!mapInstance.current });
     if (!mapInstance.current || isRouteGeneratedRef.current) return;
+
+    // 마커 개수 제한 체크
+    if (markersRef.current.length >= maxMarkers) {
+      showWarningToast(t('toast.courseCreation.MaxMarkers'), { position: 'top' });
+      return;
+    }
 
     const currentIndex = markersRef.current.length;
     const markerData = createRouteMarker(position, currentIndex);

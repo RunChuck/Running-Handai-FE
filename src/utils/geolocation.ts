@@ -56,23 +56,22 @@ export const getUserLocation = (
           const errorMsg = error.code === 1 ? '권한 거부' : error.code === 2 ? '위치 불가' : '타임아웃';
           console.warn(`위치 조회 실패 (${retryCount + 1}회):`, errorMsg, error.message);
 
-          // 권한 거부가 아니고 재시도 가능한 경우
-          if (!hasSucceeded && retryCount < maxRetries && error.code !== 1) {
+          if (!hasSucceeded && retryCount < maxRetries) {
             retryCount++;
 
-            // 1-2초 후 재시도 (브라우저 권한 처리 시간 고려)
             setTimeout(() => {
               if (!hasSucceeded) {
                 attemptGetLocation();
               }
             }, retryCount * 1000);
           } else if (!hasSucceeded) {
-            // 권한 거부이거나 재시도 모두 실패
-            const finalError = error.code === 1
-              ? new Error('위치 권한이 거부되었습니다. 브라우저 설정에서 위치 권한을 허용해주세요.')
-              : error.code === 2
-              ? new Error('현재 위치를 확인할 수 없습니다. 인터넷 연결을 확인해주세요.')
-              : new Error('위치 조회에 실패했습니다. 잠시 후 다시 시도해주세요.');
+            // 모든 재시도 실패
+            const finalError =
+              error.code === 1
+                ? new Error('위치 권한이 거부되었습니다. 브라우저 설정에서 위치 권한을 허용해주세요.')
+                : error.code === 2
+                  ? new Error('현재 위치를 확인할 수 없습니다. 인터넷 연결을 확인해주세요.')
+                  : new Error('위치 조회에 실패했습니다. 잠시 후 다시 시도해주세요.');
 
             reject(finalError);
           }

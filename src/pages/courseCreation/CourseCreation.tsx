@@ -122,7 +122,13 @@ const CourseCreation = () => {
         maxAltitude={gpxData?.maxAltitude || 0}
         minAltitude={gpxData?.minAltitude || 0}
       />
-      <RouteView ref={routeViewRef} onMapLoad={setMapInstance} onMarkersChange={handleMarkersChange} isRouteGenerated={isRouteGenerated} />
+      <RouteView
+        ref={routeViewRef}
+        onMapLoad={setMapInstance}
+        onMarkersChange={handleMarkersChange}
+        isRouteGenerated={isRouteGenerated}
+        maxMarkers={30}
+      />
       <CreationBar onCreateCourse={isRouteGenerated ? () => setIsCourseCreationModalOpen(true) : handleCourseCreateWrapper} />
 
       <OnboardingModal isOpen={isOnboardingOpen} onClose={handleOnboardingClose} />

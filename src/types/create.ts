@@ -17,6 +17,13 @@ export interface LocationCheckResponse {
   data: boolean;
 }
 
+export interface CheckMarkersInKoreaRequest {
+  coordinateDtoList: Array<{
+    latitude: number;
+    longitude: number;
+  }>;
+}
+
 export interface CourseCreateRequest {
   startPointName: string;
   endPointName: string;
