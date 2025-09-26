@@ -21,8 +21,8 @@ export interface GeolocationOptions {
 export const getUserLocation = (
   options: GeolocationOptions = {
     enableHighAccuracy: false,
-    timeout: 15000,
-    maximumAge: 300000, // 5분
+    timeout: 15000, // 15초
+    maximumAge: 60000, // 1분
   }
 ): Promise<LocationCoords> => {
   return new Promise((resolve, reject) => {
@@ -33,39 +33,54 @@ export const getUserLocation = (
     }
 
     let hasSucceeded = false;
-    let errorTimeout: NodeJS.Timeout | null = null;
+    let retryCount = 0;
+    const maxRetries = 2;
 
-    navigator.geolocation.getCurrentPosition(
-      position => {
-        const { latitude, longitude } = position.coords;
+    const attemptGetLocation = () => {
+      if (import.meta.env.DEV) {
+        console.log(`위치 조회 시도 ${retryCount + 1}/${maxRetries + 1}`);
+      }
 
-        if (import.meta.env.DEV) {
-          console.log('사용자 위치 조회 성공:', { lat: latitude, lng: longitude });
-        }
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          const { latitude, longitude } = position.coords;
 
-        hasSucceeded = true;
-
-        // 에러 타이머가 있다면 클리어
-        if (errorTimeout) {
-          clearTimeout(errorTimeout);
-          errorTimeout = null;
-        }
-
-        resolve({ lat: latitude, lng: longitude });
-      },
-      error => {
-        console.warn('위치 조회 실패:', error.message);
-
-        // 에러 발생 후 1초 기다려서 성공했는지 확인
-        errorTimeout = setTimeout(() => {
-          if (!hasSucceeded) {
-            // 1초 후에도 성공하지 않았다면 진짜 에러로 처리
-            reject(error);
+          if (import.meta.env.DEV) {
+            console.log('사용자 위치 조회 성공:', { lat: latitude, lng: longitude });
           }
-          errorTimeout = null;
-        }, 1000);
-      },
-      options
-    );
+
+          hasSucceeded = true;
+          resolve({ lat: latitude, lng: longitude });
+        },
+        error => {
+          const errorMsg = error.code === 1 ? '권한 거부' : error.code === 2 ? '위치 불가' : '타임아웃';
+          console.warn(`위치 조회 실패 (${retryCount + 1}회):`, errorMsg, error.message);
+
+          // 권한 거부가 아니고 재시도 가능한 경우
+          if (!hasSucceeded && retryCount < maxRetries && error.code !== 1) {
+            retryCount++;
+
+            // 1-2초 후 재시도 (브라우저 권한 처리 시간 고려)
+            setTimeout(() => {
+              if (!hasSucceeded) {
+                attemptGetLocation();
+              }
+            }, retryCount * 1000);
+          } else if (!hasSucceeded) {
+            // 권한 거부이거나 재시도 모두 실패
+            const finalError = error.code === 1
+              ? new Error('위치 권한이 거부되었습니다. 브라우저 설정에서 위치 권한을 허용해주세요.')
+              : error.code === 2
+              ? new Error('현재 위치를 확인할 수 없습니다. 인터넷 연결을 확인해주세요.')
+              : new Error('위치 조회에 실패했습니다. 잠시 후 다시 시도해주세요.');
+
+            reject(finalError);
+          }
+        },
+        options
+      );
+    };
+
+    attemptGetLocation();
   });
 };

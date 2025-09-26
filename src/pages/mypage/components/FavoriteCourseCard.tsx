@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import { useBookmark } from '@/hooks/useBookmark';
@@ -14,7 +13,6 @@ interface FavoriteCourseCardProps {
 }
 
 const FavoriteCourseCard = ({ course, onUpdateCourse }: FavoriteCourseCardProps) => {
-  const [t] = useTranslation();
   const navigate = useNavigate();
   const { handleBookmarkById } = useBookmark({ onUpdateCourse });
 
@@ -35,10 +33,7 @@ const FavoriteCourseCard = ({ course, onUpdateCourse }: FavoriteCourseCardProps)
         </BookmarkButton>
         <img src={course.thumbnailUrl || DefaultThumbnailSrc} alt="북마크된 코스" />
       </ThumbnailWrapper>
-      <BookmarkCount>
-        {course.bookmarkCount}
-        {t('main.bookmark')}
-      </BookmarkCount>
+      <CourseName>{course.courseName}</CourseName>
     </CardContainer>
   );
 };
@@ -48,9 +43,13 @@ export default FavoriteCourseCard;
 const CardContainer = styled.div`
   display: flex;
   flex-direction: column;
-  max-width: 126px;
+  width: 126px;
   gap: var(--spacing-8);
   cursor: pointer;
+
+  @media (max-width: 600px) {
+    width: 100px;
+  }
 `;
 
 const ThumbnailWrapper = styled.div`
@@ -79,7 +78,7 @@ const BookmarkButton = styled.button`
   cursor: pointer;
 `;
 
-const BookmarkCount = styled.span`
+const CourseName = styled.span`
   ${theme.typography.body2};
   color: var(--text-text-secondary, #555555);
 

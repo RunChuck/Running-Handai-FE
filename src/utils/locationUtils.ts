@@ -15,7 +15,8 @@ export const moveToCurrentLocation = async (mapInstance: MapInstance | null) => 
   }
 
   try {
-    const location = await getUserLocation();
+    // 현재 위치 가져오기 (캐시 사용 X)
+    const location = await getUserLocation({ maximumAge: 0 });
 
     // 현재 줌 레벨 확인 후 조건부 레벨 설정
     const currentLevel = mapInstance.getCurrentLevel?.() ?? 7;
