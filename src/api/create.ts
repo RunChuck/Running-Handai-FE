@@ -3,6 +3,7 @@ import type {
   CourseNameCheckResponse,
   LocationCheckRequest,
   LocationCheckResponse,
+  CheckMarkersInKoreaRequest,
   CourseCreateRequest,
   CourseCreateResponse,
   MyCoursesRequest,
@@ -12,6 +13,11 @@ import type {
 } from '@/types/create';
 
 const PREFIX = '/api/members/me/courses';
+
+export const checkMarkersInKorea = async (request: CheckMarkersInKoreaRequest): Promise<LocationCheckResponse> => {
+  const response = await http.post<LocationCheckResponse>('/api/locations/korea', request);
+  return response.data;
+};
 
 export const checkCourseName = async (name: string): Promise<CourseNameCheckResponse> => {
   const response = await http.get<CourseNameCheckResponse>(`/api/courses/name/exists`, { params: { name } });

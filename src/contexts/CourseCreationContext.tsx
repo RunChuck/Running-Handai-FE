@@ -357,8 +357,15 @@ export const CourseCreationProvider = ({ children }: CourseCreationProviderProps
 
     try {
       // 1. 모든 마커가 한국 내에 있는지 확인
-      const { validateMarkersInKorea } = await import('@/api/openroute');
-      const isInKorea = await validateMarkersInKorea(markers);
+      const { checkMarkersInKorea } = await import('@/api/create');
+      const requestBody = {
+        coordinateDtoList: markers.map(coord => ({
+          latitude: coord.lat,
+          longitude: coord.lng,
+        })),
+      };
+      const result = await checkMarkersInKorea(requestBody);
+      const isInKorea = result.data;
 
       if (!isInKorea) {
         showErrorToast(t('toast.courseCreation.NotKorea'), { position: 'top' });
