@@ -67,6 +67,7 @@ export interface CheckNicknameResponse {
 export interface BookmarkedCourse {
   bookmarkId: number;
   courseId: number;
+  courseName: string;
   thumbnailUrl: string;
   distance: number;
   duration: number;

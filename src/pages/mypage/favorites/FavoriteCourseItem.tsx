@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
 import { useBookmark } from '@/hooks/useBookmark';
@@ -13,7 +12,6 @@ interface FavoriteCourseItemProps {
 }
 
 const FavoriteCourseItem = ({ course }: FavoriteCourseItemProps) => {
-  const [t] = useTranslation();
   const navigate = useNavigate();
   const { handleBookmarkById } = useBookmark();
 
@@ -37,10 +35,7 @@ const FavoriteCourseItem = ({ course }: FavoriteCourseItemProps) => {
           {course.distance}km · {course.duration}분 · {course.maxElevation}m
         </CourseStats>
       </ThumbnailWrapper>
-      <BookmarkCount>
-        {course.bookmarkCount}
-        {t('main.bookmark')}
-      </BookmarkCount>
+      <CourseName>{course.courseName}</CourseName>
     </CardContainer>
   );
 };
@@ -52,11 +47,13 @@ const CardContainer = styled.div`
   flex-direction: column;
   gap: var(--spacing-8);
   cursor: pointer;
+  width: 100%;
+  min-width: 0;
 `;
 
 const ThumbnailWrapper = styled.div`
   width: 100%;
-  height: 100%;
+  aspect-ratio: 1/1;
   border-radius: 4px;
   overflow: hidden;
   position: relative;
@@ -65,7 +62,6 @@ const ThumbnailWrapper = styled.div`
     width: 100%;
     height: 100%;
     object-fit: cover;
-    aspect-ratio: 1/1;
   }
 `;
 
@@ -76,7 +72,7 @@ const BookmarkButton = styled.button`
   cursor: pointer;
 `;
 
-const BookmarkCount = styled.span`
+const CourseName = styled.span`
   ${theme.typography.body2};
   color: var(--text-text-secondary, #555555);
 
