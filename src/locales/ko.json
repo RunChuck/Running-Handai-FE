@@ -54,6 +54,7 @@
     "courseDeleteFailed": "코스 삭제 중 문제가 발생했어요. 다시 시도해주세요.",
     "gpxDownloaded": "GPX 파일이 다운로드 되었어요.",
     "gpxDownloadFailed": "GPX 다운로드 중 문제가 발생했어요. 다시 시도해주세요.",
+    "courseCreation.MaxMarkers": "마커는 최대 30개까지만 추가할 수 있어요.",
     "courseCreation.NotKorea": "코스 생성이 가능한 지역을 벗어났어요.",
     "courseCreation.InvalidLocation": "선택한 위치에서는 코스를 생성할 수 없어요.",
     "courseCreation.ServerError": "코스 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
