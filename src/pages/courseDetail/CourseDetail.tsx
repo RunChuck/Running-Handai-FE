@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import Lottie from 'lottie-react';
 import styled from '@emotion/styled';
@@ -24,6 +24,7 @@ import NoCourseImgSrc from '@/assets/images/sad-emoji.png';
 const CourseDetail = () => {
   const [t] = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams<{ id: string }>();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -68,7 +69,17 @@ const CourseDetail = () => {
   };
 
   const getThumbnailUrl = (): string => {
-    // 캐시된 코스 목록에서 썸네일 찾기
+    // 1. Navigation state에서 먼저 확인 (마이페이지/즐겨찾기에서 진입)
+    const courseFromState = location.state?.course;
+
+    if (courseFromState?.thumbnailUrl) {
+      if (courseFromState.thumbnailUrl.startsWith('/')) {
+        return `${window.location.origin}${courseFromState.thumbnailUrl}`;
+      }
+      return courseFromState.thumbnailUrl;
+    }
+
+    // 2. 코스 목록에서 진입
     const courseQueries = queryClient.getQueryCache().findAll({ queryKey: ['courses'] });
 
     for (const query of courseQueries) {
@@ -76,11 +87,9 @@ const CourseDetail = () => {
       if (courseData?.data) {
         const course = courseData.data.find((c: CourseData) => c.courseId === courseId);
         if (course?.thumbnailUrl) {
-          // 썸네일 URL이 상대 경로인 경우 절대 URL로 변환
           if (course.thumbnailUrl.startsWith('/')) {
             return `${window.location.origin}${course.thumbnailUrl}`;
           }
-          // 이미 절대 URL인 경우 그대로 반환
           return course.thumbnailUrl;
         }
       }

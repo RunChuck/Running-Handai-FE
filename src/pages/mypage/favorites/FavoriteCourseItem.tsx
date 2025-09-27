@@ -16,7 +16,9 @@ const FavoriteCourseItem = ({ course }: FavoriteCourseItemProps) => {
   const { handleBookmarkById } = useBookmark();
 
   const handleCardClick = () => {
-    navigate(`/course-detail/${course.courseId}`);
+    navigate(`/course-detail/${course.courseId}`, {
+      state: { course },
+    });
   };
 
   const handleBookmarkClick = (e: React.MouseEvent) => {
