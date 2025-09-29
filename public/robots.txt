@@ -3,3 +3,6 @@ Allow: /
 
 # 개인정보 관련 페이지 크롤링 방지
 Disallow: /mypage/info
+
+# 사이트맵 
+Sitemap: https://runninghandai.com/sitemap.xml
