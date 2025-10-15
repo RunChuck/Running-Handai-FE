@@ -42,6 +42,7 @@ export const createCourse = async (request: CourseCreateRequest): Promise<Course
     headers: {
       'Content-Type': 'multipart/form-data',
     },
+    timeout: 60000,
   });
 
   return response.data;
@@ -83,6 +84,7 @@ export const updateCourse = async (courseId: number, request: CourseUpdateReques
     headers: {
       'Content-Type': 'multipart/form-data',
     },
+    timeout: 60000,
   });
 
   return response.data;
