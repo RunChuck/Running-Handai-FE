@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
+import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 
 export type KeyTabType = 'pace' | 'distance' | 'body' | 'training' | 'injury' | 'equipment' | 'technique';
 
@@ -23,6 +24,7 @@ const TAB_ITEMS: KeyTabItem[] = [
 const KeyTab = () => {
   const [t] = useTranslation();
   const [activeTab, setActiveTab] = useState<KeyTabType>('pace');
+  const { scrollContainerRef, handleMouseDown } = useHorizontalScroll();
 
   const handleTabChange = (tabKey: KeyTabType) => {
     setActiveTab(tabKey);
@@ -75,7 +77,7 @@ const KeyTab = () => {
 
   return (
     <Container>
-      <TabWrapper>
+      <TabWrapper ref={scrollContainerRef} onMouseDown={handleMouseDown} data-scrollable="true">
         {TAB_ITEMS.map(tab => (
           <TabButton key={tab.key} isActive={activeTab === tab.key} onClick={() => handleTabChange(tab.key)}>
             {t(tab.label)}
@@ -101,9 +103,38 @@ const TabWrapper = styled.div`
   justify-content: center;
   border-bottom: 1px solid var(--line-line-001, #eeeeee);
   background: var(--surface-surface-default, #ffffff);
+  overflow-x: auto;
+  scroll-behavior: auto;
+  padding: 0 var(--spacing-16);
+
+  /* 터치 스크롤 */
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+
+  /* 드래그 시 선택 방지 */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+
+  touch-action: pan-x;
+  cursor: auto;
+
+  &[data-scrollable='true'] {
+    cursor: grab;
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   @media (max-width: 600px) {
     justify-content: flex-start;
+    padding: 0;
   }
 `;
 
