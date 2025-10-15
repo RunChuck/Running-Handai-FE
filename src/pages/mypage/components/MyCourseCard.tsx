@@ -140,7 +140,7 @@ const CardContainer = styled.div<{ $variant: 'mypage' | 'grid' }>`
   min-height: ${({ $variant }) => ($variant === 'mypage' ? '240px' : 'unset')};
   border-radius: 8px;
   box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.2);
-  overflow: visible;
+  overflow: hidden;
   cursor: pointer;
 
   ${({ $variant }) =>
