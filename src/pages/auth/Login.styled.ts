@@ -151,6 +151,8 @@ export const AdminLogin = styled.div`
   text-decoration: underline;
   text-decoration-color: var(--GrayScale-gray700, #777);
   cursor: pointer;
+  width: fit-content;
+  align-self: center;
 
   &:hover {
     opacity: 0.8;
