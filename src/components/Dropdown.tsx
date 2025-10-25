@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import type { ReactNode } from 'react';
 import styled from '@emotion/styled';
 import { theme } from '@/styles/theme';
@@ -10,6 +11,7 @@ interface DropdownProps {
   onToggle?: (isOpen: boolean) => void;
   width?: number;
   padding?: string;
+  usePortal?: boolean;
 }
 
 interface DropdownItemProps {
@@ -18,21 +20,36 @@ interface DropdownItemProps {
   variant?: 'default' | 'danger';
 }
 
-const Dropdown = ({ trigger, children, isOpen: controlledIsOpen, onToggle, width = 80, padding = '4px' }: DropdownProps) => {
+const Dropdown = ({ trigger, children, isOpen: controlledIsOpen, onToggle, width = 80, padding = '4px', usePortal = false }: DropdownProps) => {
   const [internalIsOpen, setInternalIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
 
   const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen;
   const setIsOpen = onToggle || setInternalIsOpen;
 
   const handleTriggerClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+
+    if (usePortal && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setMenuPosition({
+        top: rect.top,
+        right: window.innerWidth - rect.left,
+      });
+    }
+
     setIsOpen(!isOpen);
   };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const clickedOnTrigger = triggerRef.current && triggerRef.current.contains(target);
+      const clickedOnMenu = dropdownRef.current && dropdownRef.current.contains(target);
+
+      if (!clickedOnTrigger && !clickedOnMenu) {
         setIsOpen(false);
       }
     };
@@ -46,12 +63,25 @@ const Dropdown = ({ trigger, children, isOpen: controlledIsOpen, onToggle, width
     };
   }, [isOpen, setIsOpen]);
 
+  const renderMenu = () => {
+    if (!isOpen) return null;
+
+    const menu = (
+      <DropdownMenu ref={dropdownRef} width={width} $usePortal={usePortal} $top={menuPosition.top} $right={menuPosition.right}>
+        {children}
+      </DropdownMenu>
+    );
+
+    return usePortal ? createPortal(menu, document.body) : menu;
+  };
+
   return (
-    <DropdownContainer ref={dropdownRef}>
-      <TriggerButton onClick={handleTriggerClick} $padding={padding}>
+    <DropdownContainer>
+      <TriggerButton ref={triggerRef} onClick={handleTriggerClick} $padding={padding}>
         {trigger}
       </TriggerButton>
-      {isOpen && <DropdownMenu width={width}>{children}</DropdownMenu>}
+      {!usePortal && renderMenu()}
+      {usePortal && renderMenu()}
     </DropdownContainer>
   );
 };
@@ -89,10 +119,15 @@ const TriggerButton = styled.div<{ $padding: string }>`
   }
 `;
 
-const DropdownMenu = styled.div<{ width: number }>`
-  position: absolute;
-  top: 0;
-  right: 100%;
+const DropdownMenu = styled.div<{
+  width: number;
+  $usePortal: boolean;
+  $top: number;
+  $right: number;
+}>`
+  position: ${props => (props.$usePortal ? 'fixed' : 'absolute')};
+  top: ${props => (props.$usePortal ? `${props.$top}px` : '0')};
+  right: ${props => (props.$usePortal ? `${props.$right}px` : '100%')};
   background: white;
   border: 1px solid var(--line-line-001, #eeeeee);
   border-radius: 4px;

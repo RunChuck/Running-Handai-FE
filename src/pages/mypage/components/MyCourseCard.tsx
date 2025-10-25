@@ -88,6 +88,7 @@ const MyCourseCard = ({ variant = 'mypage', course, onEdit, onDelete }: MyCourse
               padding="0"
               isOpen={isDropdownOpen}
               onToggle={setIsDropdownOpen}
+              usePortal={true}
             >
               <DropdownItem onClick={handleEditClick}>{t('edit')}</DropdownItem>
               <DropdownItem onClick={handleDeleteClick} variant="danger">
