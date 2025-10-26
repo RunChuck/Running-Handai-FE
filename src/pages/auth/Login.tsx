@@ -6,6 +6,8 @@ import * as S from './Login.styled';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
+import { useUserStore } from '@/stores/userStore';
+import { authAPI } from '@/api/auth';
 
 import Button from '@/components/Button';
 import CommonInput from '@/components/CommonInput';
@@ -31,8 +33,9 @@ const Login = () => {
   const [adminId, setAdminId] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const isMobile = useIsMobile();
-  const { isAuthenticated } = useAuth();
-  const { showInfoToast } = useToast();
+  const { isAuthenticated, setToken } = useAuth();
+  const { showInfoToast, showSuccessToast, showErrorToast } = useToast();
+  const { setUserInfo } = useUserStore();
   const handleAutoLoginToggle = () => {
     setIsAutoLoginChecked(!isAutoLoginChecked);
   };
@@ -50,9 +53,33 @@ const Login = () => {
     setAdminPassword('');
   };
 
-  const handleAdminSubmit = () => {
-    // TODO: 관리자 로그인 API 호출
-    console.log('Admin login:', { adminId, adminPassword });
+  const handleAdminSubmit = async () => {
+    try {
+      const response = await authAPI.adminLogin({
+        email: adminId,
+        password: adminPassword,
+      });
+
+      // 토큰 저장
+      setToken(response.data.accessToken, response.data.refreshToken, isAdminAutoLoginChecked, adminId);
+
+      // 사용자 정보 조회 및 저장
+      try {
+        const userInfoResponse = await authAPI.getUserInfo();
+        setUserInfo({
+          nickname: userInfoResponse.data.nickname,
+          email: userInfoResponse.data.email,
+        });
+      } catch (error) {
+        console.error('Failed to fetch user info after admin login:', error);
+      }
+
+      showSuccessToast(t('toast.loginSuccess'), { position: 'top' });
+      navigate('/course', { replace: true });
+    } catch (error) {
+      console.error('Admin login failed:', error);
+      showErrorToast(t('toast.loginFailed'), { position: 'top' });
+    }
   };
 
   const buttonSize = isMobile ? 'md' : 'lg';

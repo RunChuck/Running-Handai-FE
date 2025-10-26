@@ -33,7 +33,7 @@
     "autoLogin": "자동 로그인",
     "adminLogin.title": "테스트 계정으로 로그인",
     "adminLogin": "테스트 로그인",
-    "adminLogin.id": "아이디",
+    "adminLogin.id": "이메일 아이디",
     "adminLogin.password": "비밀번호",
     "backToSocial": "뒤로가기",
     "login": "로그인 하기",
