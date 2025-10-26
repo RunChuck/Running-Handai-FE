@@ -28,7 +28,6 @@ const Login = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isAutoLoginChecked, setIsAutoLoginChecked] = useState(false);
-  const [isAdminAutoLoginChecked, setIsAdminAutoLoginChecked] = useState(false);
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [adminId, setAdminId] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
@@ -38,9 +37,6 @@ const Login = () => {
   const { setUserInfo } = useUserStore();
   const handleAutoLoginToggle = () => {
     setIsAutoLoginChecked(!isAutoLoginChecked);
-  };
-  const handleAdminAutoLoginToggle = () => {
-    setIsAdminAutoLoginChecked(!isAdminAutoLoginChecked);
   };
 
   const handleAdminLogin = () => {
@@ -60,8 +56,8 @@ const Login = () => {
         password: adminPassword,
       });
 
-      // 토큰 저장
-      setToken(response.data.accessToken, response.data.refreshToken, isAdminAutoLoginChecked, adminId);
+      // 토큰 저장 (테스트 계정은 무조건 자동 로그인 - useAuth에서 처리)
+      setToken(response.data.accessToken, response.data.refreshToken, undefined, adminId);
 
       // 사용자 정보 조회 및 저장
       try {
@@ -201,15 +197,6 @@ const Login = () => {
                 <S.InputLabel>{t('login.adminLogin.password')}</S.InputLabel>
                 <CommonInput placeholder="비밀번호를 입력하세요" value={adminPassword} onChange={setAdminPassword} type="password" />
               </S.InputWrapper>
-
-              <S.AutoLogin onClick={handleAdminAutoLoginToggle}>
-                {isAdminAutoLoginChecked ? (
-                  <CheckBoxIcon color={isMobile ? 'inherit' : 'disabled'} />
-                ) : (
-                  <CheckBoxOutlineBlankIcon color={isMobile ? 'inherit' : 'disabled'} />
-                )}
-                {t('login.autoLogin')}
-              </S.AutoLogin>
 
               <Button
                 fullWidth
