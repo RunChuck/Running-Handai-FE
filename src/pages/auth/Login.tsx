@@ -26,6 +26,7 @@ const Login = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isAutoLoginChecked, setIsAutoLoginChecked] = useState(false);
+  const [isAdminAutoLoginChecked, setIsAdminAutoLoginChecked] = useState(false);
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [adminId, setAdminId] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
@@ -34,6 +35,9 @@ const Login = () => {
   const { showInfoToast } = useToast();
   const handleAutoLoginToggle = () => {
     setIsAutoLoginChecked(!isAutoLoginChecked);
+  };
+  const handleAdminAutoLoginToggle = () => {
+    setIsAdminAutoLoginChecked(!isAdminAutoLoginChecked);
   };
 
   const handleAdminLogin = () => {
@@ -145,19 +149,19 @@ const Login = () => {
                     {button.text}
                   </Button>
                 ))}
-                <S.AdminLogin onClick={handleAdminLogin}>
-                  <S.AdminLoginText>{t('login.adminLogin.title')}</S.AdminLoginText>
-                </S.AdminLogin>
+                <S.AutoLogin onClick={handleAutoLoginToggle}>
+                  {isAutoLoginChecked ? (
+                    <CheckBoxIcon color={isMobile ? 'inherit' : 'disabled'} />
+                  ) : (
+                    <CheckBoxOutlineBlankIcon color={isMobile ? 'inherit' : 'disabled'} />
+                  )}
+                  {t('login.autoLogin')}
+                </S.AutoLogin>
               </S.ButtonGroup>
 
-              <S.AutoLogin onClick={handleAutoLoginToggle}>
-                {isAutoLoginChecked ? (
-                  <CheckBoxIcon color={isMobile ? 'inherit' : 'disabled'} />
-                ) : (
-                  <CheckBoxOutlineBlankIcon color={isMobile ? 'inherit' : 'disabled'} />
-                )}
-                {t('login.autoLogin')}
-              </S.AutoLogin>
+              <S.AdminLogin onClick={handleAdminLogin}>
+                <S.AdminLoginText>{t('login.adminLogin.title')}</S.AdminLoginText>
+              </S.AdminLogin>
             </>
           ) : (
             <S.AdminInputGroup>
@@ -171,10 +175,19 @@ const Login = () => {
                 <CommonInput placeholder="비밀번호를 입력하세요" value={adminPassword} onChange={setAdminPassword} type="password" />
               </S.InputWrapper>
 
+              <S.AutoLogin onClick={handleAdminAutoLoginToggle}>
+                {isAdminAutoLoginChecked ? (
+                  <CheckBoxIcon color={isMobile ? 'inherit' : 'disabled'} />
+                ) : (
+                  <CheckBoxOutlineBlankIcon color={isMobile ? 'inherit' : 'disabled'} />
+                )}
+                {t('login.autoLogin')}
+              </S.AutoLogin>
+
               <Button
                 fullWidth
                 size={buttonSize}
-                backgroundColor="var(--primary-primary)"
+                variant={isMobile ? 'secondary' : 'primary'}
                 onClick={handleAdminSubmit}
                 disabled={!adminId || !adminPassword}
               >

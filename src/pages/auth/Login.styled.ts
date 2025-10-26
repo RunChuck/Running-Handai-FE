@@ -74,7 +74,6 @@ export const ButtonWrapper = styled.div`
 export const ButtonGroup = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: var(--spacing-12);
   width: 100%;
 `;
