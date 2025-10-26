@@ -1,5 +1,7 @@
 import { http } from '@/constants/http';
 import type {
+  AdminLoginRequest,
+  AdminLoginResponse,
   RefreshTokenRequest,
   RefreshTokenResponse,
   UserInfoResponse,
@@ -12,6 +14,11 @@ import type { AreaCode } from '@/types/course';
 const PREFIX = 'api/members';
 
 export const authAPI = {
+  adminLogin: async (data: AdminLoginRequest): Promise<AdminLoginResponse> => {
+    const response = await http.post<AdminLoginResponse>(import.meta.env.VITE_ADMIN_LOGIN_ENDPOINT, data);
+    return response.data;
+  },
+
   refreshToken: async (refreshToken: string): Promise<RefreshTokenResponse> => {
     const requestData: RefreshTokenRequest = { refreshToken };
     const response = await http.post<RefreshTokenResponse>(`${PREFIX}/oauth/token`, requestData);

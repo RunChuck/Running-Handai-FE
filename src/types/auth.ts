@@ -1,5 +1,20 @@
 import type { AreaCode } from './course';
 
+export interface AdminLoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface AdminLoginResponse {
+  statusCode: number;
+  responseCode: string;
+  message: string;
+  data: {
+    accessToken: string;
+    refreshToken: string;
+  };
+}
+
 export interface RefreshTokenRequest {
   refreshToken: string;
 }

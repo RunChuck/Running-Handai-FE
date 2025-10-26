@@ -15,6 +15,7 @@ export const HTTP_STATUS = {
 const envConfig = {
   apiRoot: import.meta.env.VITE_API_ROOT,
   isDev: import.meta.env.DEV,
+  adminLoginEndpoint: import.meta.env.VITE_ADMIN_LOGIN_ENDPOINT,
 } as const;
 
 // Axios 인스턴스 생성
@@ -82,8 +83,8 @@ client.interceptors.response.use(
       console.error(`❌ [${response?.status}] ${error.config?.url}`, error.response?.data);
     }
 
-    // 401 에러이고 토큰 재발급 API가 아닌 경우
-    if (response?.status === 401 && !config.url?.includes('oauth/token')) {
+    // 401 에러이고 토큰 재발급 또는 관리자 로그인 API가 아닌 경우
+    if (response?.status === 401 && !config.url?.includes('oauth/token') && !config.url?.includes(envConfig.adminLoginEndpoint)) {
       if (!isRefreshing) {
         isRefreshing = true;
         const isAutoLogin = localStorage.getItem('autoLogin') === 'true';
