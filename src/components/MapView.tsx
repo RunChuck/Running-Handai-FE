@@ -1,5 +1,7 @@
 import { useEffect, useRef, forwardRef, useImperativeHandle, useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from '@emotion/styled';
+import { useToast } from '@/hooks/useToast';
 import { BUSAN_CITY_HALL, DEFAULT_MAP_LEVEL } from '@/constants/locations';
 import { getUserLocation, type LocationCoords } from '@/utils/geolocation';
 import {
@@ -32,6 +34,8 @@ interface MapViewProps {
 }
 
 const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarkerClick, containerHeight, initialCenter, initialZoom }, ref) => {
+  const [t] = useTranslation();
+  const { showInfoToast } = useToast();
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<kakao.maps.Map | null>(null);
   const courseElements = useRef<CourseMapElements>({ polylines: [], markers: [] });
@@ -67,19 +71,26 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
   );
 
   // 지도 초기 위치 설정
-  const getInitialLocation = async () => {
-    // props로 전달받은 초기 위치가 있으면 우선 사용 (복원된 위치)
-    if (initialCenter) {
-      return { location: initialCenter, isUserLocation: false, isRestored: true };
-    }
+  const getInitialLocation = useCallback(
+    async (onLocationFailed?: () => void) => {
+      // props로 전달받은 초기 위치가 있으면 우선 사용 (복원된 위치)
+      if (initialCenter) {
+        return { location: initialCenter, isUserLocation: false, isRestored: true };
+      }
 
-    try {
-      const location = await getUserLocation();
-      return { location, isUserLocation: true, isRestored: false };
-    } catch {
-      return { location: BUSAN_CITY_HALL, isUserLocation: false, isRestored: false };
-    }
-  };
+      try {
+        const location = await getUserLocation();
+        return { location, isUserLocation: true, isRestored: false };
+      } catch {
+        // 사용자 위치를 받아오지 못한 경우
+        if (onLocationFailed) {
+          onLocationFailed();
+        }
+        return { location: BUSAN_CITY_HALL, isUserLocation: false, isRestored: false };
+      }
+    },
+    [initialCenter]
+  );
 
   // 현재 위치에 마커 표시
   const addLocationMarker = (map: kakao.maps.Map, location: LocationCoords, isUserLocation: boolean) => {
@@ -309,7 +320,9 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
           const container = mapContainer.current;
           if (!container || isMapInitialized.current) return;
 
-          const { location: initialLocation, isUserLocation: isCurrentUserLocation } = await getInitialLocation();
+          const { location: initialLocation, isUserLocation: isCurrentUserLocation } = await getInitialLocation(() => {
+            showInfoToast(t('toast.locationFailed'), { position: 'top' });
+          });
 
           const options = {
             center: new window.kakao.maps.LatLng(initialLocation.lat, initialLocation.lng),
@@ -368,6 +381,7 @@ const MapView = forwardRef<MapViewRef, MapViewProps>(({ onMapLoad, onCourseMarke
         resizeObserver.current.disconnect();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

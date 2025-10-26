@@ -21,7 +21,7 @@ export interface GeolocationOptions {
 export const getUserLocation = (
   options: GeolocationOptions = {
     enableHighAccuracy: false,
-    timeout: 15000, // 15초
+    timeout: 5000, // 5초
     maximumAge: 60000, // 1분
   }
 ): Promise<LocationCoords> => {
