@@ -8,10 +8,13 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 
 import Button from '@/components/Button';
+import CommonInput from '@/components/CommonInput';
 import MetaTags from '@/components/MetaTags';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
+import SVGColor from '@/components/SvgColor';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import ArrowIconSrc from '@/assets/icons/arrow-left-24px.svg';
 import GoogleIconSrc from '@/assets/icons/google-icon.svg';
 import KakaoIconSrc from '@/assets/icons/kakao-icon.svg';
 import NaverIconSrc from '@/assets/icons/naver-icon.svg';
@@ -23,11 +26,29 @@ const Login = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isAutoLoginChecked, setIsAutoLoginChecked] = useState(false);
+  const [isAdminMode, setIsAdminMode] = useState(false);
+  const [adminId, setAdminId] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
   const isMobile = useIsMobile();
   const { isAuthenticated } = useAuth();
   const { showInfoToast } = useToast();
   const handleAutoLoginToggle = () => {
     setIsAutoLoginChecked(!isAutoLoginChecked);
+  };
+
+  const handleAdminLogin = () => {
+    setIsAdminMode(true);
+  };
+
+  const handleBackToSocial = () => {
+    setIsAdminMode(false);
+    setAdminId('');
+    setAdminPassword('');
+  };
+
+  const handleAdminSubmit = () => {
+    // TODO: 관리자 로그인 API 호출
+    console.log('Admin login:', { adminId, adminPassword });
   };
 
   const buttonSize = isMobile ? 'md' : 'lg';
@@ -107,30 +128,64 @@ const Login = () => {
           <img src={isMobile ? WhiteLogoSrc : PrimaryLogoSrc} alt="러닝한다이" />
         </S.LogoWrapper>
         <S.ButtonWrapper>
-          <S.ButtonGroup>
-            {loginButtons.map(button => (
+          {!isAdminMode ? (
+            <>
+              <S.ButtonGroup>
+                {loginButtons.map(button => (
+                  <Button
+                    key={button.id}
+                    fullWidth
+                    size={buttonSize}
+                    backgroundColor={button.backgroundColor}
+                    startIcon={button.icon}
+                    iconPosition={button.icon ? 'left' : undefined}
+                    style={button.style}
+                    onClick={button.onClick}
+                  >
+                    {button.text}
+                  </Button>
+                ))}
+                <S.AdminLogin onClick={handleAdminLogin}>
+                  <S.AdminLoginText>{t('login.adminLogin.title')}</S.AdminLoginText>
+                </S.AdminLogin>
+              </S.ButtonGroup>
+
+              <S.AutoLogin onClick={handleAutoLoginToggle}>
+                {isAutoLoginChecked ? (
+                  <CheckBoxIcon color={isMobile ? 'inherit' : 'disabled'} />
+                ) : (
+                  <CheckBoxOutlineBlankIcon color={isMobile ? 'inherit' : 'disabled'} />
+                )}
+                {t('login.autoLogin')}
+              </S.AutoLogin>
+            </>
+          ) : (
+            <S.AdminInputGroup>
+              <S.AdminText>{t('login.adminLogin')}</S.AdminText>
+              <S.InputWrapper>
+                <S.InputLabel>{t('login.adminLogin.id')}</S.InputLabel>
+                <CommonInput placeholder="테스트 계정 아이디를 입력하세요" value={adminId} onChange={setAdminId} type="text" />
+              </S.InputWrapper>
+              <S.InputWrapper>
+                <S.InputLabel>{t('login.adminLogin.password')}</S.InputLabel>
+                <CommonInput placeholder="비밀번호를 입력하세요" value={adminPassword} onChange={setAdminPassword} type="password" />
+              </S.InputWrapper>
+
               <Button
-                key={button.id}
                 fullWidth
                 size={buttonSize}
-                backgroundColor={button.backgroundColor}
-                startIcon={button.icon}
-                iconPosition={button.icon ? 'left' : undefined}
-                style={button.style}
-                onClick={button.onClick}
+                backgroundColor="var(--primary-primary)"
+                onClick={handleAdminSubmit}
+                disabled={!adminId || !adminPassword}
               >
-                {button.text}
+                {t('login.login')}
               </Button>
-            ))}
-          </S.ButtonGroup>
-          <S.AutoLogin onClick={handleAutoLoginToggle}>
-            {isAutoLoginChecked ? (
-              <CheckBoxIcon color={isMobile ? 'inherit' : 'disabled'} />
-            ) : (
-              <CheckBoxOutlineBlankIcon color={isMobile ? 'inherit' : 'disabled'} />
-            )}
-            {t('login.autoLogin')}
-          </S.AutoLogin>
+              <S.BackButton onClick={handleBackToSocial}>
+                <SVGColor src={ArrowIconSrc} width="20" height="20" color={isMobile ? '#BBBBBB' : '#1C1C1C'} />
+                <S.BackButtonText>{t('login.backToSocial')}</S.BackButtonText>
+              </S.BackButton>
+            </S.AdminInputGroup>
+          )}
         </S.ButtonWrapper>
       </S.LoginContainer>
     </S.Container>

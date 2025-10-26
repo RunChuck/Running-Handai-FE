@@ -31,6 +31,12 @@
     "naver": "Naver 로그인",
     "guest": "게스트로 이용하기",
     "autoLogin": "자동 로그인",
+    "adminLogin.title": "테스트 계정으로 로그인",
+    "adminLogin": "테스트 로그인",
+    "adminLogin.id": "아이디",
+    "adminLogin.password": "비밀번호",
+    "backToSocial": "뒤로가기",
+    "login": "로그인 하기",
     "error": "로그인 처리 중 오류가 발생했습니다.\n다시 시도해주세요."
   },
   "toast": {
