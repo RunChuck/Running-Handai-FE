@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 
 import Login from '@/pages/auth/Login';
 import Auth from '@/pages/auth/Auth';
+import AdminLogin from '@/pages/auth/AdminLogin';
 import Course from '@/pages/course/Course';
 import CourseDetail from '@/pages/courseDetail/CourseDetail';
 import CourseCreation from '@/pages/courseCreation/CourseCreation';
@@ -21,6 +22,7 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/" element={<Login />} />
       <Route path="/auth" element={<Auth />} />
+      <Route path="/admin-login" element={<AdminLogin />} />
       <Route path="/course" element={<Course />} />
       <Route path="/course-detail/:id" element={<CourseDetail />} />
       <Route
