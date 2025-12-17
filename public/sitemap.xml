@@ -30,22 +30,4 @@
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
-  <url>
-    <loc>https://runninghandai.com/mypage/favorites</loc>
-    <lastmod>2025-09-29</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://runninghandai.com/mypage/review</loc>
-    <lastmod>2025-09-29</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://runninghandai.com/mypage/mycourse</loc>
-    <lastmod>2025-09-29</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
 </urlset>
